@@ -539,17 +539,16 @@ device_db["zotino0"] = {
         "clr_device": "ttl_zotino0_clr"
     }
 }
+device_db["led0"] = {
+    "type": "local",
+    "module": "artiq.coredevice.ttl",
+    "class": "TTLOut",
+    "arguments": {"channel": 0x00002d}
+}
 
-#device_db["led0"] = {
-#    "type": "local",
-#    "module": "artiq.coredevice.ttl",
-#    "class": "TTLOut",
-#    "arguments": {"channel": 0x00002d}
-#}
-#
-#device_db["led1"] = {
-#    "type": "local",
-#    "module": "artiq.coredevice.ttl",
-#    "class": "TTLOut",
-#    "arguments": {"channel": 0x00002e}
-#}
+device_db["led1"] = {
+    "type": "local",
+    "module": "artiq.coredevice.ttl",
+    "class": "TTLOut",
+    "arguments": {"channel": 0x00002e}
+}

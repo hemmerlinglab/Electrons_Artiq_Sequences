@@ -12,12 +12,13 @@ in
         # You probably want these two.
         artiq-full.artiq
         artiq-full.artiq-comtools
-
+  
         # You need a board support package if and only if you intend to flash
         # a board (those packages contain only board firmware).
         # The lines below are only examples, you need to select appropriate
         # packages for your boards.
-        #artiq-full.artiq-board-kc705-nist_clock
+        artiq-full.artiq-board-kasli-ucr2
+	#artiq-full.artiq-board-kc705-nist_clock
         #artiq-full.artiq-board-kasli-wipm
         #ps.paramiko  # needed if and only if flashing boards remotely (artiq_flash -H)
 
@@ -34,7 +35,7 @@ in
       ]))
 
       # List desired non-Python packages here
-      #artiq-full.openocd  # needed if and only if flashing boards
+      artiq-full.openocd  # needed if and only if flashing boards
       # Other potentially interesting packages from the NixOS package collection:
       #pkgs.gtkwave
       #pkgs.spyder
