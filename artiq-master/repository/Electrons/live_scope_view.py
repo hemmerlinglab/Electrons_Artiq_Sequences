@@ -27,11 +27,6 @@ class basic_live_scope_view(EnvExperiment):
     def prepare(self):
         #function run before the experiment 
         
-        # dictionary as to what each port is
-        #self.smp_data_sets = {
-        #        'ch0' : 'mcp_signal'
-        #        }
-
         #each sampler takes 9us in addition to whatever the time delay is
         # scope count -1 for endpoint considerations
         # division converts it to ms
@@ -39,10 +34,6 @@ class basic_live_scope_view(EnvExperiment):
 
         # turn np array into a dataset, time dataset for scope
         self.set_dataset('times', (self.time_interval),broadcast=True)
-
-        # an array of 0 to initialize voltage dataset
-        #self.set_dataset('voltage',([0]*len(self.time_interval)),broadcast=True)
-
     
     def run(self):
         self.core.reset()
@@ -50,15 +41,9 @@ class basic_live_scope_view(EnvExperiment):
             self.scheduler.pause() # allows for "terminate instances" functionality
             self.run_pmt()
     
-    def display_data(self,x,y):
-        pass
-    
     def readout_data(self):
         self.smp_data = {}
     
-    def get_data(self):
-        pass
-        
     # run_pmt, this is directly counting pulses in FPGA and decorated with kernel so that artiq is listening/waiting for a pulse for 100ms        
     @kernel
     def run_pmt(self):
