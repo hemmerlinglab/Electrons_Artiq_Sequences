@@ -41,9 +41,6 @@ class basic_live_scope_view(EnvExperiment):
             self.scheduler.pause() # allows for "terminate instances" functionality
             self.run_pmt()
     
-    def readout_data(self):
-        self.smp_data = {}
-    
     # run_pmt, this is directly counting pulses in FPGA and decorated with kernel so that artiq is listening/waiting for a pulse for 100ms        
     @kernel
     def run_pmt(self):
@@ -61,7 +58,7 @@ class basic_live_scope_view(EnvExperiment):
         # data0 is from a single scope count
         data0 = [0]*self.scope_count
 
-        # add to smp data by continuously overriding
+        # add to smp data by continuously overriding, list of 8 points of all zeros
         smp = [0]*8
 
         # smp has been overriden
@@ -74,8 +71,3 @@ class basic_live_scope_view(EnvExperiment):
         self.set_dataset('ch0',(data0),broadcast=True)
 
 
-    #prints the counts, decorated with rpc because this is something computer does, do not want to wait for artiq to count before going to next line, want to do it simultaneously  
-#    @rpc(flags={"async"}) 
-#    def pc(self,counts): 
-#        print("counts: ")
-#        print(counts)

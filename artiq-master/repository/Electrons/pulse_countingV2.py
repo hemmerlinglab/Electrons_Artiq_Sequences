@@ -35,8 +35,8 @@ class pulse_counting2(EnvExperiment):
     # run_pmt, this is directly counting pulses in FPGA and decorated with kernel so that artiq is listening/waiting for a pulse for 100ms        
     @kernel
     def run_pmt(self):
+        self.core.break_realtime() #this always needs to be first
         t_count = self.ttl3.gate_rising(self.detection_time*ms)
-        self.core.break_realtime()
         pmt_count = self.ttl3.count(t_count)
         self.pc(pmt_count)
     #prints the counts, decorated with rpc because this is something computer does, do not want to wait for artiq to count before going to next line, want to do it simultaneously  
