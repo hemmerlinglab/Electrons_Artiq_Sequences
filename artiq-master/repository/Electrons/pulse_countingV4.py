@@ -29,7 +29,7 @@ def print_underflow():
 #    print(counts)
 
 # Class which defines the pmt counting experiment
-class pulse_counting4(EnvExperiment):
+class pulse_counting3(EnvExperiment):
     def build(self):
          self.setattr_device('core') # need the core for everything
          self.setattr_device('ttl3') # where pulses are being sent in by ttl
