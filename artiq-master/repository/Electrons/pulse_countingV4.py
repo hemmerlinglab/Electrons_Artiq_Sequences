@@ -59,21 +59,18 @@ class pulse_counting3(EnvExperiment):
 
         # read the counts and store into a dataset
         
-        # single step in time
-        data0 = [0]*self.time_count
+        # single step in time, defines the length of the list as the time count
+        t_counts = [0]*self.time_count
 
-        # define a count variable and continuously override
-        #count = [0]
-
-        # continuously override 
+        # save the number of counts into a variable called data0
         for j in range(self.time_count):
 
-            data0[j]=self.ttl3.gate_rising(self.detection_time*ms) # reads from the channel
-            #data0[j] = count[0]
+            t_counts[j]=self.ttl3.gate_rising(self.detection_time*ms) # reads from the channel
+            count =self.ttl3.count(t_count)
             # delay for as long your listening for, translates between machine time and actual time
             delay(self.detection_time*ms)
         
-        self.set_dataset('TTL_counts',(data0),broadcast=True)
+        self.set_dataset('TTL_counts',(counts),broadcast=True)
         
 
 
