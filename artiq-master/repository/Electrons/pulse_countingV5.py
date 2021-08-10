@@ -1,5 +1,6 @@
-''' Differences from V3: 
- - added a variable count to count properly
+''' Differences from V4: 
+ - trying to make this one simular to the run_pmt_continuously on Haeffner lba github
+
 
     '''
 
@@ -22,7 +23,7 @@ def print_underflow():
 #    print(counts)
 
 # Class which defines the pmt counting experiment
-class pulse_counting4(EnvExperiment):
+class pulse_counting5_eg(EnvExperiment):
     def build(self):
          self.setattr_device('core') # need the core for everything
          self.setattr_device('ttl3') # where pulses are being sent in by ttl
@@ -33,12 +34,13 @@ class pulse_counting4(EnvExperiment):
          self.setattr_argument('time_count', NumberValue(default=400,unit='number of counts',scale=1,ndecimals=0,step=1)) #how many indices you have in time axis
          self.setattr_argument('detection_time',NumberValue(default=100,unit='ms',scale=1,ndecimals=0,step=1))
          self.setattr_device('scheduler') # scheduler used
-    def prepare(self):
+#    def prepare(self):
 	# this function runs before the experiment, set dataset variables here
-        self.time_interval=np.linspace(0,(self.step_size)*(self.time_count-1)/1.0e3,self.time_count)
-        self.set_dataset('times',(self.time_interval),broadcast=True)
+#        self.time_interval=np.linspace(0,(self.step_size)*(self.time_count-1)/1.0e3,self.time_count)
+#        self.set_dataset('times',(self.time_interval),broadcast=True)
     def run(self):
         self.core.reset()
+        self.set_dataset("counts",[],broadcast=True)
         while True:
             self.scheduler.pause() # allows for "terminate instances" functionality
          #   delay(100*ms)
@@ -48,23 +50,33 @@ class pulse_counting4(EnvExperiment):
     # run_pmt, this is directly counting pulses in FPGA and decorated with kernel so that artiq is listening/waiting for a pulse for 100ms        
     @kernel
     def run_pmt(self):
-        self.core.break_realtime()
-
-        # read the counts and store into a dataset
+        while not self.scheduler.check_pause():
+            self.core.break_realtime()
+            # read the counts and store into a dataset
         
-        # single step in time, defines the length of the list as the time count
-        t_counts = [0]*self.time_count
+            # single step in time, defines the length of the list as the time count
+        #    t_count = [0]*self.time_count
 
         # save the number of counts into a variable called data0
-        for j in range(self.time_count):
 
-            t_counts[j]=self.ttl3.gate_rising(self.detection_time*ms) # reads from the channel
-            counts =self.ttl3.count(t_counts)
+            t_count[j]=self.ttl3.gate_rising(self.detection_time*ms) # reads from the channel
+            count =self.ttl3.count(t_count)
             # delay for as long your listening for, translates between machine time and actual time
             delay(self.detection_time*ms)
+            self.append("Counts",count)
         
-        self.set_dataset('TTL_counts',(counts),broadcast=True)
-        
+        #self.set_dataset('TTL_counts',(counts),broadcast=True)
+    @rpc(flags={"async"})
+    def append(self, dataset_name, data_to_append):
+        if not dataset_name in self.dataset_length.keys():
+            self.dataset_length[dataset_name] = 0
+
+        if self.dataset_length[dataset_name] % 1000 == 0:
+            self.set_dataset(dataset_name, [], broadcast=True)
+
+        self.append_to_dataset(dataset_name, data_to_append)
+        self.dataset_length[dataset_name] += 1
+            
 
 
 
