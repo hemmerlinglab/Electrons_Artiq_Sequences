@@ -27,8 +27,10 @@ class pulse_counting(EnvExperiment):
     def run_pmt(self,detection_time):
         while True:
             self.core.break_realtime()
+            # counts the number of rising edges within a detection time
             t_count = self.ttl3.gate_rising(detection_time*ms)
             pmt_count = self.ttl3.count(t_count)
+            #pmt_count=self.ttl3.fetch_count(t_count)
             self.pc(pmt_count)
     #prints the counts, decorated with rpc because this is something computer does, do not want to wait for artiq to count before going to next line, want to do it simultaneously  
     @rpc(flags={"async"}) 

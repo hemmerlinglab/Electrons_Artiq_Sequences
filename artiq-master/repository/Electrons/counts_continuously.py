@@ -34,6 +34,7 @@ class counts_continuously(EnvExperiment):
          
          self.setattr_argument('detection_time',NumberValue(default=100,unit='ms',scale=1,ndecimals=0,step=1))
          self.setattr_device('scheduler') # scheduler used
+         self.dataset_length = {}
 #    def prepare(self):
 	# this function runs before the experiment, set dataset variables here
 #        self.time_interval=np.linspace(0,(self.step_size)*(self.time_count-1)/1.0e3,self.time_count)
@@ -42,29 +43,22 @@ class counts_continuously(EnvExperiment):
         self.core.reset()
         self.set_dataset("counts",[],broadcast=True)
         self.set_dataset("collection_duration",[self.detection_time])
+        self.set_dataset("clear_pmt_plot",[False],broadcast=True)
         while True:
             self.scheduler.pause() # allows for "terminate instances" functionality
-         #   delay(100*ms)
-            self.run_pmt()
-        #    delay(100*ms)
+            self.run_pulse_counter()
    
     # run_pmt, this is directly counting pulses in FPGA and decorated with kernel so that artiq is listening/waiting for a pulse for 100ms        
     @kernel
-    def run_pmt(self):
+    def run_pulse_counter(self):
         self.core.break_realtime()
+        # runs this function while not paused (so continusouly)
         while not self.scheduler.check_pause():
             self.core.break_realtime()
-            # read the counts and store into a dataset
-        
-            # single step in time, defines the length of the list as the time count
-        #    t_count = [0]*self.time_count
-
-        # save the number of counts into a variable called data0
-
+            
+            #counts the rising edges within a certain detection time
             t_count=self.ttl3.gate_rising(self.detection_time*ms) # reads from the channel
             count =self.ttl3.count(t_count)
-            # delay for as long your listening for, translates between machine time and actual time
-            #delay(self.detection_time*ms)
             self.append("counts",count)
         
         #self.set_dataset('TTL_counts',(counts),broadcast=True)
@@ -78,7 +72,10 @@ class counts_continuously(EnvExperiment):
 
         self.append_to_dataset(dataset_name, data_to_append)
         self.dataset_length[dataset_name] += 1
-            
+    
+    @rpc(flags={"async"}) 
+    def pc(self,count): 
+        print(count)           
 
 
 
