@@ -1,0 +1,110 @@
+[nix-shell:~/software/Electrons_Artiq_Sequences/artiq-master]$ artiq_flash -v -V ucr2
+Design: top;UserID=FFFFFFFF;COMPRESS=TRUE;Version=2020.1
+Part name: 7a100tfgg484
+Date: 2021/06/15
+Time: 21:08:25
+Bitstream payload length: 0x29da0c
+Open On-Chip Debugger 0.10.0-snapshot (2021-06-15-23:20)
+Licensed under GNU GPL v2
+For bug reports, read
+	http://openocd.org/doc/doxygen/bugs.html
+none separate
+adapter speed: 25000 kHz
+Info : ftdi: if you experience problems at higher adapter clocks, try the command "ftdi_tdo_sample_edge falling"
+Info : clock speed 25000 kHz
+Info : JTAG tap: xc7.tap tap/device found: 0x13631093 (mfg: 0x049 (Xilinx), part: 0x3631, ver: 0x1)
+Info : gdb server disabled
+TEMP 90.56 C
+VCCINT 0.983 V
+VCCAUX 1.774 V
+VCCBRAM 0.988 V
+VPVN 0.000 V
+VREFP 0.000 V
+VREFN 0.000 V
+VCCPINT 0.000 V
+VCCPAUX 0.000 V
+VCCODDR 0.000 V
+loaded file /nix/store/3k04dpqhg885g94k6y1p7zylv8i8s551-openocd-mlabs-0.10.0/share/bscan-spi-bitstreams/bscan_spi_xc7a100t.bit to pld device 0 in 0s 289651us
+Info : Found flash device 'sp s25fl128' (ID 0x00182001)
+flash 'jtagspi' found at 0x00000000
+Info : Found flash device 'sp s25fl128' (ID 0x00182001)
+Info : sector 0 took 1878 ms
+Info : sector 1 took 1848 ms
+Info : sector 2 took 103 ms
+Info : sector 3 took 99 ms
+Info : sector 4 took 106 ms
+Info : sector 5 took 106 ms
+Info : sector 6 took 105 ms
+Info : sector 7 took 110 ms
+Info : sector 8 took 104 ms
+Info : sector 9 took 106 ms
+Info : sector 10 took 103 ms
+Info : sector 11 took 105 ms
+Info : sector 12 took 103 ms
+Info : sector 13 took 114 ms
+Info : sector 14 took 105 ms
+Info : sector 15 took 108 ms
+Info : sector 16 took 107 ms
+Info : sector 17 took 107 ms
+Info : sector 18 took 106 ms
+Info : sector 19 took 105 ms
+Info : sector 20 took 107 ms
+Info : sector 21 took 101 ms
+Info : sector 22 took 101 ms
+Info : sector 23 took 100 ms
+Info : sector 24 took 104 ms
+Info : sector 25 took 105 ms
+Info : sector 26 took 105 ms
+Info : sector 27 took 109 ms
+Info : sector 28 took 106 ms
+Info : sector 29 took 106 ms
+Info : sector 30 took 102 ms
+Info : sector 31 took 108 ms
+Info : sector 32 took 105 ms
+Info : sector 33 took 111 ms
+Info : sector 34 took 117 ms
+Info : sector 35 took 101 ms
+Info : sector 36 took 106 ms
+Info : sector 37 took 103 ms
+Info : sector 38 took 109 ms
+Info : sector 39 took 104 ms
+Info : sector 40 took 115 ms
+Info : sector 41 took 107 ms
+erased sectors 0 through 41 on flash bank 1 in 7.960225s
+Info : Found flash device 'sp s25fl128' (ID 0x00182001)
+wrote 2742796 bytes from file /run/user/1000/artiq_zhbbjpxb_top.bit to flash bank 1 at offset 0x00000000 in 18.568052s (144.254 KiB/s)
+Info : Found flash device 'sp s25fl128' (ID 0x00182001)
+read 2742796 bytes from file /run/user/1000/artiq_zhbbjpxb_top.bit and flash bank 1 at offset 0x00000000 in 1.640652s (1632.590 KiB/s)
+contents match
+Info : Found flash device 'sp s25fl128' (ID 0x00182001)
+flash 'jtagspi' found at 0x00000000
+Info : Found flash device 'sp s25fl128' (ID 0x00182001)
+Info : sector 64 took 111 ms
+Info : sector 65 took 110 ms
+Info : sector 66 took 127 ms
+erased sectors 64 through 66 on flash bank 1 in 0.347912s
+Info : Found flash device 'sp s25fl128' (ID 0x00182001)
+wrote 133892 bytes from file /nix/store/z0dg8kzbvcbg8xcmfvl4zzygv1ix9f53-python3-3.8.9-env/lib/python3.8/site-packages/artiq/board-support/kasli-ucr2/bootloader.bin to flash bank 1 at offset 0x00400000 in 0.977047s (133.826 KiB/s)
+Info : Found flash device 'sp s25fl128' (ID 0x00182001)
+read 133892 bytes from file /nix/store/z0dg8kzbvcbg8xcmfvl4zzygv1ix9f53-python3-3.8.9-env/lib/python3.8/site-packages/artiq/board-support/kasli-ucr2/bootloader.bin and flash bank 1 at offset 0x00400000 in 0.082011s (1594.346 KiB/s)
+contents match
+Info : Found flash device 'sp s25fl128' (ID 0x00182001)
+flash 'jtagspi' found at 0x00000000
+Info : Found flash device 'sp s25fl128' (ID 0x00182001)
+Info : sector 69 took 105 ms
+Info : sector 70 took 110 ms
+Info : sector 71 took 110 ms
+Info : sector 72 took 113 ms
+Info : sector 73 took 107 ms
+Info : sector 74 took 112 ms
+Info : sector 75 took 114 ms
+Info : sector 76 took 109 ms
+Info : sector 77 took 116 ms
+Info : sector 78 took 118 ms
+erased sectors 69 through 78 on flash bank 1 in 1.114227s
+Info : Found flash device 'sp s25fl128' (ID 0x00182001)
+wrote 649424 bytes from file /nix/store/z0dg8kzbvcbg8xcmfvl4zzygv1ix9f53-python3-3.8.9-env/lib/python3.8/site-packages/artiq/board-support/kasli-ucr2/runtime.fbi to flash bank 1 at offset 0x00450000 in 4.437298s (142.926 KiB/s)
+Info : Found flash device 'sp s25fl128' (ID 0x00182001)
+read 649424 bytes from file /nix/store/z0dg8kzbvcbg8xcmfvl4zzygv1ix9f53-python3-3.8.9-env/lib/python3.8/site-packages/artiq/board-support/kasli-ucr2/runtime.fbi and flash bank 1 at offset 0x00450000 in 0.387824s (1635.286 KiB/s)
+contents match
+
