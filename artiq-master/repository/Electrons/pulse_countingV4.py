@@ -49,21 +49,23 @@ class pulse_counting4(EnvExperiment):
     @kernel
     def run_pmt(self):
         self.core.break_realtime()
+        #self.ttl3.init() #initializes sampler
 
         # read the counts and store into a dataset
         
         # single step in time, defines the length of the list as the time count
-        t_counts = [0]*self.time_count
+        count_tot = [0]*self.time_count
 
         # save the number of counts into a variable called data0
         for j in range(self.time_count):
-
-            t_counts[j]=self.ttl3.gate_rising(self.detection_time*ms) # reads from the channel
-            counts =self.ttl3.count(t_counts)
+            #register rising edges for detection time
+            t_count= self.ttl3.gate_rising(self.detection_time*ms) # reads from the channel
+            count =self.ttl3.count(t_counts)
+            self.mutate_dataset('count_tot',j,count)
             # delay for as long your listening for, translates between machine time and actual time
             delay(self.detection_time*ms)
         
-        self.set_dataset('TTL_counts',(counts),broadcast=True)
+        self.set_dataset('TTL_counts',(count_tot),broadcast=True)
         
 
 
