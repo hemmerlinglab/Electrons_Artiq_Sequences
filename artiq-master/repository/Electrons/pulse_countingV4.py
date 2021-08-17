@@ -37,6 +37,7 @@ class pulse_counting4(EnvExperiment):
 	# this function runs before the experiment, set dataset variables here
         self.time_interval=np.linspace(0,(self.step_size)*(self.time_count-1)/1.0e3,self.time_count)
         self.set_dataset('times',(self.time_interval),broadcast=True)
+        self.set_dataset('count_tot',[0]*self.time_count,broadcast=True)
     def run(self):
         self.core.reset()
         while True:
@@ -54,8 +55,7 @@ class pulse_counting4(EnvExperiment):
         # read the counts and store into a dataset
         
         # single step in time, defines the length of the list as the time count
-        count_tot = [0]*self.time_count
-
+        
         # save the number of counts into a variable called data0
         for j in range(self.time_count):
             #register rising edges for detection time
@@ -66,7 +66,7 @@ class pulse_counting4(EnvExperiment):
             # delay for as long your listening for, translates between machine time and actual time
             delay(self.detection_time*ms)
         
-        self.set_dataset('TTL_counts',(count_tot),broadcast=True)
+        #self.set_dataset('TTL_counts',(count_tot),broadcast=True)
         
 
 

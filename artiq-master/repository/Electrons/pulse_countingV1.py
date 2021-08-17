@@ -22,7 +22,7 @@ class pulse_counting(EnvExperiment):
         self.core.reset()
         self.counting(100)
    
-    # run_pmt, this is directly counting pulses in FPGA and decorated with kernel so that artiq is listening/waiting for a pulse for 100ms        
+    # directly counting pulses in FPGA and decorated with kernel so that artiq is listening/waiting for a pulse for 100ms        
     @kernel
     def counting(self,detection_time):
         while True:
