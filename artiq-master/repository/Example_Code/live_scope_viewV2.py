@@ -15,11 +15,11 @@ def print_underflow():
 
 
 # Class which defines the pmt counting experiment --> shows up in the GUI as this name
-class basic_live_scope_view(EnvExperiment):
+class basic_live_scope_view2(EnvExperiment):
     def build(self):
          self.setattr_device('core') # need the core for everything
          self.setattr_device('sampler0') # where voltages being read in
-         self.setattr_argument('step_size',NumberValue(default=100,unit='us',scale=1,ndecimals=0,step=1)) #time scale on the scope,how zoomed you are in time
+         self.setattr_argument('step_size',NumberValue(default=100,unit='ms',scale=1,ndecimals=0,step=1)) #time scale on the scope,how zoomed you are in time
          self.setattr_argument('scope_count', NumberValue(default=400,unit='reads per shot',scale=1,ndecimals=0,step=1)) #how many indices you have in time axis
          self.setattr_argument('detection_time',NumberValue(default=100,unit='ms',scale=1,ndecimals=0,step=1)) #this makes detection time an attribute to change on GUI 
          self.setattr_device('scheduler') # scheduler used
@@ -63,11 +63,12 @@ class basic_live_scope_view(EnvExperiment):
 
         # smp has been overriden
         for j in range(self.scope_count):
+            #acquire set of data (data)
             self.sampler0.sample_mu(smp) # reads in machine units from 8 channels
             # save the value of smp
             data0[j] = smp[0]
             delay(self.step_size*us)
 
-        self.set_dataset('ch0',(data0),broadcast=True)
+        self.set_dataset('volts',(data0),broadcast=True)
 
 

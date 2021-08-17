@@ -60,7 +60,8 @@ class pulse_counting4(EnvExperiment):
         for j in range(self.time_count):
             #register rising edges for detection time
             t_count= self.ttl3.gate_rising(self.detection_time*ms) # reads from the channel
-            count =self.ttl3.count(t_counts)
+            count =self.ttl3.count(t_count)
+            # mutate dataset at index j with the value of count
             self.mutate_dataset('count_tot',j,count)
             # delay for as long your listening for, translates between machine time and actual time
             delay(self.detection_time*ms)
