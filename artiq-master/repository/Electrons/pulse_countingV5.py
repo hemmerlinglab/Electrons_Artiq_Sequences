@@ -1,5 +1,5 @@
-''' Differences from V3: 
- - First working code, live updates the live feed with mutate dataset variable
+''' Differences from V4: 
+ - continuosly append to list, if list is greater than 400, delete up to 400
 
     '''
 
@@ -22,7 +22,7 @@ def print_underflow():
 #    print(counts)
 
 # Class which defines the pmt counting experiment
-class pulse_counting4(EnvExperiment):
+class pulse_counting5(EnvExperiment):
     def build(self):
          self.setattr_device('core') # need the core for everything
          self.setattr_device('ttl3') # where pulses are being sent in by ttl
@@ -33,6 +33,7 @@ class pulse_counting4(EnvExperiment):
          self.setattr_argument('time_count', NumberValue(default=400,unit='number of counts',scale=1,ndecimals=0,step=1)) #how many indices you have in time axis
          self.setattr_argument('detection_time',NumberValue(default=100,unit='ms',scale=1,ndecimals=0,step=1))
          self.setattr_device('scheduler') # scheduler used
+         self.dataset_length = {}
     def prepare(self):
 	# this function runs before the experiment, set dataset variables here
         self.time_interval=np.linspace(0,(self.step_size)*(self.time_count-1)/1.0e3,self.time_count)
@@ -42,21 +43,13 @@ class pulse_counting4(EnvExperiment):
         self.core.reset()
         while True:
             self.scheduler.pause() # allows for "terminate instances" functionality
-         #   delay(100*ms)
-            self.run_pmt()
-        #    delay(100*ms)
+            self.counting()
    
-    # run_pmt, this is directly counting pulses in FPGA and decorated with kernel so that artiq is listening/waiting for a pulse for 100ms        
+    #  directly counting pulses in FPGA and decorated with kernel -> artiq is listening/waiting for a pulse for a certain detection time        
     @kernel
-    def run_pmt(self):
+    def counting(self):
         self.core.break_realtime()
-        #self.ttl3.init() #initializes sampler
 
-        # read the counts and store into a dataset
-        
-        # single step in time, defines the length of the list as the time count
-        
-        # save the number of counts into a variable called data0
         for j in range(self.time_count):
             #register rising edges for detection time
             t_count= self.ttl3.gate_rising(self.detection_time*ms) # reads from the channel
@@ -65,9 +58,19 @@ class pulse_counting4(EnvExperiment):
             self.mutate_dataset('count_tot',j,count)
             # delay for as long your listening for, translates between machine time and actual time
             delay(self.detection_time*ms)
+            #self.append("count_tot", count)
         
-        #self.set_dataset('TTL_counts',(count_tot),broadcast=True)
-        
+    # not used but thinking of using this    
+    @rpc(flags={"async"})
+    def append(self, dataset_name, data_to_append):
+        if not dataset_name in self.dataset_length.keys():
+            self.dataset_length[dataset_name] = 0
+
+        if self.dataset_length[dataset_name] % 1000 == 0:
+            self.set_dataset(dataset_name, [], broadcast=True)
+
+        self.append_to_dataset(dataset_name, data_to_append)
+        self.dataset_length[dataset_name] += 1
 
 
 
