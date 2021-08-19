@@ -1,8 +1,5 @@
 ''' Differences from V3: 
- - First working code, live updates the live feed with mutate dataset variable
- 
- detection_time variable doesnt work, this is just hard coded version of detection time variable
-    '''
+ - no more hard coded detection time, dont forget to recompute all arguments'''
 
 import sys
 import os
@@ -20,12 +17,12 @@ def print_underflow():
 
 
 # Class which defines the pmt counting experiment
-class pulse_counting4(EnvExperiment):
+class pulse_counting5(EnvExperiment):
     def build(self):
          self.setattr_device('core') # need the core for everything
          self.setattr_device('ttl3') # where pulses are being sent in by ttl
          self.setattr_argument('time_count', NumberValue(default=400,unit='number of counts',scale=1,ndecimals=0,step=1)) #how many indices you have in time axis
-         self.setattr_argument('detection_time',NumberValue(default=100,unit='ms',scale=1,ndecimals=0,step=1))
+         self.setattr_argument('detection_time',NumberValue(default=500,unit='ms',scale=1,ndecimals=0,step=1))
          self.setattr_device('scheduler') # scheduler used
     def prepare(self):
         self.set_dataset('count_tot',[0]*self.time_count,broadcast=True)
@@ -43,12 +40,12 @@ class pulse_counting4(EnvExperiment):
         # read the counts and store into a dataset for live updating
         for j in range(self.time_count):
             #register rising edges for detection time
-            t_count= self.ttl3.gate_rising(500*ms) # reads from the channel
+            t_count= self.ttl3.gate_rising(self.detection_time*ms) # reads from the channel
             count =self.ttl3.count(t_count)
-            # mutate dataset at index j with the value of count
-            self.mutate_dataset('count_tot',j,count/500.0e-3)
+            # mutate dataset at index j with the value of counts/second
+            self.mutate_dataset('count_tot',j,(count)/(self.detection_time*ms))
             # delay for as long your listening for, translates between machine time and actual time
-            delay(500*ms)
+            delay(self.detection_time*ms)
         
         
 
