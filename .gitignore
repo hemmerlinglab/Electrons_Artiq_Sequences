@@ -1,0 +1,5 @@
+*.pyc
+*.hd5
+artiq-master/results
+artiq-master/last_rid.pyon
+*.h5
