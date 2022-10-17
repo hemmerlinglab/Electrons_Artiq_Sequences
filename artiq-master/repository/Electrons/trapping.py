@@ -7,9 +7,9 @@ import sys
 sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions")
 from helper_functions import *
 
+from dc_electrodes import *
 
-
-class Scan_Laser_With_Server(EnvExperiment):
+class Trapping(EnvExperiment):
     
     def build(self):
         
@@ -36,6 +36,10 @@ class Scan_Laser_With_Server(EnvExperiment):
         self.my_setattr('no_of_repeats', NumberValue(default=10,unit='',scale=1,ndecimals=0,step=1))
         self.my_setattr('detection_time', NumberValue(default=10,unit='us',scale=1,ndecimals=0,step=1))
 
+        self.electrodes = Electrodes()
+
+        return
+
     def my_setattr(self, arg, val):
         
         # define the attribute
@@ -47,6 +51,8 @@ class Scan_Laser_With_Server(EnvExperiment):
         else:
             exec("self.config_dict.append({'par' : arg, 'val' : self." + arg + "})")
 
+
+
     @kernel
     def set_mesh_voltage(self, voltage):
         
@@ -57,6 +63,32 @@ class Scan_Laser_With_Server(EnvExperiment):
         self.zotino0.write_gain_mu(0, 65000)
         self.zotino0.write_dac(0, 1.0/200.0 * voltage)
         self.zotino0.load()
+
+
+
+    @kernel
+    def set_electrode_voltages(self, channel_list, voltage_list):
+        
+        voltage = 0
+
+        self.core.reset()
+        self.core.break_realtime()
+        self.zotino0.init()
+        delay(200*us)
+
+        for k in range(len(channel_list)):
+        #for k in [0,1]:
+
+            self.zotino0.write_gain_mu(channel_list[k], 65000)
+            self.zotino0.load()
+            delay(200*us)
+            self.zotino0.write_dac(channel_list[k], voltage_list[k])
+            self.zotino0.load()
+            delay(200*us)
+
+        return
+
+
 
     def prepare(self):
         
@@ -159,7 +191,34 @@ class Scan_Laser_With_Server(EnvExperiment):
     def run(self):
         
         # Set voltage of the mesh
-        self.set_mesh_voltage(self.mesh_voltage)
+        #self.set_mesh_voltage(self.mesh_voltage)
+       
+        self.multipole_vector = {
+                'Ex' : 0,
+                'Ey' : 0,
+                'Ez' : 0,
+                'U1' : 0,
+                'U2' : -0.65,
+                'U3' : 0,
+                'U4' : 0,
+                'U5' : 0
+            }
+
+
+        (chans, voltages) = self.electrodes.getVoltageMatrix(self.multipole_vector)
+
+        
+
+        chans = list(range(20))
+        voltages = list(range(-10, 10, 1))
+
+        print(chans)
+        print(voltages)
+        print(len(voltages))
+
+        self.set_electrode_voltages(chans, voltages)
+
+        return
 
         # Lock the frequency of 422
 
