@@ -206,6 +206,8 @@ class Trapping(EnvExperiment):
 
 
         (chans, voltages) = self.electrodes.getVoltageMatrix(self.multipole_vector)
+        print(chans)
+        print(voltages)
 
         
 

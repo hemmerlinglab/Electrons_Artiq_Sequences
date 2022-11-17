@@ -42,3 +42,4 @@ class RTHist_test(EnvExperiment):
                 tstamp = self.ttl3.timestamp_mu(t_end) # read the timestamp of another event
 #            delay(100*ns)
             self.make_histogram()
+            self.set_dataset('bin_times', [], broadcast=True)
