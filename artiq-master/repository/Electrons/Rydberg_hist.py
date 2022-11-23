@@ -127,8 +127,7 @@ class Rydberg_hist(EnvExperiment):
         #    self.hist_data[loop % self.max_loop_data] = extract[1:len(extract)]
         
         flatten_data = sum(self.hist_data, []) # flatten 2D list self.hist_data to 1D list
-        a, b = np.histogram(flatten_data, bins = np.linspace(0, self.dete#        self.set_single_laser(390, self.frequency_390 + self.min_freq*1e6/1e12, do_switch = True, wait_time = self.relock_wait_time)
-ction_time, self.number_of_bins))
+        a, b = np.histogram(flatten_data, bins = np.linspace(0, self.detection_time, self.number_of_bins))
         
         self.set_dataset('hist_ys', a, broadcast=True)
         self.set_dataset('hist_xs', b, broadcast=True)
