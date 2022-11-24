@@ -155,9 +155,8 @@ class Rydberg_hist(EnvExperiment):
 ######################################################
 
     def set_single_laser(self, which_laser, frequency, do_switch = False, wait_time = None):
-        
-        return
-
+       
+        #return 
         if which_laser == 422:
             channel = 5
         elif which_laser == 390:
@@ -235,22 +234,23 @@ class Rydberg_hist(EnvExperiment):
             len_bin_times = np.zeros(self.no_of_repeats) # record the number of events in each repeat
             save_bin_times = np.zeros(self.max_no_of_timestamps)
 
+
+            ind_count = 0
             for j in range(self.no_of_repeats):
 
                 self.run_sequence()
 
                 # Save data
-                extract = list(self.get_dataset('bin_times'))
-                my_bin_times = extract[1:len(extract)]
-                len_bin_times[j] = len(my_bin_times)
-                save_bin_times[len_bin_times[0:j].sum():len_bin_times[0:j+1]] = my_bin_times
+                my_timestamps = list(self.get_dataset('bin_times'))
 
-            #self.run_sequence()
+                # save histogram
+                for kk in range(len(my_timestamps)):
 
-            #extract = list(self.get_dataset('bin_times')) # of variable length
-            #my_bin_times = extract[1:len(extract)]
+                    save_bin_times[ind_count] = my_timestamps[kk]
 
-            #save_bin_times[0:len(my_bin_times)] = my_bin_times
+                    ind_count += 1
+
+
 
             self.mutate_dataset('scan_result', i, save_bin_times)
 
