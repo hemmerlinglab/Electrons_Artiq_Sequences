@@ -1,3 +1,4 @@
+'''Zijue Luo: Trying to plot spectrum of histogram of the Rydberg line in the Rydberg_hist time sequence.'''
 from artiq.experiment import *
 import numpy as np
 
@@ -7,7 +8,7 @@ import sys
 sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions")
 from helper_functions import *
 
-class Rydberg_hist(EnvExperiment):
+class Rydberg_hist_spectrum(EnvExperiment):
     
     def build(self):
         
@@ -28,7 +29,7 @@ class Rydberg_hist(EnvExperiment):
         self.my_setattr('max_freq', NumberValue(default=1000,unit='MHz',scale=1,ndecimals=6,step=1))
         self.my_setattr('steps', NumberValue(default=10,unit='steps to scan',scale=1,ndecimals=0,step=1))
         self.my_setattr('scanning_laser', EnumerationValue(['422', '390'],default='390'))
-        
+                
         # Setting laser lock parameters
         self.my_setattr('relock_422_steps', NumberValue(default=3,unit='',scale=1,ndecimals=0,step=1))
         self.my_setattr('relock_422_wait_time', NumberValue(default=5000,unit='ms',scale=1,ndecimals=1,step=1))
@@ -119,9 +120,9 @@ class Rydberg_hist(EnvExperiment):
         print('Scan ' + self.basefilename + ' finished.')
         print('Scan finished.')
 
-#########################################################
-#####              Histogram Functions              #####
-#########################################################
+##########################################################
+#####              Pcolormesh Functions              #####
+##########################################################
 
     def make_histogram(self):
         extract = list(self.get_dataset('bin_times'))
@@ -138,7 +139,7 @@ class Rydberg_hist(EnvExperiment):
         self.set_dataset('hist_ys', a, broadcast=True)
         self.set_dataset('hist_xs', b, broadcast=True)
 
-        return
+        return a, b
 
     @kernel
     def read_timestamps(self, t_start, t_end):
@@ -153,12 +154,12 @@ class Rydberg_hist(EnvExperiment):
             tstamp = self.ttl3.timestamp_mu(t_end) # read the timestamp of another event
 
         # display
-        self.make_histogram()
-        return
+        a, b = self.make_histogram()
+        return a, b
 
-######################################################
-#####         End of Histogram Functions         #####
-######################################################
+#######################################################
+#####         End of Pcolormesh Functions         #####
+#######################################################
 
     def set_single_laser(self, which_laser, frequency, do_switch = False, wait_time = None):
        
@@ -205,22 +206,15 @@ class Rydberg_hist(EnvExperiment):
                 t_start = now_mu()
                 t_end = self.ttl3.gate_rising(self.detection_time*us)
                 
-                self.read_timestamps(t_start, t_end)
+                counts, bin_edges = self.read_timestamps(t_start, t_end)
 
-        return
+        return counts, bin_edges
 
 
     def run(self):
        
         # Set voltage of the mesh
         self.set_mesh_voltage(self.mesh_voltage)
-
-        ## Lock the frequency of 422 and 390 to the initial point
-        #if self.scanning_laser == '390':
-        #    self.set_single_laser(422, self.frequency_422, do_switch = True, wait_time = self.relock_422_wait_time)
-        #    self.set_single_laser(390, self.frequency_390, do_switch = True, wait_time = self.relock_390_wait_time)
-
-        #time.sleep(3)
 
         for i in range(len(self.scan_values)):
 
@@ -250,11 +244,11 @@ class Rydberg_hist(EnvExperiment):
             len_bin_times = np.zeros(self.no_of_repeats) # record the number of events in each repeat
             save_bin_times = np.zeros(self.max_no_of_timestamps)
 
-
+            my_histograms = np.zeros((self.steps,self.number_of_bins))
             ind_count = 0
             for j in range(self.no_of_repeats):
 
-                self.run_sequence()
+                my_histograms[i], my_bins = self.run_sequence()
 
                 # Save data
                 my_timestamps = list(self.get_dataset('bin_times'))
@@ -266,14 +260,13 @@ class Rydberg_hist(EnvExperiment):
 
                     ind_count += 1
 
-
+            self.set_dataset('pcolor', my_histograms, broadcast=True)
 
             self.mutate_dataset('scan_result', i, save_bin_times)
 
             # read laser frequencies
             self.wavemeter_frequencies = get_laser_frequencies()
             
-
             self.mutate_dataset('act_freqs', i, self.wavemeter_frequencies)
             self.mutate_dataset('set_points', i, self.scan_values[i])
 
