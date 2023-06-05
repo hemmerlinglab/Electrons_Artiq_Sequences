@@ -29,12 +29,12 @@ class pcolormesh_test(EnvExperiment):
             samples[i] = np.random.normal(centers[i], self.std, self.sample_size)
             my_histograms[i], my_bins = np.histogram(samples[i], bins=bins)
 
-        return my_bins, np.array(range(self.no_of_steps)), my_histograms
+        return my_bins, my_histograms
 
 #    @kernel
     def run(self):
-        y, x, val = self.get_datas()
+        y, val = self.get_datas()
 
-        self.set_dataset('xval', x, broadcast=True)
+#        self.set_dataset('xval', x, broadcast=True)
         self.set_dataset('yval', y, broadcast=True)
         self.set_dataset('values', val, broadcast=True)

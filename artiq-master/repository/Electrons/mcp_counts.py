@@ -35,15 +35,12 @@ class MCP_gated_counting(EnvExperiment):
 
     @kernel
     def set_mesh_voltage(self, voltage):
-        self.core.reset()
+
         self.core.break_realtime()
         self.zotino0.init()
-        delay(200*us) # this is important to avoid RTIO underflows
-
+        delay(200*us)
         self.zotino0.write_gain_mu(31, 65000)
-        
-        self.zotino0.write_dac(31, voltage)
-        
+        self.zotino0.write_dac(31, 1.0/198.946 * (voltage + 14.6027))
         self.zotino0.load()
 
         return

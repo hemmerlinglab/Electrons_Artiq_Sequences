@@ -180,6 +180,8 @@ class Scan_390(EnvExperiment):
 
         # Lock the frequency of 422 and 390 to the initial point
 
+        time.sleep(10)
+
         self.set_single_laser(422, self.frequency_422, do_switch = True, wait_time = self.relock_wait_time)
         self.set_single_laser(390, self.frequency_390 + self.min_freq*1e6/1e12, do_switch = True, wait_time = self.relock_wait_time)
 

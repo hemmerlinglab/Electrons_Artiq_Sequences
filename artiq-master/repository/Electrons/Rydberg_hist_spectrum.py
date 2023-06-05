@@ -63,16 +63,16 @@ class Rydberg_hist_spectrum(EnvExperiment):
 
     @kernel
     def set_mesh_voltage(self, voltage):
-        
-        mesh_voltage_dc_channel = 31
 
-        self.core.reset()
         self.core.break_realtime()
         self.zotino0.init()
         delay(200*us)
-        self.zotino0.write_gain_mu(mesh_voltage_dc_channel, 65000)
-        self.zotino0.write_dac(mesh_voltage_dc_channel, 1.0/200.0 * voltage)
+        self.zotino0.write_gain_mu(31, 65000)
+        self.zotino0.write_dac(31, 1.0/198.946 * (voltage + 14.6027))
         self.zotino0.load()
+
+        return
+
 
 
     def prepare(self):
