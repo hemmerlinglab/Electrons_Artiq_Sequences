@@ -9,7 +9,7 @@ class RS:
     
     def __init__(self):
 
-        TCP_IP = '192.168.42.149'
+        TCP_IP = '192.168.42.108'
         TCP_PORT = 5025
 
         self.command_delay = 0.1
@@ -163,13 +163,15 @@ y_arr = []
 #low_freq = 1e9
 #high_freq = 2.5e9
 
-my_width = 100e6
+my_width = 200e6
 
-low_freq = 1.67e9 - my_width
-high_freq = 1.67e9 + my_width
+cnt_freq = 1.570e9
+
+low_freq = cnt_freq - my_width
+high_freq = cnt_freq + my_width
 
 
-steps = 50
+steps = 200
 
 
 span_freq = high_freq - low_freq
@@ -180,7 +182,7 @@ spec.set_center_freq(cnt_freq)
 spec.set_span(span_freq)
 
 
-spec.set_span(100e6)
+#spec.set_span(100e6)
 
 
 freq_arr = cnt_freq + np.linspace(-0.5*span_freq,0.5*span_freq,steps)

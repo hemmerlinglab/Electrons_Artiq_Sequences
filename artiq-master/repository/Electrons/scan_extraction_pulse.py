@@ -9,12 +9,20 @@ import sys
 sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions")
 from helper_functions import *
 
+sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/drivers")
+
 from dc_electrodes import *
 
-class Trapping2(EnvExperiment):
+from bk_4053 import BK4053
+
+
+
+class Scan_Extracion_Pulse(EnvExperiment):
     
     def build(self):
-        
+
+        self.bk4053 = BK4053()
+
         self.config_dict = []
         self.wavemeter_frequencies = []
         
@@ -34,16 +42,23 @@ class Trapping2(EnvExperiment):
         self.my_setattr('mesh_voltage', NumberValue(default=200,unit='V',scale=1,ndecimals=0,step=1))
 
         # Setting parameters for the histogram
-        self.my_setattr('number_of_bins', NumberValue(default=50,unit='',scale=1,ndecimals=0,step=1))
+        self.my_setattr('bin_width', NumberValue(default=1.0,unit='us',scale=1,ndecimals=1,step=0.1))
+        #self.my_setattr('number_of_bins', NumberValue(default=50,unit='',scale=1,ndecimals=0,step=1))
         self.my_setattr('histogram_refresh', NumberValue(default=1000,unit='',scale=1,ndecimals=0,step=1))
         #self.my_setattr('max_no_of_timestamps', NumberValue(default=1000,unit='',scale=1,ndecimals=0,step=1))
 
         # Setting time parameters of the experiment
-        self.my_setattr('detection_time', NumberValue(default=100,unit='us',scale=1,ndecimals=0,step=1))
+        #self.my_setattr('detection_time', NumberValue(default=100,unit='us',scale=1,ndecimals=0,step=1))
         self.my_setattr('load_time', NumberValue(default=50,unit='us',scale=1,ndecimals=0,step=1))
-        self.my_setattr('extraction_time', NumberValue(default=45,unit='us',scale=1,ndecimals=1,step=0.1))
         self.my_setattr('no_of_repeats', NumberValue(default=100000,unit='',scale=1,ndecimals=0,step=1))
         self.my_setattr('flip', EnumerationValue(['Y', 'N'],default='N'))
+
+
+        self.my_setattr('min_t', NumberValue(default=0,unit='us',scale=1,ndecimals=0,step=1))
+        self.my_setattr('max_t', NumberValue(default=1000,unit='us',scale=1,ndecimals=0,step=1))
+        self.my_setattr('steps', NumberValue(default=20,unit='steps to scan',scale=1,ndecimals=0,step=1))
+
+
 
         if self.flip == 'N':
             self.electrodes = Electrodes()
@@ -105,7 +120,11 @@ class Trapping2(EnvExperiment):
     def prepare(self):
 
         # Create the dataset of the result
-        self.set_dataset('timestamps', [0], broadcast=True)
+        self.set_dataset('timestamps', [], broadcast=True)
+        
+        self.set_dataset('arr_of_extraction_times', [0] * self.steps, broadcast=True)
+        self.set_dataset('arr_of_timestamps',       [ [] ] * self.steps, broadcast=True)
+
         self.hist_data = []
 
         # Laser was locked automatically on 1041RGA, so we do not need to do anything here
@@ -135,13 +154,19 @@ class Trapping2(EnvExperiment):
         self.set_mesh_voltage(self.mesh_voltage)
         print('Mesh voltage already set!')
 
+        
+        # Scan interval
+        self.scan_values = np.linspace(self.min_t, self.max_t, self.steps)
+
         print('Presets done!')
         
         #Set the data going to save
         self.data_to_save = [
 #                {'var' : 'set_points', 'name' : 'set_points'},
 #                {'var' : 'act_freqs', 'name' : 'act_freqs'},
-                {'var' : 'timestamps', 'name' : 'timestamps'}
+                {'var' : 'timestamps', 'name' : 'timestamps'},
+                {'var' : 'arr_of_timestamps', 'name' : 'array of timestamps'},
+                {'var' : 'arr_of_extraction_times', 'name' : 'array of extraction times'},
                 ]
 
         # save sequence file name
@@ -171,10 +196,13 @@ class Trapping2(EnvExperiment):
 
 
     def make_histogram(self):
-
+        
+        # for display
         extract = list(self.get_dataset('timestamps'))
         self.hist_data = extract[1:len(extract)]
-        a, b = np.histogram(self.hist_data, bins = np.linspace(0, self.detection_time, self.number_of_bins))
+        number_of_bins = self.detection_time // self.bin_width
+        print(number_of_bins)
+        a, b = np.histogram(self.hist_data, bins = np.linspace(0, self.detection_time, number_of_bins))
         
         self.set_dataset('hist_ys', a, broadcast=True)
         self.set_dataset('hist_xs', b, broadcast=True)
@@ -200,7 +228,7 @@ class Trapping2(EnvExperiment):
 
 
     @kernel
-    def run(self):
+    def run_histogram(self):
         
         ind_count = 0
         # Time Sequence
@@ -220,8 +248,44 @@ class Trapping2(EnvExperiment):
                 self.ttl11.pulse(self.load_time*us)
 
                 with sequential:
-                    delay(self.extraction_time*us)
+                    delay(self.extraction_time * us)
                     self.ttl6.pulse(1*us)
 
             self.read_timestamps(t_start, t_end, i)
+
+
+
+    def run(self):
+
+        
+        for my_t_ind in range(len(self.scan_values)):
+
+            print("Extraction time: {0:.2f} us".format(self.scan_values[my_t_ind]))
+
+            self.scheduler.pause()
+
+            # set the extraction pulse
+            self.bk4053.set_carr_delay(self.scan_values[my_t_ind] * 1e-6)
+
+            self.extraction_time = self.scan_values[my_t_ind]
+           
+            # set detection time 10% longer than extraction pulse
+            self.detection_time = int(1.1 * self.scan_values[my_t_ind])
+
+            # extraction
+            self.run_histogram()
+
+            # update data
+
+            self.mutate_dataset('arr_of_extraction_times', my_t_ind, self.scan_values[my_t_ind]) 
+            
+            self.mutate_dataset('arr_of_timestamps', my_t_ind, self.get_dataset('timestamps')) 
+
+            
+            # reset timestamps
+            self.set_dataset('timestamps', [], broadcast=True)
+
+
+        #print(self.get_dataset('arr_of_timestamps'))
+        #print(self.get_dataset('arr_of_extraction_times'))
 

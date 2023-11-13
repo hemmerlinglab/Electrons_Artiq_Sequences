@@ -109,12 +109,23 @@ def get_basefilename(self, extension = ''):
 def save_all_data(self):
     # loops over data_to_save and saves all data sets in the array self.data_to_save
     for hlp in self.data_to_save:
-        # transform into numpy arrays
-        arr = np.array(self.get_dataset(hlp['var']))
+        
+        try:
+            # transform into numpy arrays
+            arr = np.array(self.get_dataset(hlp['var']))
        
-        # Write Data to Files
-        f_hlp = open(self.basefilename + '_' + hlp['var'],'w')
-        np.savetxt(f_hlp, arr, delimiter=",")
+            # Write Data to Files
+            f_hlp = open(self.basefilename + '_' + hlp['var'],'w')
+        
+            np.savetxt(f_hlp, arr, delimiter=",")
+    
+        except:
+            
+            arr = self.get_dataset(hlp['var'])
+
+            for k in range(len(arr)):
+                f_hlp.write(str(arr[k]) + '\n')        
+
         f_hlp.close()
 
 
