@@ -32,6 +32,9 @@ in
         #ps.bokeh
         #ps.cirq
         #ps.qiskit
+        ps.pyvisa
+        ps.pyvisa-py
+        ps.ifaddr
       ]))
 
       # List desired non-Python packages here

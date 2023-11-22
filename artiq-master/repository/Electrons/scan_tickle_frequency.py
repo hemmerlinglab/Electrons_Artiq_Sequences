@@ -9,12 +9,19 @@ import sys
 sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions")
 from helper_functions import *
 
+sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/drivers")
 from dc_electrodes import *
+from bk_4053 import BK4053
+from rigol import Rigol_DSG821
 
-class Trapping2(EnvExperiment):
+
+class Scan_Tickle_Frequency(EnvExperiment):
     
     def build(self):
-        
+
+        self.bk4053  = BK4053()
+        self.tickler = Rigol_DSG821()
+
         self.config_dict = []
         self.wavemeter_frequencies = []
         
@@ -23,27 +30,46 @@ class Trapping2(EnvExperiment):
         self.setattr_device('ttl4') # For sending beginning signal
         self.setattr_device('ttl6') # For triggering RF
         self.setattr_device('ttl11') # For triggering AOM and extraction pulse
+        
+        self.setattr_device('ttl8') # For tickle pulse
+        
         self.setattr_device('scheduler')
         self.setattr_device('zotino0') # For setting voltages of the mesh and DC electrodes
 
-        # Setting the lock frequency for 422 and 390
-        #self.my_setattr('frequency_422', NumberValue(default=709.078540,unit='THz',scale=1,ndecimals=6,step=1e-6))
-        #self.my_setattr('frequency_390', NumberValue(default=768.824120,unit='THz',scale=1,ndecimals=6,step=1e-6))
-        
         # Setting mesh voltage
         self.my_setattr('mesh_voltage', NumberValue(default=200,unit='V',scale=1,ndecimals=0,step=1))
 
         # Setting parameters for the histogram
-        self.my_setattr('number_of_bins', NumberValue(default=50,unit='',scale=1,ndecimals=0,step=1))
+        self.my_setattr('bin_width', NumberValue(default=1.0,unit='us',scale=1,ndecimals=1,step=0.1))
+        #self.my_setattr('number_of_bins', NumberValue(default=50,unit='',scale=1,ndecimals=0,step=1))
         self.my_setattr('histogram_refresh', NumberValue(default=1000,unit='',scale=1,ndecimals=0,step=1))
         #self.my_setattr('max_no_of_timestamps', NumberValue(default=1000,unit='',scale=1,ndecimals=0,step=1))
 
         # Setting time parameters of the experiment
         self.my_setattr('detection_time', NumberValue(default=100,unit='us',scale=1,ndecimals=0,step=1))
         self.my_setattr('load_time', NumberValue(default=50,unit='us',scale=1,ndecimals=0,step=1))
-        self.my_setattr('extraction_time', NumberValue(default=45,unit='us',scale=1,ndecimals=1,step=0.1))
         self.my_setattr('no_of_repeats', NumberValue(default=100000,unit='',scale=1,ndecimals=0,step=1))
         self.my_setattr('flip', EnumerationValue(['Y', 'N'],default='N'))
+
+        self.my_setattr('min_scan', NumberValue(default=1,unit='MHz',scale=1,ndecimals=3,step=.001))
+        self.my_setattr('max_scan', NumberValue(default=1000,unit='MHz',scale=1,ndecimals=3,step=.001))
+        self.my_setattr('steps', NumberValue(default=20,unit='steps to scan',scale=1,ndecimals=0,step=1))
+        
+        self.my_setattr('tickle_level', NumberValue(default=-10,unit='dBm',scale=1,ndecimals=1,step=1))
+        self.my_setattr('tickle_pulse_length', NumberValue(default=10,unit='us',scale=1,ndecimals=1,step=1))
+        
+
+        self.my_setattr('Ex', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.01))
+        self.my_setattr('Ey', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.01))
+        self.my_setattr('Ez', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.01))
+
+        self.my_setattr('U1', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.01))
+        self.my_setattr('U2', NumberValue(default=-0.69,unit='V',scale=1,ndecimals=3,step=.01))
+        self.my_setattr('U3', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.01))
+        self.my_setattr('U4', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.01))
+        self.my_setattr('U5', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.01))
+
+
 
         if self.flip == 'N':
             self.electrodes = Electrodes()
@@ -104,8 +130,17 @@ class Trapping2(EnvExperiment):
 
     def prepare(self):
 
+        # Scan interval
+        self.scan_values = np.linspace(self.min_scan, self.max_scan, self.steps)
+
         # Create the dataset of the result
-        self.set_dataset('timestamps', [0], broadcast=True)
+        self.set_dataset('timestamps', [], broadcast=True)
+        
+        self.set_dataset('arr_of_setpoints', self.scan_values, broadcast=True)
+        self.set_dataset('arr_of_timestamps',       [ [] ] * self.steps, broadcast=True)
+        
+        self.set_dataset('spectrum',       [0] * self.steps, broadcast=True)
+
         self.hist_data = []
 
         # Laser was locked automatically on 1041RGA, so we do not need to do anything here
@@ -114,14 +149,14 @@ class Trapping2(EnvExperiment):
 
         # Compute the voltages of DC electrodes we want
         self.multipole_vector = {
-                'Ex' : 0,
-                'Ey' : 0,
-                'Ez' : 0,
-                'U1' : 0,
-                'U2' : -0.3, #-0.69,
-                'U3' : 0,
-                'U4' : 0,
-                'U5' : 0
+                'Ex' : self.Ex, #0,
+                'Ey' : self.Ey, #0,
+                'Ez' : self.Ez, #0,
+                'U1' : self.U1, #0,
+                'U2' : self.U2, #-0.69,
+                'U3' : self.U3, #0,
+                'U4' : self.U4, #0,
+                'U5' : self.U5  #0
             }
         print('Vector Defined!')
         (chans, voltages) = self.electrodes.getVoltageMatrix(self.multipole_vector)
@@ -135,13 +170,17 @@ class Trapping2(EnvExperiment):
         self.set_mesh_voltage(self.mesh_voltage)
         print('Mesh voltage already set!')
 
+        
+
         print('Presets done!')
         
         #Set the data going to save
         self.data_to_save = [
 #                {'var' : 'set_points', 'name' : 'set_points'},
 #                {'var' : 'act_freqs', 'name' : 'act_freqs'},
-                {'var' : 'timestamps', 'name' : 'timestamps'}
+#                {'var' : 'timestamps', 'name' : 'timestamps'},
+                {'var' : 'arr_of_timestamps', 'name' : 'array of timestamps'},
+                {'var' : 'arr_of_setpoints', 'name' : 'array of setpoints'},
                 ]
 
         # save sequence file name
@@ -171,10 +210,12 @@ class Trapping2(EnvExperiment):
 
 
     def make_histogram(self):
-
+        
+        # for display
         extract = list(self.get_dataset('timestamps'))
         self.hist_data = extract[1:len(extract)]
-        a, b = np.histogram(self.hist_data, bins = np.linspace(0, self.detection_time, self.number_of_bins))
+        number_of_bins = int(self.detection_time / self.bin_width)
+        a, b = np.histogram(self.hist_data, bins = np.linspace(0, self.detection_time, number_of_bins))
         
         self.set_dataset('hist_ys', a, broadcast=True)
         self.set_dataset('hist_xs', b, broadcast=True)
@@ -200,7 +241,7 @@ class Trapping2(EnvExperiment):
 
 
     @kernel
-    def run(self):
+    def run_histogram(self):
         
         ind_count = 0
         # Time Sequence
@@ -211,17 +252,80 @@ class Trapping2(EnvExperiment):
 
             with parallel:
 
+                # Overall start TTL of sequence
                 self.ttl4.pulse(2*us)
 
+                # Gate counting to count MCP pulses
                 with sequential:
                     t_start = now_mu()
                     t_end = self.ttl3.gate_rising(self.detection_time*us)
 
+                # Loading: TTL to switch on AOM
                 self.ttl11.pulse(self.load_time*us)
 
+                # Extraction pulse
                 with sequential:
-                    delay(self.extraction_time*us)
+                    delay(self.extraction_time * us)
                     self.ttl6.pulse(1*us)
 
+                # Tickling pulse
+                with sequential:
+                    delay(self.load_time * us)
+                    delay(5 * us)
+                    self.ttl8.pulse(self.tickle_pulse_length * us)
+
+
             self.read_timestamps(t_start, t_end, i)
+
+
+
+    def run(self):
+
+        ## set aom pulse length
+        #self.bk4053.set_carr_freq(2, bk4053_freq)
+
+        for my_ind in range(len(self.scan_values)):
+
+            print("Tickle frequency: {0:.3f} MHz".format(self.scan_values[my_ind]))
+
+            self.scheduler.pause()
+
+            self.extraction_time = int(0.9 * self.detection_time)
+           
+            # set detection time 10% longer than extraction pulse
+            #self.detection_time = int(1.1 * self.scan_values[my_ind])
+            
+            # set the extraction pulse
+            bk4053_freq = 1e6 / (self.detection_time+100)
+            self.bk4053.set_carr_freq(2, bk4053_freq)
+            self.bk4053.set_carr_delay(2, (self.extraction_time+0.15) * 1e-6)
+
+            # apply CW tickle pulse
+            self.tickler.set_level(self.tickle_level)
+            self.tickler.set_freq(self.scan_values[my_ind])
+            self.tickler.on()
+
+            # extraction
+            self.run_histogram()
+
+            self.tickler.off()
+
+            # update data
+
+            self.mutate_dataset('arr_of_setpoints',  my_ind, self.scan_values[my_ind]) 
+            
+            self.mutate_dataset('arr_of_timestamps', my_ind, self.get_dataset('timestamps')) 
+            
+            
+            xs = self.get_dataset('hist_xs')
+            ys = self.get_dataset('hist_ys')
+
+            hlp_ind = np.where(xs > 0.95 * self.extraction_time)
+
+            self.mutate_dataset('spectrum', my_ind, np.sum(ys[hlp_ind[0][:-1]]))
+
+            # reset timestamps
+            self.set_dataset('timestamps', [], broadcast=True)
+
+
 

@@ -10,8 +10,8 @@ class BK4053:
     
     def __init__(self):
 
-        TCP_IP = '192.168.42.121'
-        TCP_PORT = 5025
+        TCP_IP = '192.168.42.64'
+        #TCP_PORT = 5025
         TCP_PORT = 5024
         #TCP_PORT = 61325
 
@@ -21,12 +21,12 @@ class BK4053:
     
         s.connect((TCP_IP,TCP_PORT))
    
-        print('Opened port')
+        #print('Opened port')
 
-        s.send(b"*IDN?\n")
-        t = s.recv(1024)
+        #s.send(b"*IDN?\n")
+        #t = s.recv(1024)
     
-        print(t)
+        #print(t)
         
         self.socket = s
     
@@ -60,14 +60,20 @@ class BK4053:
 
         self.send(':POW ' + str(ampl))
 
-    def set_carr_delay(self, delay):
+    def set_carr_delay(self, channel, delay):
 
-        self.send('C2:BTWV CARR,DLY,' + str(delay))
+        self.send('C' + str(channel) + ':BTWV CARR,DLY,' + str(delay))
+
+        return
+
+    def set_carr_freq(self, channel, frequency):
+
+        self.send('C' + str(channel) + ':BTWV CARR,FRQ,' + str(frequency))
 
         return
 
     def close(self):
-        self.socket.shutdown()
+        self.socket.shutdown(socket.SHUT_RDWR)
         self.socket.close()
 
 
