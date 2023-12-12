@@ -1,16 +1,16 @@
 from artiq.experiment import *
 import numpy as np
-
 import socket
 import time
 import sys
+
 sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions")
 from helper_functions import *
+from dc_electrodes import *
 
 sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/drivers")
-from dc_electrodes import *
 from bk_4053 import BK4053
-
+from rs_scan import RS
 
 class Scan_Extracion_Time(EnvExperiment):
     
@@ -47,7 +47,7 @@ class Scan_Extracion_Time(EnvExperiment):
         self.my_setattr('RF_frequency',NumberValue(default=1.5762,unit='GHz',scale=1,ndecimals=4,step=.0001))
         self.my_setattr('RF_amplitude',NumberValue(default=5,unit='dBm',scale=1,ndecimals=1,step=.1))
 
-        self.my_setattr('min_t', NumberValue(default=0,unit='us',scale=1,ndecimals=0,step=1))
+        self.my_setattr('min_t', NumberValue(default=50,unit='us',scale=1,ndecimals=0,step=1))
         self.my_setattr('max_t', NumberValue(default=1000,unit='us',scale=1,ndecimals=0,step=1))
         self.my_setattr('steps', NumberValue(default=20,unit='steps to scan',scale=1,ndecimals=0,step=1))
 
@@ -108,11 +108,12 @@ class Scan_Extracion_Time(EnvExperiment):
 
     def prepare(self):
 
-        # Create the dataset of the result
-        self.set_dataset('timestamps', [], broadcast=True)
-        
-        self.set_dataset('arr_of_extraction_times', [0] * self.steps, broadcast=True)
+        # Scan interval
+        self.scan_values = np.linspace(self.min_t, self.max_t, self.steps)
+        self.set_dataset('scan_x', self.scan_values, broadcast=True)
+        self.set_dataset('scan_result', [0.0] * self.steps, broadcast=True)
         self.set_dataset('arr_of_timestamps',       [ [] ] * self.steps, broadcast=True)
+        self.set_dataset('timestamps', [], broadcast=True)
 
         self.hist_data = []
 
@@ -143,19 +144,16 @@ class Scan_Extracion_Time(EnvExperiment):
         self.RF_driver.set_freq(self.RF_frequency*1e+9)
         self.RF_driver.set_ampl(self.RF_amplitude)
         
-        # Scan interval
-        self.scan_values = np.linspace(self.min_t, self.max_t, self.steps)
-
         print('Presets done!')
         
         #Set the data going to save
         self.data_to_save = [
                 {'var' : 'arr_of_timestamps', 'name' : 'array of timestamps'},
-                {'var' : 'arr_of_extraction_times', 'name' : 'array of extraction times'},
+                {'var' : 'scan_x', 'name' : 'array of extraction times'},
+                {'var' : 'scan_result', 'name' : 'array of trapped electrons counts'}
                 ]
 
         # save sequence file name
-
         self.config_dict.append({'par' : 'sequence_file', 'val' : os.path.abspath(__file__), 'cmt' : 'Filename of the main sequence file'})
 
         get_basefilename(self)
@@ -238,9 +236,7 @@ class Scan_Extracion_Time(EnvExperiment):
             self.read_timestamps(t_start, t_end, i)
 
 
-
     def run(self):
-
         
         for my_t_ind in range(len(self.scan_values)):
 
@@ -255,19 +251,24 @@ class Scan_Extracion_Time(EnvExperiment):
 
             # set the extraction pulse
             bk4053_freq = 1e6 / (self.detection_time+100)
-            self.bk4053.set_carr_freq(bk4053_freq)
-            self.bk4053.set_carr_delay((self.extraction_time+0.15) * 1e-6)
+            self.bk4053.set_carr_freq(2, bk4053_freq)
+            self.bk4053.set_carr_delay(2, (self.extraction_time+0.15) * 1e-6)
 
+            print('extraction_time =', self.extraction_time)
+            print('detection_time =', self.detection_time)
+            print('load_time =', self.load_time)
             # extraction
             self.run_histogram()
 
             # update data
-
-            self.mutate_dataset('arr_of_extraction_times', my_t_ind, self.scan_values[my_t_ind]) 
-            
+            xs = self.get_dataset('hist_xs')
+            ys = self.get_dataset('hist_ys')
+            ind_l = (xs > (self.extraction_time - 1 / self.bin_width))[:-1]
+            ind_u = (xs < (self.extraction_time + 3 / self.bin_width))[:-1]
+            cts = np.sum(ys[ind_l*ind_u])
+            self.mutate_dataset('scan_result', my_t_ind, cts) 
             self.mutate_dataset('arr_of_timestamps', my_t_ind, self.get_dataset('timestamps')) 
 
-            
             # reset timestamps
             self.set_dataset('timestamps', [], broadcast=True)
 

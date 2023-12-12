@@ -71,6 +71,14 @@ class BK4053:
         self.send('C' + str(channel) + ':BTWV CARR,FRQ,' + str(frequency))
 
         return
+        
+    def set_carr_width(self, channel, freq, width):
+    
+        duty = 100 * width / (1/freq)
+        
+        self.send('C' + str(channel) + ':BTWV CARR,DUTY,' + str(duty))
+        
+        return
 
     def close(self):
         self.socket.shutdown(socket.SHUT_RDWR)

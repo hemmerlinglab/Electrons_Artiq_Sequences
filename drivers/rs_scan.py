@@ -15,10 +15,10 @@ class RS:
     
         s.connect((TCP_IP,TCP_PORT))
     
-        s.send(b"*IDN?\n")
-        t = s.recv(1024)
+        #s.send(b"*IDN?\n")
+        #t = s.recv(1024)
     
-        print(t)
+        #print(t)
         
         self.socket = s
     
@@ -162,13 +162,13 @@ if __name__ == '__main__':
     
     my_width = 200e6
     
-    cnt_freq = 1.570e9
+    cnt_freq = 210e6
     
     low_freq = cnt_freq - my_width
     high_freq = cnt_freq + my_width
     
     
-    steps = 200
+    steps = 4001
     
     
     span_freq = high_freq - low_freq

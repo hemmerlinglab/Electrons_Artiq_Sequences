@@ -15,7 +15,7 @@ from bk_4053 import BK4053
 from rigol import Rigol_DSG821
 
 
-class Scan_Tickle_Frequency(EnvExperiment):
+class Boerge_Scan_Tickle_Frequency(EnvExperiment):
     
     def build(self):
 
@@ -45,24 +45,24 @@ class Scan_Tickle_Frequency(EnvExperiment):
         self.my_setattr('histogram_refresh', NumberValue(default=1000,unit='',scale=1,ndecimals=0,step=1))
         
         # Setting time parameters of the experiment
-        self.my_setattr('extraction_time', NumberValue(default=250,unit='us',scale=1,ndecimals=0,step=1))
+        self.my_setattr('extraction_time', NumberValue(default=270,unit='us',scale=1,ndecimals=0,step=1))
         self.my_setattr('load_time', NumberValue(default=200,unit='us',scale=1,ndecimals=0,step=1))
-        self.my_setattr('no_of_repeats', NumberValue(default=10000,unit='',scale=1,ndecimals=0,step=1))
+        self.my_setattr('no_of_repeats', NumberValue(default=1000,unit='',scale=1,ndecimals=0,step=1))
         self.my_setattr('flip', EnumerationValue(['Y', 'N'],default='N'))
 
-        self.my_setattr('min_scan', NumberValue(default=1,unit='MHz',scale=1,ndecimals=3,step=.001))
-        self.my_setattr('max_scan', NumberValue(default=1000,unit='MHz',scale=1,ndecimals=3,step=.001))
-        self.my_setattr('steps', NumberValue(default=20,unit='steps to scan',scale=1,ndecimals=0,step=1))
+        self.my_setattr('min_scan', NumberValue(default=100,unit='MHz',scale=1,ndecimals=3,step=.001))
+        self.my_setattr('max_scan', NumberValue(default=200,unit='MHz',scale=1,ndecimals=3,step=.001))
+        self.my_setattr('steps', NumberValue(default=100,unit='steps to scan',scale=1,ndecimals=0,step=1))
         
-        self.my_setattr('tickle_level', NumberValue(default=-10,unit='dBm',scale=1,ndecimals=1,step=1))
-        self.my_setattr('tickle_pulse_length', NumberValue(default=10,unit='us',scale=1,ndecimals=1,step=1))
+        self.my_setattr('tickle_level', NumberValue(default=-5,unit='dBm',scale=1,ndecimals=1,step=1))
+        self.my_setattr('tickle_pulse_length', NumberValue(default=50,unit='us',scale=1,ndecimals=1,step=1))
         
         self.my_setattr('Ex', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.01))
         self.my_setattr('Ey', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.01))
         self.my_setattr('Ez', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.01))
 
         self.my_setattr('U1', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.01))
-        self.my_setattr('U2', NumberValue(default=-0.2,unit='V',scale=1,ndecimals=3,step=.01))
+        self.my_setattr('U2', NumberValue(default=-0.69,unit='V',scale=1,ndecimals=3,step=.01))
         self.my_setattr('U3', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.01))
         self.my_setattr('U4', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.01))
         self.my_setattr('U5', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.01))
@@ -276,12 +276,77 @@ class Scan_Tickle_Frequency(EnvExperiment):
 
             self.read_timestamps(t_start, t_end, i)
 
+    @kernel
+    def read_only_timestamps(self, t_start, t_end, i):
+
+        tstamp = self.ttl3.timestamp_mu(t_end)
+        while tstamp != -1:
+            timestamp = self.core.mu_to_seconds(tstamp) - self.core.mu_to_seconds(t_start)
+            timestamp_us = timestamp * 1e6
+            self.append_to_dataset('timestamps', timestamp_us) # store the timestamps in microsecond
+            tstamp = self.ttl3.timestamp_mu(t_end) # read the timestamp of another event
+
+        return
+
+
+
+
+    @kernel
+    def count_events(self):
+        
+        ind_count = 0
+        # Time Sequence
+        for i in range(self.no_of_repeats):
+
+            self.core.break_realtime()
+
+            with parallel:
+
+                # Overall start TTL of sequence
+                self.ttl4.pulse(2*us)
+
+                # Gate counting to count MCP pulses
+                with sequential:
+
+                    delay(self.detection_time * us)
+
+                    # detect for 5 us
+                    t_start = now_mu()
+                    t_end = self.ttl3.gate_rising(20 * us)
+
+                    #t_start = now_mu()
+                    #t_end = self.ttl3.gate_rising(self.detection_time*us)
+
+                # Loading: TTL to switch on AOM
+                self.ttl11.pulse(self.load_time*us)
+
+                # Extraction pulse
+                with sequential:
+                    delay(self.extraction_time * us)
+                    self.ttl6.pulse(1*us)
+
+                # Tickling pulse
+                with sequential:
+                    delay(self.load_time * us)
+                    delay(5 * us)
+                    self.ttl8.pulse(self.tickle_pulse_length * us)
+
+            self.read_only_timestamps(t_start, t_end, i)
+
+
 
     def run(self):
 
         ## set aom pulse length
         #self.bk4053.set_carr_freq(2, bk4053_freq)
 
+        # set the extraction pulse
+        bk4053_freq = 1e6 / (self.detection_time+100)
+        self.bk4053.set_carr_freq(2, bk4053_freq)
+        self.bk4053.set_carr_delay(2, (self.extraction_time+0.15) * 1e-6)
+
+        self.tickler.set_level(self.tickle_level)
+        
         self.tickler.on()
         
         for my_ind in range(len(self.scan_values)):
@@ -290,30 +355,16 @@ class Scan_Tickle_Frequency(EnvExperiment):
 
             self.scheduler.pause()
 
-            #self.extraction_time = int(0.9 * self.detection_time)
             
-            # set the extraction pulse
-            bk4053_freq = 1e6 / (self.detection_time+100)
-            self.bk4053.set_carr_freq(2, bk4053_freq)
-            self.bk4053.set_carr_delay(2, (self.extraction_time+0.15) * 1e-6)
-
             # apply CW tickle pulse
-            self.tickler.set_level(self.tickle_level)
             self.tickler.set_freq(self.scan_values[my_ind])
 
-            # extraction
-            self.run_histogram()
+            self.count_events()
 
-            # update data
-            self.mutate_dataset('arr_of_timestamps', my_ind, self.get_dataset('timestamps')) 
-            xs = self.get_dataset('hist_xs')
-            ys = self.get_dataset('hist_ys')
-            ind_l = (xs > (self.extraction_time - 2 / self.bin_width))[:-1]
-            ind_u = (xs < (self.extraction_time + 4 / self.bin_width))[:-1]
-            cts = np.sum(ys[ind_l*ind_u])
-            self.mutate_dataset('spectrum', my_ind, cts) 
-            #self.mutate_dataset('spectrum', my_ind, np.sum(ys[hlp_ind[0][:-1]]))
+            extract = list(self.get_dataset('timestamps'))
 
+            self.mutate_dataset('spectrum', my_ind, len(extract)) 
+ 
             # reset timestamps
             self.set_dataset('timestamps', [], broadcast=True)
 

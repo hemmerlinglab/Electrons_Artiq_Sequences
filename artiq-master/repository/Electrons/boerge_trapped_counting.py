@@ -12,7 +12,7 @@ sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/drivers")
 from bk_4053 import BK4053
 from rs_scan import RS
 
-class Trapped_Electrons_Counting(EnvExperiment):
+class Boerge_Trapped_Electrons_Counting(EnvExperiment):
 
     def build(self):
 
@@ -32,7 +32,7 @@ class Trapped_Electrons_Counting(EnvExperiment):
         self.setattr_device('zotino0') # For setting voltages of the mesh and DC electrodes
 
         # Setting mesh voltage
-        self.setattr_argument('mesh_voltage', NumberValue(default=200,unit='V',scale=1,ndecimals=0,step=1))
+        self.setattr_argument('mesh_voltage', NumberValue(default=350,unit='V',scale=1,ndecimals=0,step=1))
 
         # Setting parameters for the applet display
         self.setattr_argument('time_count', NumberValue(default=200,unit='number of counts',scale=1,ndecimals=0,step=1))
@@ -42,9 +42,9 @@ class Trapped_Electrons_Counting(EnvExperiment):
         self.setattr_argument('histogram_refresh', NumberValue(default=1000,unit='',scale=1,ndecimals=0,step=1))
         
         # Setting time parameters of the experiment
-        self.setattr_argument('detection_time', NumberValue(default=70,unit='us',scale=1,ndecimals=0,step=1))
-        self.setattr_argument('load_time', NumberValue(default=50,unit='us',scale=1,ndecimals=0,step=1))
-        self.setattr_argument('extraction_time', NumberValue(default=60,unit='us',scale=1,ndecimals=0,step=1))
+        #self.setattr_argument('detection_time', NumberValue(default=250,unit='us',scale=1,ndecimals=0,step=1))
+        self.setattr_argument('load_time', NumberValue(default=200,unit='us',scale=1,ndecimals=0,step=1))
+        self.setattr_argument('extraction_time', NumberValue(default=240,unit='us',scale=1,ndecimals=0,step=1))
         self.setattr_argument('no_of_repeats', NumberValue(default=10000,unit='',scale=1,ndecimals=0,step=1))
         self.setattr_argument('tickle_pulse_length', NumberValue(default=10,unit='us',scale=1,ndecimals=1,step=1))
         self.setattr_argument('flip', EnumerationValue(['Y', 'N'],default='N'))
@@ -59,7 +59,7 @@ class Trapped_Electrons_Counting(EnvExperiment):
         self.setattr_argument('Ez', NumberValue(default=0.0,unit='',scale=1,ndecimals=2,step=.01))
 
         self.setattr_argument('U1', NumberValue(default=0.0,unit='',scale=1,ndecimals=2,step=.01))
-        self.setattr_argument('U2', NumberValue(default=-0.69,unit='',scale=1,ndecimals=2,step=.01))
+        self.setattr_argument('U2', NumberValue(default=-0.2,unit='',scale=1,ndecimals=2,step=.01))
         self.setattr_argument('U3', NumberValue(default=0.0,unit='',scale=1,ndecimals=2,step=.01))
         self.setattr_argument('U4', NumberValue(default=0.0,unit='',scale=1,ndecimals=2,step=.01))
         self.setattr_argument('U5', NumberValue(default=0.0,unit='',scale=1,ndecimals=2,step=.01))
@@ -110,6 +110,8 @@ class Trapped_Electrons_Counting(EnvExperiment):
 
     def prepare(self):
 
+        self.detection_time = int(self.extraction_time - 5*us)
+        
         # Create the dataset of the result
         self.set_dataset('timestamps', [], broadcast=True)
         self.set_dataset('count_tot', [0.0] * self.time_count, broadcast=True)
@@ -182,6 +184,19 @@ class Trapped_Electrons_Counting(EnvExperiment):
 
         return
 
+    @kernel
+    def read_only_timestamps(self, t_start, t_end, i):
+
+        tstamp = self.ttl3.timestamp_mu(t_end)
+        while tstamp != -1:
+            timestamp = self.core.mu_to_seconds(tstamp) - self.core.mu_to_seconds(t_start)
+            timestamp_us = timestamp * 1e6
+            self.append_to_dataset('timestamps', timestamp_us) # store the timestamps in microsecond
+            tstamp = self.ttl3.timestamp_mu(t_end) # read the timestamp of another event
+
+        return
+
+
 
     @kernel
     def run_histogram(self):
@@ -199,6 +214,13 @@ class Trapped_Electrons_Counting(EnvExperiment):
 
                 # Gate counting to count MCP pulses
                 with sequential:
+
+                    #delay(self.detection_time * us)
+
+                    ## detect for 5 us
+                    #t_start = now_mu()
+                    #t_end = self.ttl3.gate_rising(20 * us)
+
                     t_start = now_mu()
                     t_end = self.ttl3.gate_rising(self.detection_time*us)
 
@@ -219,6 +241,51 @@ class Trapped_Electrons_Counting(EnvExperiment):
             self.read_timestamps(t_start, t_end, i)
 
 
+
+    @kernel
+    def count_events(self):
+        
+        ind_count = 0
+        # Time Sequence
+        for i in range(self.no_of_repeats):
+
+            self.core.break_realtime()
+
+            with parallel:
+
+                # Overall start TTL of sequence
+                self.ttl4.pulse(2*us)
+
+                # Gate counting to count MCP pulses
+                with sequential:
+
+                    delay(self.detection_time * us)
+
+                    # detect for 5 us
+                    t_start = now_mu()
+                    t_end = self.ttl3.gate_rising(20 * us)
+
+                    #t_start = now_mu()
+                    #t_end = self.ttl3.gate_rising(self.detection_time*us)
+
+                # Loading: TTL to switch on AOM
+                self.ttl11.pulse(self.load_time*us)
+
+                # Extraction pulse
+                with sequential:
+                    delay(self.extraction_time * us)
+                    self.ttl6.pulse(1*us)
+
+                # Tickling pulse
+                with sequential:
+                    delay(self.load_time * us)
+                    delay(5 * us)
+                    self.ttl8.pulse(self.tickle_pulse_length * us)
+
+            self.read_only_timestamps(t_start, t_end, i)
+
+
+
     def run(self):
 
         counter = 0
@@ -228,15 +295,27 @@ class Trapped_Electrons_Counting(EnvExperiment):
             self.scheduler.pause()
 
             # extraction
-            self.run_histogram()
+            #self.run_histogram()
+
             
-            # update data
-            xs = self.get_dataset('hist_xs')
-            ys = self.get_dataset('hist_ys')
-            ind_l = (xs > (self.extraction_time - 2 / self.bin_width))[:-1]
-            ind_u = (xs < (self.extraction_time + 4 / self.bin_width))[:-1]
-            cts = np.sum(ys[ind_l*ind_u])
-            self.mutate_dataset('count_tot', counter % self.time_count, cts)
+            if False:
+                # update data
+                xs = self.get_dataset('hist_xs')
+                ys = self.get_dataset('hist_ys')
+                ind_l = (xs > (self.extraction_time - 2 / self.bin_width))[:-1]
+                ind_u = (xs < (self.extraction_time + 4 / self.bin_width))[:-1]
+                cts = np.sum(ys[ind_l*ind_u])
+                self.mutate_dataset('count_tot', counter % self.time_count, cts)
+
+            
+            self.count_events()
+
+            extract = list(self.get_dataset('timestamps'))
+
+            self.mutate_dataset('count_tot', counter % self.time_count, len(extract))
 
             self.set_dataset('timestamps', [], broadcast=True)
             counter += 1
+
+
+
