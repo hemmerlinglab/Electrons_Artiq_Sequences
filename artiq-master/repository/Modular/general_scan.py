@@ -58,7 +58,7 @@ class General_Scan(EnvExperiment):
                     self.mutate_dataset('arr_of_timestamps', my_ind, self.get_dataset('timestamps')) 
 
                     ind_l = (xs > (1 / self.bin_width))[:-1]
-                    ind_u = (xs < (20 / self.bin_width))[:-1]
+                    ind_u = (xs < (self.load_time / self.bin_width))[:-1]
                     cts = np.sum(ys[ind_l*ind_u])
                     self.mutate_dataset('loading_signal', my_ind, cts)                     
                     self.mutate_dataset('arr_of_timestamps_loading', my_ind, self.get_dataset('timestamps_loading')) 

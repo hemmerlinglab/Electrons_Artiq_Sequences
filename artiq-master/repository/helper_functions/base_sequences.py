@@ -3,8 +3,54 @@ from artiq.experiment import *
 import numpy as np
 import os
 
-#####################################################################
-# Functions with decorators
+
+############################################################
+def set_extraction_pulse(self):
+
+    ext_freq = 1e6 / (self.detection_time+100)
+    self.ext_pulser.set_carr_freq(2, ext_freq)
+    self.ext_pulser.set_carr_delay(2, (self.extraction_time+0.15) * 1e-6)
+
+    return
+
+def set_loading_pulse(self):
+  
+    # set the loading pulse
+    
+    ext_freq = 1e6 / (self.detection_time+100)
+
+    self.ext_pulser.set_carr_freq(1, ext_freq)
+    self.ext_pulser.set_carr_width(1, ext_freq, self.load_time * 1e-6)
+
+    return
+
+
+############################################################
+
+def set_multipoles(self):
+
+    # Compute the voltages of DC electrodes we want
+
+    self.multipole_vector = {
+            'Ex' : self.Ex, #0,
+            'Ey' : self.Ey, #0,
+            'Ez' : self.Ez, #0,
+            'U1' : self.U1, #0,
+            'U2' : self.U2, #-0.69,
+            'U3' : self.U3, #0,
+            'U4' : self.U4, #0,
+            'U5' : self.U5  #0
+        }
+
+    # get dc voltages
+    (chans, voltages) = self.electrodes.getVoltageMatrix(self.multipole_vector)
+
+    # set Zotino voltages
+    set_electrode_voltages(self, chans, voltages)
+
+    return
+
+
 #####################################################################
 
 @kernel
@@ -76,12 +122,10 @@ def count_events(self):
                 #t_start = now_mu()
                 #t_end = self.ttl3.gate_rising(20 * us)                
 
-                delay(1*us)
-
                 tload_start = now_mu()
-                tload_end = self.ttl3.gate_rising(20*us)
+                tload_end = self.ttl3.gate_rising(self.load_time*us)
 
-                delay((self.detection_time-20)*us)
+                delay((self.detection_time-self.load_time)*us)
 
                 t_start = now_mu()
                 t_end = self.ttl3.gate_rising(20*us)

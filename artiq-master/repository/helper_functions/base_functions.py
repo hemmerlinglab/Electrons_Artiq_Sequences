@@ -99,17 +99,17 @@ def load_parameters(self):
     my_setattr(self, 'tickle_level', NumberValue(default=-5,unit='dBm',scale=1,ndecimals=1,step=1))
     my_setattr(self, 'tickle_frequency', NumberValue(default=100.0,unit='MHz',scale=1,ndecimals=4,step=.0001))
     my_setattr(self, 'tickle_pulse_length', NumberValue(default=50,unit='us',scale=1,ndecimals=1,step=1))
-    my_setattr(self, 'tickle_on', EnumerationValue(['Y', 'N'],default='N'), scanable = False)
+    my_setattr(self, 'tickle_on', BooleanValue(default=False), scanable = False)
     
     my_setattr(self, 'RF_amplitude',NumberValue(default=5,unit='dBm',scale=1,ndecimals=1,step=.1))
-    my_setattr(self, 'RF_frequency',NumberValue(default=1.5762,unit='GHz',scale=1,ndecimals=4,step=.0001))
+    my_setattr(self, 'RF_frequency',NumberValue(default=1.5780,unit='GHz',scale=1,ndecimals=4,step=.0001))
     
     my_setattr(self, 'Ex', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.01))
     my_setattr(self, 'Ey', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.01))
     my_setattr(self, 'Ez', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.01))
 
     my_setattr(self, 'U1', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.01))
-    my_setattr(self, 'U2', NumberValue(default=-0.69,unit='V',scale=1,ndecimals=3,step=.01))
+    my_setattr(self, 'U2', NumberValue(default=-0.38,unit='V',scale=1,ndecimals=3,step=.01))
     my_setattr(self, 'U3', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.01))
     my_setattr(self, 'U4', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.01))
     my_setattr(self, 'U5', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.01))
@@ -124,7 +124,6 @@ def load_parameters(self):
     my_setattr(self, 'scanning_parameter', EnumerationValue(list_of_parameters, default = list_of_parameters[0]))
     
     return
-
 
 
 ############################################################
@@ -144,24 +143,8 @@ def prepare_initial_instruments(self):
     # DC voltages
     ##########################
 
-    # Compute the voltages of DC electrodes we want
-    self.multipole_vector = {
-            'Ex' : self.Ex, #0,
-            'Ey' : self.Ey, #0,
-            'Ez' : self.Ez, #0,
-            'U1' : self.U1, #0,
-            'U2' : self.U2, #-0.69,
-            'U3' : self.U3, #0,
-            'U4' : self.U4, #0,
-            'U5' : self.U5  #0
-        }
-
-    # get dc voltages
-    (chans, voltages) = self.electrodes.getVoltageMatrix(self.multipole_vector)
-
-    # set Zotino voltages
-    set_electrode_voltages(self, chans, voltages)
-    
+    set_multipoles(self)
+        
     ##########################
     # Mesh voltage
     ##########################
@@ -174,9 +157,9 @@ def prepare_initial_instruments(self):
     ##########################
 
     # Set the extraction pulse
-    ext_freq = 1e6 / (self.detection_time+100)
-    self.ext_pulser.set_carr_freq(2, ext_freq)
-    self.ext_pulser.set_carr_delay(2, (self.extraction_time+0.15) * 1e-6)
+    set_extraction_pulse(self)
+   
+    set_loading_pulse(self)
 
     ##########################
     # Tickle Pulse
@@ -184,7 +167,7 @@ def prepare_initial_instruments(self):
 
     # Set the extraction pulse
      
-    if self.tickle_on == 'Y':
+    if self.tickle_on:
         self.tickler.on()
         self.tickler.set_level(self.tickle_level)
         self.tickler.set_freq(self.tickle_frequency)

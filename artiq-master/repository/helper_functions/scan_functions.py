@@ -1,7 +1,7 @@
 import time
 import numpy as np
 
-from base_sequences import set_mesh_voltage
+from base_sequences   import set_mesh_voltage, set_multipoles, set_loading_pulse
 
 
 ########################################################################
@@ -20,12 +20,19 @@ def scan_parameter(self, my_ind, scan_check = False, reset_value = False):
     if not scan_check and not reset_value:
         print("Scanning parameter {3}: {2} ({0}/{1})".format(my_ind, len(self.scan_values), val, self.scanning_parameter))
     
-    if self.scanning_parameter == 'mesh_voltage':
-        return _scan_mesh_voltage(self, val, self.scan_values, scan_check = scan_check)
-    elif self.scanning_parameter == 'RF_frequency':
-        return _scan_RF_frequency(self, val, self.scan_values, scan_check = scan_check)
-    elif self.scanning_parameter == 'load_time':
-        return _scan_load_time(self, val, self.scan_values, scan_check = scan_check)
+    #if self.scanning_parameter == 'mesh_voltage':
+    #    return _scan_mesh_voltage(self, val, self.scan_values, scan_check = scan_check)
+    #elif self.scanning_parameter == 'RF_frequency':
+    #    return _scan_RF_frequency(self, val, self.scan_values, scan_check = scan_check)
+    #elif self.scanning_parameter == 'load_time':
+    #    return _scan_load_time(self, val, self.scan_values, scan_check = scan_check)
+    #elif self.scanning_parameter == 'U2':
+    #    return _scan_U2(self, val, self.scan_values, scan_check = scan_check)
+
+    if self.scanning_parameter in ['mesh_voltage', 'RF_frequency', 'load_time', 'U1', 'U2']:
+
+        return eval('_scan_' + self.scanning_parameter + '(self, val, self.scan_values, scan_check = scan_check)')
+
 
     else:
         
@@ -46,6 +53,8 @@ def _scan_load_time(self, val, scan_values, scan_check = False):
     else:
         
         self.load_time = val
+
+        set_loading_pulse(self)
 
         return 1
 
@@ -75,12 +84,50 @@ def _scan_mesh_voltage(self, val, scan_values, scan_check = False):
 
     if scan_check:
 
-        return limit_check(self.scanning_parameter, scan_values, [0, 500.0])
+        return limit_check(self.scanning_parameter, scan_values, [0.0, 600.0])
     
     else:
         
         set_mesh_voltage(self, val)
         #time.sleep(3)
+
+        return 1
+
+    return
+
+
+########################################################################
+
+def _scan_U2(self, val, scan_values, scan_check = False):
+
+    if scan_check:
+
+        return limit_check(self.scanning_parameter, scan_values, [-0.69, +0.69])
+    
+    else:
+        
+        self.U2 = val
+       
+        set_multipoles(self)        
+
+        return 1
+
+    return
+
+
+########################################################################
+
+def _scan_U1(self, val, scan_values, scan_check = False):
+
+    if scan_check:
+
+        return limit_check(self.scanning_parameter, scan_values, [-0.69, +0.69])
+    
+    else:
+        
+        self.U1 = val
+       
+        set_multipoles(self)        
 
         return 1
 
