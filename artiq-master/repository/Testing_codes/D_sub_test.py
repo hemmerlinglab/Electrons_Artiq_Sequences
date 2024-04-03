@@ -39,7 +39,7 @@ class D_sub_test(EnvExperiment):
 
     def run(self):
 
-        channels = np.arange(0, 32)
+        channels = np.arange(0, 28)
         voltages = 0.1 * channels
         for i in range(len(voltages)):
             voltages[i] = adjust_set_volt(i, voltages[i])

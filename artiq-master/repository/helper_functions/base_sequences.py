@@ -2,6 +2,7 @@ from artiq.experiment import *
 #import artiq.coredevice.sampler as splr
 import numpy as np
 import os
+from helper_functions import adjust_set_volt
 
 
 ############################################################
@@ -9,7 +10,7 @@ def set_extraction_pulse(self):
 
     ext_freq = 1e6 / (self.detection_time+100)
     self.ext_pulser.set_carr_freq(2, ext_freq)
-    self.ext_pulser.set_carr_delay(2, (self.extraction_time+0.15) * 1e-6)
+    self.ext_pulser.set_carr_delay(2, (self.load_time+self.wait_time+0.15) * 1e-6)
 
     return
 
@@ -24,6 +25,20 @@ def set_loading_pulse(self):
 
     return
 
+
+############################################################
+
+def update_detection_time(self):
+
+    # Detect during the extraction pulse
+    if self.show_histogram:
+        # detect all the time + 10 us extraction pulse
+        self.detection_time = self.load_time + self.wait_time + 10
+    else:
+        # detect for short time starting 5 us before extraction pulse
+        self.detection_time = self.load_time + self.wait_time - 3
+
+    return
 
 ############################################################
 
@@ -44,6 +59,10 @@ def set_multipoles(self):
 
     # get dc voltages
     (chans, voltages) = self.electrodes.getVoltageMatrix(self.multipole_vector)
+
+    # adjust voltage setpoint using calibrating data
+    for i in range(len(chans)-1):
+        voltages[i+1] = adjust_set_volt(chans[i+1], voltages[i+1])
 
     # set Zotino voltages
     set_electrode_voltages(self, chans, voltages)
@@ -96,6 +115,27 @@ def set_electrode_voltages(self, channel_list, voltage_list):
 
 #####################################################################
 
+def set_MCP_voltages(self, front_voltage):
+
+    '''This function takes adjusted voltages, remember
+    to divide the setpoint by 500 and make calibration
+    adjustment when using.'''
+
+    chan = [28, 29, 30]
+
+    vols = [0, 0, 0]
+    vols[0] = adjust_set_volt(chan[0], front_voltage/500)
+    vols[1] = adjust_set_volt(chan[1], (front_voltage+2000)/500)
+    vols[2] = adjust_set_volt(chan[2], (front_voltage+2200)/500)
+
+    #print(chan, vols)
+    set_electrode_voltages(self, chan, vols)
+    
+    return 0
+
+
+#####################################################################
+
 @kernel
 def count_events(self):
     
@@ -112,15 +152,7 @@ def count_events(self):
                 self.ttl4.pulse(2*us)
 
             # Gate counting to count MCP pulses
-            with sequential:
-
-                #delay(self.load_time * us)
-                
-                #delay(self.detection_time * us)
-
-                # detect for 5 us
-                #t_start = now_mu()
-                #t_end = self.ttl3.gate_rising(20 * us)                
+            with sequential:             
 
                 tload_start = now_mu()
                 tload_end = self.ttl3.gate_rising(self.load_time*us)
@@ -128,9 +160,8 @@ def count_events(self):
                 delay((self.detection_time-self.load_time)*us)
 
                 t_start = now_mu()
-                t_end = self.ttl3.gate_rising(20*us)
+                t_end = self.ttl3.gate_rising(10*us)
                 
-
             with sequential:
 
                 # Loading: TTL to switch on AOM
@@ -139,22 +170,20 @@ def count_events(self):
             # Extraction pulse
             with sequential:
                 
-                #delay(self.load_time * us)
-                
-                delay(self.extraction_time * us)
+                delay((self.load_time+self.wait_time) * us)
                 self.ttl6.pulse(1*us)
 
             # Tickling pulse
             with sequential:
                 
-                #delay(self.load_time * us)
+                delay(self.load_time * us)
                 
                 delay(5 * us)
                 
                 self.ttl8.pulse(self.tickle_pulse_length * us)
 
-        read_only_timestamps(self, tload_start, tload_end, 'timestamps_loading')
-        read_only_timestamps(self, t_start, t_end, 'timestamps')
+        #read_only_timestamps(self, tload_start, tload_end, 'timestamps_loading')
+        read_only_timestamps(self, tload_start, t_end, 'timestamps')
 
     return
 
@@ -173,14 +202,13 @@ def count_histogram(self):
         with parallel:
 
             with sequential:
+
                 # Overall start TTL of sequence
                 self.ttl4.pulse(2*us)
 
             # Gate counting to count MCP pulses
             with sequential:
 
-                #delay(self.load_time * us)
-                
                 t_start = now_mu()
                 t_end = self.ttl3.gate_rising(self.detection_time*us)
 
@@ -192,15 +220,13 @@ def count_histogram(self):
             # Extraction pulse
             with sequential:
                 
-                #delay(self.load_time * us)
-                
-                delay(self.extraction_time * us)
+                delay((self.load_time+self.wait_time) * us)
                 self.ttl6.pulse(1*us)
 
             # Tickling pulse
             with sequential:
                 
-                #delay(self.load_time * us)
+                delay(self.load_time * us)
                 
                 delay(5 * us)
                 

@@ -84,14 +84,10 @@ def load_parameters(self):
     my_setattr(self, 'histogram_refresh', NumberValue(default=1000,unit='',scale=1,ndecimals=0,step=1), scanable = False)
 
     # Setting mesh voltage
-    my_setattr(self, 'mesh_voltage', NumberValue(default=500,unit='V',scale=1,ndecimals=0,step=1))
-
-    # Setting parameters for the histogram
-    #my_setattr('bin_width', NumberValue(default=1.0,unit='us',scale=1,ndecimals=1,step=0.1))
-    #my_setattr('number_of_bins', NumberValue(default=50,unit='',scale=1,ndecimals=0,step=1))
-    #my_setattr('histogram_refresh', NumberValue(default=1000,unit='',scale=1,ndecimals=0,step=1))
+    my_setattr(self, 'mesh_voltage', NumberValue(default=300,unit='V',scale=1,ndecimals=0,step=1))
+    my_setattr(self, 'MCP_front', NumberValue(default=400,unit='V',scale=1,ndecimals=0,step=1))
     
-    my_setattr(self, 'extraction_time', NumberValue(default=270,unit='us',scale=1,ndecimals=0,step=1))
+    my_setattr(self, 'wait_time', NumberValue(default=70,unit='us',scale=1,ndecimals=0,step=1))
     my_setattr(self, 'load_time', NumberValue(default=200,unit='us',scale=1,ndecimals=0,step=1))
     my_setattr(self, 'no_of_repeats', NumberValue(default=1000,unit='',scale=1,ndecimals=0,step=1))
     my_setattr(self, 'flip_electrodes', BooleanValue(default=False))
@@ -102,17 +98,17 @@ def load_parameters(self):
     my_setattr(self, 'tickle_on', BooleanValue(default=False), scanable = False)
     
     my_setattr(self, 'RF_amplitude',NumberValue(default=5,unit='dBm',scale=1,ndecimals=1,step=.1))
-    my_setattr(self, 'RF_frequency',NumberValue(default=1.5780,unit='GHz',scale=1,ndecimals=4,step=.0001))
+    my_setattr(self, 'RF_frequency',NumberValue(default=1.5760,unit='GHz',scale=1,ndecimals=4,step=.0001))
     
-    my_setattr(self, 'Ex', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.01))
-    my_setattr(self, 'Ey', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.01))
-    my_setattr(self, 'Ez', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.01))
+    my_setattr(self, 'Ex', NumberValue(default=-0.01,unit='V',scale=1,ndecimals=3,step=.001))
+    my_setattr(self, 'Ey', NumberValue(default=-0.05,unit='V',scale=1,ndecimals=3,step=.001))
+    my_setattr(self, 'Ez', NumberValue(default=-0.1,unit='V',scale=1,ndecimals=3,step=.001))
 
-    my_setattr(self, 'U1', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.01))
-    my_setattr(self, 'U2', NumberValue(default=-0.38,unit='V',scale=1,ndecimals=3,step=.01))
-    my_setattr(self, 'U3', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.01))
-    my_setattr(self, 'U4', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.01))
-    my_setattr(self, 'U5', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.01))
+    my_setattr(self, 'U1', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.001))
+    my_setattr(self, 'U2', NumberValue(default=-0.6,unit='V',scale=1,ndecimals=3,step=.001))
+    my_setattr(self, 'U3', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.001))
+    my_setattr(self, 'U4', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.001))
+    my_setattr(self, 'U5', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.001))
 
     # get all parameters
     list_of_parameters = [x['par'] for x in self.config_dict if x['scanable']]
@@ -129,7 +125,7 @@ def load_parameters(self):
 ############################################################
 
 def prepare_initial_instruments(self):
-    
+
     # configures the trap drive, mesh voltage, etc ...
 
     ##########################
@@ -144,29 +140,32 @@ def prepare_initial_instruments(self):
     ##########################
 
     set_multipoles(self)
-        
+
     ##########################
-    # Mesh voltage
+    # Mesh and MCP voltage
     ##########################
 
     # Set mesh voltage
     set_mesh_voltage(self, self.mesh_voltage)
-    
+
+    # Set MCP voltages
+    self.current_MCP_front = self.MCP_front
+    set_MCP_voltages(self, self.MCP_front)
+
     ##########################
     # Extraction Pulse
     ##########################
 
     # Set the extraction pulse
     set_extraction_pulse(self)
-   
+
     set_loading_pulse(self)
 
     ##########################
     # Tickle Pulse
     ##########################
 
-    # Set the extraction pulse
-     
+    # Set the tickling pulse
     if self.tickle_on:
         self.tickler.on()
         self.tickler.set_level(self.tickle_level)
@@ -191,7 +190,8 @@ def prepare_saving_configuration(self):
             {'var' : 'arr_of_timestamps_loading', 'name' : 'array of timestamps during loading'},
             {'var' : 'arr_of_setpoints', 'name' : 'array of setpoints'},
             {'var' : 'trapped_signal', 'name' : 'array of trapped electron counts'},
-            {'var' : 'loading_signal', 'name' : 'array of loading electron counts'}
+            {'var' : 'loading_signal', 'name' : 'array of loading electron counts'},
+            {'var' : 'ratio_signal', 'name' : 'array of trapped counts / loading counts'}
             ]
 
     # save sequence file name
@@ -216,13 +216,7 @@ def prepare_saving_configuration(self):
 
 def prepare_datasets(self):
 
-    # Detect during the extraction pulse
-    if self.show_histogram:
-        # detect all the time + 10 us extraction pulse
-        self.detection_time = self.extraction_time + 10
-    else:
-        # detect for short time starting 5 us before extraction pulse
-        self.detection_time = self.extraction_time - 5
+    update_detection_time(self)
     
     # Scan interval
     self.scan_values = np.linspace(self.min_scan, self.max_scan, self.steps)
@@ -243,6 +237,7 @@ def prepare_datasets(self):
     
     self.set_dataset('trapped_signal',       [0] * self.steps, broadcast=True)
     self.set_dataset('loading_signal',       [0] * self.steps, broadcast=True)
+    self.set_dataset('ratio_signal',         [0] * self.steps, broadcast=True)
 
     return
 
@@ -271,11 +266,11 @@ def base_build(self):
 
 def my_prepare(self):
 
-    prepare_datasets(self)  
+    prepare_datasets(self)
     
     prepare_initial_instruments(self)
     
-    prepare_saving_configuration(self) 
+    prepare_saving_configuration(self)
 
     return
 

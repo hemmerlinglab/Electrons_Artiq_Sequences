@@ -6,7 +6,7 @@ class RS:
     
     def __init__(self):
 
-        TCP_IP = '192.168.42.108'
+        TCP_IP = '192.168.42.61'
         TCP_PORT = 5025
 
         self.command_delay = 0.1
