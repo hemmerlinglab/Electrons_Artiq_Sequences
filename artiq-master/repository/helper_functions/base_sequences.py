@@ -8,9 +8,16 @@ from helper_functions import adjust_set_volt
 ############################################################
 def set_extraction_pulse(self):
 
+    # Set extraction pulse frequency (for robustness)
     ext_freq = 1e6 / (self.detection_time+100)
     self.ext_pulser.set_carr_freq(2, ext_freq)
     self.ext_pulser.set_carr_delay(2, (self.load_time+self.wait_time+0.15) * 1e-6)
+
+    # Set extraction pulse length
+    self.ext_pulser.set_carr_width(2, ext_freq, self.ext_pulse_length * 1e-9)
+
+    # Set extraction pulse amplitude
+    self.ext_pulser.set_carr_ampl(2, self.ext_pulse_amplitude)
 
     return
 
@@ -30,13 +37,8 @@ def set_loading_pulse(self):
 
 def update_detection_time(self):
 
-    # Detect during the extraction pulse
-    if self.show_histogram:
-        # detect all the time + 10 us extraction pulse
-        self.detection_time = self.load_time + self.wait_time + 10
-    else:
-        # detect for short time starting 5 us before extraction pulse
-        self.detection_time = self.load_time + self.wait_time - 3
+    # detect all the time + 10 us extraction pulse
+    self.detection_time = self.load_time + self.wait_time + self.ext_pulse_length // 1000 + 10
 
     return
 
@@ -182,11 +184,62 @@ def count_events(self):
                 
                 self.ttl8.pulse(self.tickle_pulse_length * us)
 
-        #read_only_timestamps(self, tload_start, tload_end, 'timestamps_loading')
         read_only_timestamps(self, tload_start, t_end, 'timestamps')
 
     return
 
+
+#####################################################################
+
+@kernel
+def count_events(self):
+    
+    ind_count = 0
+    # Time Sequence
+    for i in range(self.no_of_repeats):
+
+        self.core.break_realtime()
+
+        with parallel:
+
+            with sequential:
+                # Overall start TTL of sequence
+                self.ttl4.pulse(2*us)
+
+            # Gate counting to count MCP pulses
+            with sequential:             
+
+                tload_start = now_mu()
+                tload_end = self.ttl3.gate_rising(self.load_time*us)
+
+                delay((self.wait_time-3)*us)
+
+                t_start = now_mu()
+                t_end = self.ttl3.gate_rising((self.ext_pulse_length // 1000 + 8)*us)
+                
+            with sequential:
+
+                # Loading: TTL to switch on AOM
+                self.ttl11.pulse(self.load_time * us)
+
+            # Extraction pulse
+            with sequential:
+                
+                delay((self.load_time+self.wait_time) * us)
+                self.ttl6.pulse(1*us)
+
+            # Tickling pulse
+            with sequential:
+                
+                delay(self.load_time * us)
+                
+                delay(5 * us)
+                
+                self.ttl8.pulse(self.tickle_pulse_length * us)
+
+        read_only_timestamps(self, tload_start, t_end, 'timestamps')
+
+    return
 
 #####################################################################
 
@@ -278,7 +331,7 @@ def make_histogram(self):
     # for display
     extract = list(self.get_dataset('timestamps'))
     self.hist_data = extract[1:len(extract)]
-    number_of_bins = int(self.detection_time / self.bin_width)
+    number_of_bins = int(self.detection_time / self.bin_width) + 1
     a, b = np.histogram(self.hist_data, bins = np.linspace(0, self.detection_time, number_of_bins))
     
     self.set_dataset('hist_ys', a, broadcast=True)

@@ -78,34 +78,38 @@ def load_attributes(self):
 
 def load_parameters(self):
 
-    my_setattr(self, 'show_histogram', BooleanValue(default=False), scanable = False)
+    my_setattr(self, 'histogram_on', BooleanValue(default=True), scanable=False)
+    my_setattr(self, 'short_detection', BooleanValue(default=False), scanable = False)
     
     my_setattr(self, 'bin_width', NumberValue(default=1.0,unit='us',scale=1,ndecimals=1,step=0.1), scanable = False)
     my_setattr(self, 'histogram_refresh', NumberValue(default=1000,unit='',scale=1,ndecimals=0,step=1), scanable = False)
 
     # Setting mesh voltage
-    my_setattr(self, 'mesh_voltage', NumberValue(default=300,unit='V',scale=1,ndecimals=0,step=1))
+    my_setattr(self, 'mesh_voltage', NumberValue(default=450,unit='V',scale=1,ndecimals=0,step=1))
     my_setattr(self, 'MCP_front', NumberValue(default=400,unit='V',scale=1,ndecimals=0,step=1))
     
-    my_setattr(self, 'wait_time', NumberValue(default=70,unit='us',scale=1,ndecimals=0,step=1))
-    my_setattr(self, 'load_time', NumberValue(default=200,unit='us',scale=1,ndecimals=0,step=1))
-    my_setattr(self, 'no_of_repeats', NumberValue(default=1000,unit='',scale=1,ndecimals=0,step=1))
+    my_setattr(self, 'wait_time', NumberValue(default=40,unit='us',scale=1,ndecimals=0,step=1))
+    my_setattr(self, 'load_time', NumberValue(default=300,unit='us',scale=1,ndecimals=0,step=1))
+    my_setattr(self, 'no_of_repeats', NumberValue(default=10000,unit='',scale=1,ndecimals=0,step=1))
     my_setattr(self, 'flip_electrodes', BooleanValue(default=False))
 
     my_setattr(self, 'tickle_level', NumberValue(default=-5,unit='dBm',scale=1,ndecimals=1,step=1))
-    my_setattr(self, 'tickle_frequency', NumberValue(default=100.0,unit='MHz',scale=1,ndecimals=4,step=.0001))
+    my_setattr(self, 'tickle_frequency', NumberValue(default=64,unit='MHz',scale=1,ndecimals=4,step=.0001))
     my_setattr(self, 'tickle_pulse_length', NumberValue(default=50,unit='us',scale=1,ndecimals=1,step=1))
     my_setattr(self, 'tickle_on', BooleanValue(default=False), scanable = False)
     
-    my_setattr(self, 'RF_amplitude',NumberValue(default=5,unit='dBm',scale=1,ndecimals=1,step=.1))
-    my_setattr(self, 'RF_frequency',NumberValue(default=1.5760,unit='GHz',scale=1,ndecimals=4,step=.0001))
+    my_setattr(self, 'RF_amplitude',NumberValue(default=8,unit='dBm',scale=1,ndecimals=1,step=.1))
+    my_setattr(self, 'RF_frequency',NumberValue(default=1.5812,unit='GHz',scale=1,ndecimals=4,step=.0001))
+
+    my_setattr(self, 'ext_pulse_length', NumberValue(default=900,unit='ns',scale=1,ndecimals=0,step=1))
+    my_setattr(self, 'ext_pulse_amplitude', NumberValue(default=10,unit='V',scale=1,ndecimals=2,step=.01))
     
-    my_setattr(self, 'Ex', NumberValue(default=-0.01,unit='V',scale=1,ndecimals=3,step=.001))
-    my_setattr(self, 'Ey', NumberValue(default=-0.05,unit='V',scale=1,ndecimals=3,step=.001))
-    my_setattr(self, 'Ez', NumberValue(default=-0.1,unit='V',scale=1,ndecimals=3,step=.001))
+    my_setattr(self, 'Ex', NumberValue(default=0,unit='V',scale=1,ndecimals=3,step=.001))
+    my_setattr(self, 'Ey', NumberValue(default=-0.14,unit='V',scale=1,ndecimals=3,step=.001))
+    my_setattr(self, 'Ez', NumberValue(default=0,unit='V',scale=1,ndecimals=3,step=.001))
 
     my_setattr(self, 'U1', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.001))
-    my_setattr(self, 'U2', NumberValue(default=-0.6,unit='V',scale=1,ndecimals=3,step=.001))
+    my_setattr(self, 'U2', NumberValue(default=-0.45,unit='V',scale=1,ndecimals=3,step=.001))
     my_setattr(self, 'U3', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.001))
     my_setattr(self, 'U4', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.001))
     my_setattr(self, 'U5', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.001))
@@ -113,8 +117,8 @@ def load_parameters(self):
     # get all parameters
     list_of_parameters = [x['par'] for x in self.config_dict if x['scanable']]
 
-    my_setattr(self, 'min_scan', NumberValue(default=100,unit='',scale=1,ndecimals=3,step=.001))
-    my_setattr(self, 'max_scan', NumberValue(default=200,unit='',scale=1,ndecimals=3,step=.001))
+    my_setattr(self, 'min_scan', NumberValue(default=100,unit='',scale=1,ndecimals=4,step=.0001))
+    my_setattr(self, 'max_scan', NumberValue(default=200,unit='',scale=1,ndecimals=4,step=.0001))
     my_setattr(self, 'steps', NumberValue(default=100,unit='steps to scan',scale=1,ndecimals=0,step=1))
  
     my_setattr(self, 'scanning_parameter', EnumerationValue(list_of_parameters, default = list_of_parameters[0]))
@@ -187,11 +191,12 @@ def prepare_saving_configuration(self):
     # Set the data going to save
     self.data_to_save = [
             {'var' : 'arr_of_timestamps', 'name' : 'array of timestamps during extraction'},
-            {'var' : 'arr_of_timestamps_loading', 'name' : 'array of timestamps during loading'},
             {'var' : 'arr_of_setpoints', 'name' : 'array of setpoints'},
             {'var' : 'trapped_signal', 'name' : 'array of trapped electron counts'},
             {'var' : 'loading_signal', 'name' : 'array of loading electron counts'},
-            {'var' : 'ratio_signal', 'name' : 'array of trapped counts / loading counts'}
+            {'var' : 'lost_signal', 'name': 'array of kicked out electron counts in the first 15us or during the tickle pulse duration when it is smaller than 15us'},
+            {'var' : 'ratio_signal', 'name' : 'array of trapped counts / loading counts'},
+            {'var' : 'ratio_lost', 'name' : 'array of lost counts / loading counts'}
             ]
 
     # save sequence file name
@@ -228,16 +233,16 @@ def prepare_datasets(self):
 
     # timestamps for each sequence iteration
     self.set_dataset('timestamps', [], broadcast=True)
-    self.set_dataset('timestamps_loading', [], broadcast=True)
     
     # data sets to save all time stamps
     self.set_dataset('arr_of_setpoints',           self.scan_values, broadcast=True)
     self.set_dataset('arr_of_timestamps',          [ [] ] * self.steps, broadcast=True)
-    self.set_dataset('arr_of_timestamps_loading',  [ [] ] * self.steps, broadcast=True)
     
     self.set_dataset('trapped_signal',       [0] * self.steps, broadcast=True)
     self.set_dataset('loading_signal',       [0] * self.steps, broadcast=True)
+    self.set_dataset('lost_signal',          [0] * self.steps, broadcast=True)
     self.set_dataset('ratio_signal',         [0] * self.steps, broadcast=True)
+    self.set_dataset('ratio_lost',           [0] * self.steps, broadcast=True)
 
     return
 

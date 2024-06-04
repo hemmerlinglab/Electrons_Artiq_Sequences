@@ -43,48 +43,58 @@ class General_Scan(EnvExperiment):
                 # set the new parameter
                 scan_parameter(self, my_ind)
 
-                if self.show_histogram:
-
+                if self.histogram_on:
+    
+                    # run detection sequence
                     count_histogram(self)
-                    
-                    # update data
+    
+                    # get result
                     xs = self.get_dataset('hist_xs')
                     ys = self.get_dataset('hist_ys')
-
-                    ind_l = (xs > (self.load_time + self.wait_time - 1 / self.bin_width))[:-1]
-                    ind_u = (xs < (self.load_time + self.wait_time + 3 / self.bin_width))[:-1]
+                    self.mutate_dataset('arr_of_timestamps', my_ind, self.get_dataset('timestamps'))
+    
+                    # calculate trapped count
+                    ind_l = (xs > (self.load_time + self.wait_time - 1))[:-1]
+                    ind_u = (xs < (self.load_time + self.wait_time + self.ext_pulse_length // 1000 + 3))[:-1]
                     cts_trapped = np.sum(ys[ind_l*ind_u])
-                    self.mutate_dataset('trapped_signal', my_ind, cts_trapped)                     
-                    self.mutate_dataset('arr_of_timestamps', my_ind, self.get_dataset('timestamps')) 
-
-                    ind_l = (xs > (1 / self.bin_width))[:-1]
-                    ind_u = (xs < (self.load_time / self.bin_width))[:-1]
+                    #self.mutate_dataset('trapped_signal', my_ind, cts_trapped)
+    
+                    # calculate kicked out count
+                    ind_l = (xs > (self.load_time + 4))[:-1]
+                    if self.short_detection:
+                        ind_u = (xs < min(self.load_time + 15, self.load_time + self.tickle_pulse_length + 3))[:-1]
+                    else:
+                        ind_u = (xs < (self.load_time + self.tickle_pulse_length + 3))[:-1]
+                    print(ys[ind_l*ind_u])
+                    cts_lost = np.sum(ys[ind_l*ind_u])
+                    #self.mutate_dataset('lost_signal', my_ind, cts_lost)
+    
+                    # calculate loading count
+                    ind_l = (xs > 1)[:-1]
+                    ind_u = (xs < (self.load_time + 2))[:-1]
                     cts_loading = np.sum(ys[ind_l*ind_u])
-                    self.mutate_dataset('loading_signal', my_ind, cts_loading)                     
-                    self.mutate_dataset('arr_of_timestamps_loading', my_ind, self.get_dataset('timestamps_loading')) 
-
-                    self.mutate_dataset('ratio_signal', my_ind, cts_trapped / cts_loading)
+                    #self.mutate_dataset('loading_signal', my_ind, cts_loading)                     
 
                 else:
 
+                    # run detection sequence
                     count_events(self)
 
-                    extract = np.array(self.get_dataset('timestamps'))
-                    trapped = extract[extract > (self.load_time+5)]
-                    loading = extract[extract < (self.load_time+5)]
-                    cts_trapped = len(trapped)
-                    cts_loading = len(loading)
+                    # get result
+                    events = np.array(self.get_dataset('timestamps'))
+                    cts_loading = len(events[events<(self.load_time + 2)])
+                    cts_trapped = len(events[events>(self.load_time + self.wait_time -3)])
+                    cts_lost = 0
 
-                    self.mutate_dataset('trapped_signal', my_ind, cts_trapped)
-                    self.mutate_dataset('loading_signal', my_ind, cts_loading)
-                    self.set_dataset('timestamps', trapped, broadcast=True)
-                    self.set_dataset('timestamps_loading', loading, broadcast=True)
+                # store result
+                self.mutate_dataset('trapped_signal', my_ind, cts_trapped)
+                self.mutate_dataset('lost_signal', my_ind, cts_lost)
+                self.mutate_dataset('loading_signal', my_ind, cts_loading)
 
-                    try:
-                        self.mutate_dataset('ratio_signal', my_ind, cts_trapped / cts_loading)
-                    except:
-                        pass
- 
+                # calculate ratios
+                self.mutate_dataset('ratio_signal', my_ind, cts_trapped / cts_loading)
+                self.mutate_dataset('ratio_lost', my_ind, cts_lost / cts_loading)
+
                 # reset timestamps
                 self.set_dataset('timestamps', [], broadcast=True)
                 self.set_dataset('timestamps_loading', [], broadcast=True)

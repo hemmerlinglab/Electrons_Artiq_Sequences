@@ -30,7 +30,7 @@ def scan_parameter(self, my_ind, scan_check = False, reset_value = False):
     #elif self.scanning_parameter == 'U2':
     #    return _scan_U2(self, val, self.scan_values, scan_check = scan_check)
 
-    if self.scanning_parameter in ['mesh_voltage', 'MCP_front', 'RF_frequency', 'RF_amplitude', 'tickle_frequency', 'tickle_level', 'load_time', 'wait_time', 'U1', 'U2', 'U3', 'U4', 'U5', 'Ex', 'Ey', 'Ez']:
+    if self.scanning_parameter in ['mesh_voltage', 'MCP_front', 'RF_frequency', 'RF_amplitude', 'tickle_frequency', 'tickle_level', 'tickle_pulse_length', 'load_time', 'wait_time', 'ext_pulse_length', 'ext_pulse_amplitude', 'U1', 'U2', 'U3', 'U4', 'U5', 'Ex', 'Ey', 'Ez']:
 
         return eval('_scan_' + self.scanning_parameter + '(self, val, self.scan_values, scan_check = scan_check)')
 
@@ -76,6 +76,45 @@ def _scan_wait_time(self, val, scan_values, scan_check = False):
         
         self.wait_time = val
         update_detection_time(self)
+
+        set_extraction_pulse(self)
+
+        return 1
+
+    return
+
+
+########################################################################
+
+def _scan_ext_pulse_length(self, val, scan_values, scan_check = False):
+
+    if scan_check:
+
+        return limit_check(self.scanning_parameter, scan_values, [40, 100000])
+    
+    else:
+        
+        self.ext_pulse_length = val
+        update_detection_time(self)
+
+        set_extraction_pulse(self)
+
+        return 1
+
+    return
+
+
+########################################################################
+
+def _scan_ext_pulse_amplitude(self, val, scan_values, scan_check = False):
+
+    if scan_check:
+
+        return limit_check(self.scanning_parameter, scan_values, [0.01, 20])
+    
+    else:
+        
+        self.ext_pulse_amplitude = val
 
         set_extraction_pulse(self)
 
@@ -141,7 +180,7 @@ def _scan_tickle_level(self, val, scan_values, scan_check = False):
 
     if scan_check:
 
-        return limit_check(self.scanning_parameter, scan_values, [-30, 10])
+        return limit_check(self.scanning_parameter, scan_values, [-30, 20])
     
     else:
         
@@ -150,6 +189,24 @@ def _scan_tickle_level(self, val, scan_values, scan_check = False):
         return 1
 
     return
+
+
+########################################################################
+
+def _scan_tickle_pulse_length(self, val, scan_values, scan_check = False):
+
+    if scan_check:
+
+        return limit_check(self.scanning_parameter, scan_values, [1, 10000])
+    
+    else:
+        
+        self.tickle_pulse_length = val
+
+        return 1
+
+    return
+
 
 
 ########################################################################

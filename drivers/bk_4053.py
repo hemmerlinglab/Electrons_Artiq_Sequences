@@ -79,6 +79,18 @@ class BK4053:
         self.send('C' + str(channel) + ':BTWV CARR,DUTY,' + str(duty))
         
         return
+        
+    def set_carr_ampl(self, channel, amplitude):
+    
+    	self.send('C' + str(channel) + ':BTWV CARR,AMP,' + str(amplitude))
+    	
+    	return
+    	
+    def set_carr_offset(self, channel, offset):
+    
+    	self.send('C' + str(channel) + ':BTWV CARR,OFST,' + str(offset))
+    	
+    	return
 
     def close(self):
         self.socket.shutdown(socket.SHUT_RDWR)
