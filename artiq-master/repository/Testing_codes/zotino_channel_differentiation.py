@@ -8,7 +8,7 @@ import sys
 sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions")
 from helper_functions import adjust_set_volt
 
-class D_sub_test(EnvExperiment):
+class zotino_channel_differentiation(EnvExperiment):
 
     def build(self):
 

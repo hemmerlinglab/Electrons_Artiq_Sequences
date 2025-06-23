@@ -47,7 +47,6 @@ class Keysight:
 
         return self.msg
 
-
     def set_center_freq(self, freq):
 
         self.send(':FREQ:CENT ' + str(freq) + ' Hz')
@@ -55,6 +54,23 @@ class Keysight:
     def set_span(self, span):
 
         self.send(':FREQ:SPAN ' + str(span) + ' Hz')
+        
+    def set_trace(self, no, mode):
+    	'''
+    	mode:
+    	WRIT -> Clear/Write
+    	AVER -> Trace Average
+    	MAXH -> Max Hold
+    	MINH -> Min Hold
+    	'''
+    	self.send(':TRAC' + str(no) + ':TYPE ' + mode)
+    	
+    def save_trace(self, no, filename):
+    	
+    	folder = 'D:\\Users\\Instrument.K-N9000B-51535\\Documents\\SA\\data\\traces\\'
+    	filepath = folder + filename
+    	
+    	self.send(':MMEM:STOR:TRAC:DATA TRACE' + str(no) + ',\"' + filepath + '\"')
 
     def marker_on(self, no):
 

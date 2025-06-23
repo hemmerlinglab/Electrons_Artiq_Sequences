@@ -15,6 +15,7 @@ class zotino_calibration(EnvExperiment):
 
         self.setattr_argument('channel', NumberValue(default=0,unit='',scale=1,ndecimals=0,step=1))
         self.setattr_argument('mode', EnumerationValue(['Sampling', 'Testing', 'Reseting'], default='Reseting'))
+        self.setattr_argument('time_interval', NumberValue(default=5.0,unit='s',scale=1,ndecimals=1,step=0.1))
         
     @kernel
     def zotino_out(self, channel, level):
@@ -34,11 +35,11 @@ class zotino_calibration(EnvExperiment):
         if self.mode == 'Sampling':
             volts = np.linspace(-10, 10, 21)
             volts[20] = 9.9
-            sleep(10)
+            sleep(min(3*self.time_interval, 15))
             for v in volts:
                 print('setpoint:', v)
                 self.zotino_out(self.channel, v)
-                sleep(5)
+                sleep(self.time_interval)
 
         elif self.mode == 'Testing':
             volts = np.linspace(-10, 9, 20)
