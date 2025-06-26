@@ -13,11 +13,11 @@ if __name__ == '__main__':
     ############################
     ##### Experiment setup #####
     ############################
-    low_freq = 1000e+06
-    high_freq = 2000e+06
-    steps = 1001
+    low_freq = 300e+06
+    high_freq = 10000e+06
+    steps = 9701
     spec_span = 10e+06
-    experiment_name = 'Mesh1_feed_T'
+    experiment_name = 'long_scan'
     
     ######################################
     ###### Experiment initialization #####
@@ -61,7 +61,7 @@ if __name__ == '__main__':
             while True:
                 (x, y, err) = spec.marker_measure(1, wait_time = 0.1)
                 print(f'Measured Frequenct: {x/1e+09:.3f} GHz\tAmplitude: {y:.2f} dBm.')
-                threshold = max(0.25, 6.25 * np.sqrt((y_arr[i-5:i] - y_arr[i-6:i-1])**2).sum())
+                threshold = max(1.00, 25.0 * np.sqrt((y_arr[i-5:i] - y_arr[i-6:i-1])**2).sum())
                 if (abs(y - y_arr[i-1]) < threshold and y > -80): break
                 else:
                     print(y, y_arr[i-1], threshold)
