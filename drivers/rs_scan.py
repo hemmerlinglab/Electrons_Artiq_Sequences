@@ -13,15 +13,27 @@ if __name__ == '__main__':
     ############################
     ##### Experiment setup #####
     ############################
-    low_freq = 300e+06
-    high_freq = 10000e+06
-    steps = 9701
+    low_freq = 1200e+06
+    high_freq = 2400e+06
+    steps = 1201
     spec_span = 10e+06
-    experiment_name = 'long_scan'
+    experiment_name = 'Coupling'
     
-    ######################################
-    ###### Experiment initialization #####
-    ######################################
+    ################################
+    ##### Exp parameters Setup #####
+    ################################
+    init_wait_time = 0.5
+    wait_time = 0.1
+    
+    init_min = -85
+    init_max = +23
+    running_min = -85
+    thres_min = 0.25
+    thres_coeff = 6.25
+    
+    #####################################
+    ##### Experiment initialization #####
+    #####################################
     rs = RS()
     spec = Keysight()
     
@@ -53,16 +65,16 @@ if __name__ == '__main__':
         
         if i < 6:
             while True:
-                (x, y, err) = spec.marker_measure(1, wait_time = 0.5)
+                (x, y, err) = spec.marker_measure(1, wait_time = init_wait_time)
                 print(f'Measured Frequenct: {x/1e+09:.3f} GHz\tAmplitude: {y:.2f} dBm.')
-                if (y > -80 and y < 30): break
+                if (y > init_min and y < init_max): break
                 else: print('Abnormal value, retrying ...') 
         else:
             while True:
-                (x, y, err) = spec.marker_measure(1, wait_time = 0.1)
+                (x, y, err) = spec.marker_measure(1, wait_time = wait_time)
                 print(f'Measured Frequenct: {x/1e+09:.3f} GHz\tAmplitude: {y:.2f} dBm.')
-                threshold = max(1.00, 25.0 * np.sqrt((y_arr[i-5:i] - y_arr[i-6:i-1])**2).sum())
-                if (abs(y - y_arr[i-1]) < threshold and y > -80): break
+                threshold = max(thres_min, thres_coeff * np.sqrt((y_arr[i-5:i] - y_arr[i-6:i-1])**2).sum())
+                if (abs(y - y_arr[i-1]) < threshold and y > running_min): break
                 else:
                     print(y, y_arr[i-1], threshold)
                     print('Abnormal value, Retrying ...')
