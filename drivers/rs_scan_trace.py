@@ -21,10 +21,10 @@ if __name__ == '__main__':
     ############################
     ##### Experiment setup #####
     ############################
-    low_freq = 1000e+06
-    high_freq = 2000e+06
-    N_windows = 1
-    experiment_name = 'Res_test'
+    low_freq = 300e+06
+    high_freq = 3000e+06
+    N_windows = 3
+    experiment_name = 'RESJOUT_RS5dBm'
     
     ######################################
     ###### Experiment initialization #####

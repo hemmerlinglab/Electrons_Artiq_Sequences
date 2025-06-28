@@ -17,13 +17,16 @@ if __name__ == '__main__':
     high_freq = 2000e+06
     steps = 1001
     #spec_span = None
-    experiment_name = 'Test'
+    spec_ref = None
+    spec_div = 1
+    experiment_name = 'ucb_R'
     
     ################################
     ##### Exp parameters Setup #####
     ################################
     init_wait_time = 0.5
     wait_time = 0.1
+
     MAX_ATTEMPTS = 10
     INIT_POINTS = 6
     
@@ -57,6 +60,7 @@ if __name__ == '__main__':
     #if spec_span is not None: spec.set_span(spec_span)
     #else: spec.set_span(span_freq)
     spec.set_span(span_freq)
+    spec.set_div_ampl(spec_div)
     
     ######################
     ##### Experiment #####
@@ -86,6 +90,11 @@ if __name__ == '__main__':
                             y_arr[i] = y
                             break
                         else: print('Abnormal value, retrying ...')
+
+                    if spec_ref is not None:
+                        spec.set_ref_ampl(spec_ref)
+                    else:
+                        spec.set_ref_ampl(int(max(y_arr[:INIT_POINTS])) + 1)
 
                 else:
                     for attempt in range(MAX_ATTEMPTS):
