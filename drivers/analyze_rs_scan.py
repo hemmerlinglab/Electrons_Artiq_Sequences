@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 path = "/home/electrons/software/Electrons_Artiq_Sequences/drivers/data/"
 date = "20250627"
-experiment_name = "ucb_T"
+experiment_name = "ucb_R"
 basefilename = path + date + '/' + experiment_name
 
 freq = np.genfromtxt(basefilename + "_x.csv")
