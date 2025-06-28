@@ -19,7 +19,8 @@ if __name__ == '__main__':
     #spec_span = None
     spec_ref = None
     spec_div = 1
-    experiment_name = 'ucb_R'
+    experiment_name = 'Coupling'
+    folder_suffix = ''
     
     ################################
     ##### Exp parameters Setup #####
@@ -129,7 +130,7 @@ if __name__ == '__main__':
     ##### Save experiment data #####
     ################################
     timestamp = datetime.datetime.today()
-    folder = 'data/' + timestamp.strftime('%Y%m%d')
+    folder = 'data/' + timestamp.strftime('%Y%m%d') + folder_suffix
     if not os.path.exists(folder):
         os.makedirs(folder)
     basefilename = folder + '/' + experiment_name
