@@ -13,10 +13,10 @@ if __name__ == '__main__':
     ############################
     ##### Experiment setup #####
     ############################
-    low_freq = 1200e+06
-    high_freq = 2400e+06
-    steps = 1201
-    spec_span = 10e+06
+    low_freq = 1000e+06
+    high_freq = 2000e+06
+    steps = 1001
+    #spec_span = None
     experiment_name = 'Test'
     
     ################################
@@ -54,8 +54,9 @@ if __name__ == '__main__':
     freq_arr = np.linspace(low_freq, high_freq, steps)
     
     spec.set_center_freq(cnt_freq)
-    if spec_span is not None: spec.set_span(spec_span)
-    else: spec.set_span(span_freq)
+    #if spec_span is not None: spec.set_span(spec_span)
+    #else: spec.set_span(span_freq)
+    spec.set_span(span_freq)
     
     ######################
     ##### Experiment #####
@@ -72,7 +73,8 @@ if __name__ == '__main__':
 
                 print(" Step #: {0} ; Frequency: {1:2.6f} GHz".format(i, freq/1e9))
 
-                spec.set_center_freq(freq)
+                #if spec_span is not None:
+                    #spec.set_center_freq(freq)
                 rs.set_freq(freq)
         
                 if i < INIT_POINTS:
