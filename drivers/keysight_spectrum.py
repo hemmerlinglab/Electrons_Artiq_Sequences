@@ -55,6 +55,18 @@ class Keysight:
 
         self.send(':FREQ:SPAN ' + str(span) + ' Hz')
         
+    def set_ref_ampl(self, ampl):
+    
+        self.send(':DISP:WIND:TRAC:Y:RLEV ' + str(ampl) + ' dBm')
+        
+    def set_ref_ampl_lin(self, ampl):
+    
+        self.send(':DISP:WIND:TRAC:Y:RLEV ' + str(ampl) + ' mV')
+        
+    def set_div_ampl(self, div):
+    
+        self.send('DISP:WIND:TRAC:Y:PDIV ' + str(div) + ' DB')
+        
     def set_trace(self, no, mode):
     	'''
     	mode:
