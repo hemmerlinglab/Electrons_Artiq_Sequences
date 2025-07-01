@@ -13,13 +13,12 @@ if __name__ == '__main__':
     ############################
     ##### Experiment setup #####
     ############################
-    low_freq = 1000e+06
-    high_freq = 2000e+06
-    steps = 1001
-    #spec_span = None
+    low_freq = 1200e+06
+    high_freq = 2400e+06
+    steps = 1201
+    spec_span = 50e+06
     spec_ref = None
-    spec_div = 1
-    experiment_name = 'Coupling'
+    experiment_name = 'Shielding_R'
     folder_suffix = ''
     
     ################################
@@ -30,6 +29,8 @@ if __name__ == '__main__':
 
     MAX_ATTEMPTS = 10
     INIT_POINTS = 6
+    INIT_REF = 10
+    SPEC_DIV = 0.5
     
     init_min = -85
     init_max = +23
@@ -43,6 +44,9 @@ if __name__ == '__main__':
     class RescanAll(Exception):
         def __init__(self, message):
     	    super().__init__(message)
+    	    
+    def safe_initialization():
+    	return
     
     #####################################
     ##### Experiment initialization #####
@@ -58,10 +62,10 @@ if __name__ == '__main__':
     freq_arr = np.linspace(low_freq, high_freq, steps)
     
     spec.set_center_freq(cnt_freq)
-    #if spec_span is not None: spec.set_span(spec_span)
-    #else: spec.set_span(span_freq)
-    spec.set_span(span_freq)
-    spec.set_div_ampl(spec_div)
+    if spec_span is not None: spec.set_span(spec_span)
+    else: spec.set_span(span_freq)
+    spec.set_ref_ampl(INIT_REF)
+    spec.set_div_ampl(SPEC_DIV)
     
     ######################
     ##### Experiment #####
@@ -78,11 +82,13 @@ if __name__ == '__main__':
 
                 print(" Step #: {0} ; Frequency: {1:2.6f} GHz".format(i, freq/1e9))
 
-                #if spec_span is not None:
-                    #spec.set_center_freq(freq)
+                if spec_span is not None:
+                    spec.set_center_freq(freq)
                 rs.set_freq(freq)
         
                 if i < INIT_POINTS:
+                    if i == 0: spec.set_ref_ampl(INIT_REF)
+                    else: spec.set_ref_ampl(int(y_arr[i-1])+5*SPEC_DIV)
                     while True:
                         (x, y, err) = spec.marker_measure(1, wait_time = init_wait_time)
                         print(f'Measured Frequenct: {x/1e+09:.3f} GHz\tAmplitude: {y:.2f} dBm.')
@@ -91,13 +97,17 @@ if __name__ == '__main__':
                             y_arr[i] = y
                             break
                         else: print('Abnormal value, retrying ...')
-
-                    if spec_ref is not None:
-                        spec.set_ref_ampl(spec_ref)
-                    else:
-                        spec.set_ref_ampl(int(max(y_arr[:INIT_POINTS])) + 1)
+                    '''
+                    if (i == INIT_POINTS - 1):
+                        if spec_ref is not None:
+                            spec.set_ref_ampl(spec_ref)
+                        else:
+                            spec.set_ref_ampl(int(max(y_arr[:INIT_POINTS])) + 1)
+                        spec.set_div_ampl(spec_div)
+                    '''
 
                 else:
+                    spec.set_ref_ampl(int(y_arr[i-1])+5*SPEC_DIV)
                     for attempt in range(MAX_ATTEMPTS):
                         (x, y, err) = spec.marker_measure(1, wait_time = wait_time)
                         print(f'Measured Frequency: {x/1e+09:.3f} GHz\tAmplitude: {y:.2f} dBm.')
