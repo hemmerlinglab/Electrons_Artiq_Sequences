@@ -1,6 +1,7 @@
 import numpy as np
 from traps import traps
 import sys
+import matplotlib.pyplot as plt
 
 class Electrodes(object):
 
@@ -83,6 +84,115 @@ class Electrodes(object):
         print()
 
         return
+
+    def get_voltage_grid(self, multipole_vector):
+        ch_ids, ch_vols = self.getVoltageMatrix(multipole_vector)
+        volt_by_ch = {int(c): v for c, v in zip(ch_ids, ch_vols)}
+        volt_by_name = {name: volt_by_ch.get(ch, np.nan) for name, ch in self.elec_dict.items()}
+        row_keys = ['bl', 'br', 'tl', 'tr']
+        n_rows, n_cols = 4, 5
+        grid = np.full((n_rows, n_cols), np.nan)
+        for name, v in volt_by_name.items():
+            if len(name) < 3:
+                continue
+            prefix = name[:2].lower()
+            if prefix not in row_keys:
+                continue
+            try:
+                col_idx = int(name[2:]) - 1
+            except ValueError:
+                continue
+            if 0 <= col_idx < n_cols:
+                row_idx = row_keys.index(prefix)
+                grid[row_idx, col_idx] = v
+        return grid, volt_by_name.get('tg', None)
+
+
+    def plot_voltage_heatmap(self,
+                             multipole_vector,
+                             cmap='coolwarm',
+                             figsize=(5, 4),
+                             decimals=2,
+                             mode='show'):
+        """
+        Draw a 4×5 voltage heat-map (rows: bl, br, tl, tr).  
+        """
+        # 1) volt_by_ch: channel → voltage  (independent of dict order)
+        ch_ids, ch_vols = self.getVoltageMatrix(multipole_vector)
+        volt_by_ch = {int(c): v for c, v in zip(ch_ids, ch_vols)}
+
+        # 2) volt_by_name: electrode name → voltage, via elec_zotino_chs
+        volt_by_name = {
+            name: volt_by_ch.get(ch, np.nan)
+            for name, ch in self.elec_dict.items()
+        }
+
+        # 3) build 4×5 grid (rows fixed order)
+        row_keys = ['bl', 'br', 'tl', 'tr']
+        n_rows, n_cols = 4, 5
+        grid = np.full((n_rows, n_cols), np.nan)
+
+        for name, v in volt_by_name.items():
+            if len(name) < 3:
+                continue                              # 'tg', needles, etc.
+            prefix = name[:2].lower()
+            if prefix not in row_keys:
+                continue
+            try:
+                col_idx = int(name[2:]) - 1          # '1'-'5' → 0-4
+            except ValueError:
+                continue
+            if 0 <= col_idx < n_cols:
+                row_idx = row_keys.index(prefix)
+                grid[row_idx, col_idx] = v
+
+        # 4) guard electrode value for info
+        tg_val = volt_by_name.get('tg', None)
+
+        # 5) plotting
+        fig, ax = plt.subplots(figsize=figsize)
+        vmax = np.nanmax(np.abs(grid))
+        im = ax.imshow(grid,
+                       cmap=cmap,
+                       vmin=-vmax,
+                       vmax=vmax,
+                       origin='upper',
+                       aspect='auto')
+
+        ax.set_xticks(np.arange(n_cols))
+        ax.set_yticks(np.arange(n_rows))
+        ax.set_xticklabels(np.arange(1, n_cols + 1))
+        ax.set_yticklabels(row_keys)
+        ax.set_xlabel("Electrode order number")
+        ax.set_ylabel("Row of electrodes")
+
+        # title
+        nz = [f"{k} = {v:g}" for k, v in multipole_vector.items() if v]
+        title = "Generates " + ", ".join(nz) if nz else "Voltage pattern"
+        if tg_val is not None and not np.isnan(tg_val):
+            title += f"  (tg = {tg_val:.{decimals}f} V)"
+        ax.set_title(title)
+
+        # colorbar
+        cbar = plt.colorbar(im, ax=ax)
+        cbar.set_label("Voltage (V)")
+
+        # annotate each cell
+        for r in range(n_rows):
+            for c in range(n_cols):
+                if not np.isnan(grid[r, c]):
+                    ax.text(c, r,
+                            f"{grid[r, c]:.{decimals}f}",
+                            ha='center', va='center', fontsize=8)
+
+        plt.tight_layout()
+
+        if mode == 'show':
+            plt.show()
+        elif mode == 'return':
+            return fig, grid
+        else:
+            raise ValueError("`mode` must be \'show\' or \'return\'!")
 
 
 
