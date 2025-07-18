@@ -1,6 +1,7 @@
 import numpy as np
 from traps import traps
 import sys
+import os
 import matplotlib.pyplot as plt
 from helper_functions import adjust_control_voltages
 
@@ -10,18 +11,21 @@ class Electrodes(object):
 
         if flipped: trap = trap + " Flipped"
 
-        self.amp = traps[trap]["amp"]
-        self.elec_dict = traps[trap]["elec_zotino_chs"]
-        self.multipoles = traps[trap]["multipoles_order"]
-        self.elec_list = traps[trap]["electrodes_order"]
-        self.read_in_cfile(traps[trap]["cfile"])
+        info = traps[trap]
+        self.amp = info["amp"]
+        self.elec_dict = info["elec_zotino_chs"]
+        self.multipoles = info["multipoles_order"]
+        self.elec_list = info["electrodes_order"]
+        self.read_in_cfile(info["cfile"])
 
         return
 
 
     def read_in_cfile(self, filename):
         
-        Cfile_text = open(filename).read().split('\n')[:-1]
+        base_dir = os.path.dirname(__file__)
+        fullpath = os.path.join(base_dir, "Cfiles", filename)
+        Cfile_text = open(fullpath).read().split('\n')[:-1]
         
         head = []
         body = []

@@ -4,7 +4,7 @@ import time
 
 import sys
 sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions")
-from helper_functions import adjust_set_volt
+from helper_functions import calculate_input_voltage
 
 class Test_SRS_HV(EnvExperiment):
 
@@ -37,7 +37,7 @@ class Test_SRS_HV(EnvExperiment):
     def run(self):
 
         if self.mode == 'Manual':
-            voltage = adjust_set_volt(self.channel, self.voltage)
+            voltage = calculate_input_voltage(self.channel, self.voltage)
             print('Adjusted voltage setpoint: ' + str(voltage))
             self.set_voltage(self.channel, voltage)
 
@@ -45,7 +45,7 @@ class Test_SRS_HV(EnvExperiment):
             time.sleep(5)
             voltages = np.linspace(-10, 9, 20)
             for v in voltages:
-                va = adjust_set_volt(self.channel, v)
+                va = calculate_input_voltage(self.channel, v)
                 print('Original: ' + str(v) + ', Adjusted: ' + str(va))
                 self.set_voltage(self.channel, va)
                 time.sleep(2)

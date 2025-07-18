@@ -41,7 +41,7 @@ def plot_all_modes():
             ax.set_xlabel("Order")
             ax.set_ylabel("Row")
 
-            # 独立 colorbar 放在右边
+            # independent colorbar on the right
             cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
             cbar.ax.tick_params(labelsize=8)
 

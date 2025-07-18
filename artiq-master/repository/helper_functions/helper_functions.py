@@ -4,7 +4,7 @@ import datetime
 import shutil
 from configparser import ConfigParser
 import socket
-from amp_zotino_params import fit_parameters
+from amp_zotino_params import fit_parameters, old_coeffs
 
 
 def get_laser_frequencies():
@@ -152,25 +152,27 @@ def get_optimal_frequencies(mesh_voltage):
     return freq_422, freq_390
 
 
-def calculate_input_voltage(chan, volt, amp = True):
+def calculate_input_voltage(chan, volt, use_amp = True):
 
-    if amp: key = 'Input→Amp'
+    if use_amp: key = 'Input→Amp'
     else: key = 'Input→Artiq'
 
-    k = fit_parameters[chan][key]['k']
-    b = fit_parameters[chan][key]['b']
-
-    input_voltage = (volt - b) / k
+    try:
+        k = fit_parameters[chan + 1][key]['k']
+        b = fit_parameters[chan + 1][key]['b']
+        input_voltage = (volt - b) / k
+    except KeyError:
+        k, b = old_coeffs[chan]
+        input_voltage = k * volt + b
 
     return input_voltage
 
-def adjust_control_voltages(target, amp = True):
+def adjust_control_voltages(target, use_amp = True):
 
-    channels = target[0] + 1
-    voltages = target[1]
+    channels, voltages = target
 
     input_vector = np.zeros(len(channels))
     for i in range(len(channels)):
-        input_vector[i] = calculate_input_voltage(channels[i], voltages[i], amp)
+        input_vector[i] = calculate_input_voltage(channels[i], voltages[i], use_amp)
 
-    return (target[0], input_vector)
+    return (channels, input_vector)

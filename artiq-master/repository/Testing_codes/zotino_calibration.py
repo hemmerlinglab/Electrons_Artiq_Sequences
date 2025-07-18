@@ -4,7 +4,7 @@ from time import sleep
 
 import sys
 sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions")
-from helper_functions import adjust_set_volt
+from helper_functions import calculate_input_voltage
 
 class zotino_calibration(EnvExperiment):
 
@@ -16,6 +16,7 @@ class zotino_calibration(EnvExperiment):
         self.setattr_argument('channel', NumberValue(default=0,unit='',scale=1,ndecimals=0,step=1))
         self.setattr_argument('mode', EnumerationValue(['Sampling', 'Testing', 'Reseting'], default='Reseting'))
         self.setattr_argument('time_interval', NumberValue(default=5.0,unit='s',scale=1,ndecimals=1,step=0.1))
+        self.setattr_argument('use_amp', BooleanValue(default=False))
         
     @kernel
     def zotino_out(self, channel, level):
@@ -46,9 +47,9 @@ class zotino_calibration(EnvExperiment):
             sleep(10)
             for v in volts:
                 #print('setpoint:', v)
-                self.zotino_out(self.channel, adjust_set_volt(self.channel, v))
+                self.zotino_out(self.channel, calculate_input_voltage(self.channel, v, use_amp=self.use_amp))
                 sleep(2)
 
         elif self.mode == 'Reseting':
             for i in range(30):
-                self.zotino_out(i, adjust_set_volt(i, 0))
+                self.zotino_out(i, calculate_input_voltage(i, 0))

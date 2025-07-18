@@ -14,7 +14,7 @@ from base_sequences import *
 from helper_functions import *
 from scan_functions import scan_parameter
 
-list_of_traps = ["UCB 3 PCB", "Single PCB"]
+list_of_traps = ["Single PCB", "UCB 3 PCB"]
 
 ############################################################
 
@@ -93,7 +93,7 @@ def load_parameters(self):
     my_setattr(self, 'wait_time', NumberValue(default=40,unit='us',scale=1,ndecimals=0,step=1))
     my_setattr(self, 'load_time', NumberValue(default=300,unit='us',scale=1,ndecimals=0,step=1))
     my_setattr(self, 'no_of_repeats', NumberValue(default=10000,unit='',scale=1,ndecimals=0,step=1))
-    my_setattr(self, 'trap', EnumerationValue(list_of_traps, default = "Single PCB"))
+    my_setattr(self, 'trap', EnumerationValue(list_of_traps, default = list_of_traps[0]))
     my_setattr(self, 'flip_electrodes', BooleanValue(default=False))
 
     my_setattr(self, 'tickle_level', NumberValue(default=-5,unit='dBm',scale=1,ndecimals=1,step=1))
@@ -255,14 +255,9 @@ def prepare_datasets(self):
 def base_build(self):
 
     load_instruments(self)
-
     load_variables(self)
-
     load_attributes(self)
-
     load_parameters(self)
-
-    self.electrodes = Electrodes(trap = self.trap, filpped = self.flip_electrodes)
 
     return
 
@@ -272,10 +267,11 @@ def base_build(self):
 def my_prepare(self):
 
     prepare_datasets(self)
-    
     prepare_initial_instruments(self)
-    
     prepare_saving_configuration(self)
+    
+    # self attributes must be referenced after `build` was done, otherwise it will be None
+    self.electrodes = Electrodes(trap = self.trap, flipped = self.flip_electrodes)
 
     return
 

@@ -2,7 +2,7 @@ traps = {
 
     "UCB 3 PCB": {
         "amp": False,
-        "cfile": "./Cfiles/UCB_3PCBTrap.txt",
+        "cfile": "UCB_3PCBTrap.txt",
         "electrodes_order": [
             'tl1', 'tl2', 'tl3', 'tl4', 'tl5',
             'tr1', 'tr2', 'tr3', 'tr4', 'tr5',
@@ -43,7 +43,7 @@ traps = {
 
     "UCB 3 PCB Flipped": {
         "amp": False,
-        "cfile": "./Cfiles/UCB_3PCBTrap.txt",
+        "cfile": "UCB_3PCBTrap.txt",
         "electrodes_order": [
             'tl1', 'tl2', 'tl3', 'tl4', 'tl5',
             'tr1', 'tr2', 'tr3', 'tr4', 'tr5',
@@ -84,7 +84,7 @@ traps = {
 
     "Single PCB": {
         "amp": True,
-        "cfile": "./Cfiles/SinglePCBTrap.txt",
+        "cfile": "SinglePCBTrap.txt",
         "electrodes_order": [
             'tl1', 'tl2', 'tl3', 'tl4', 'tl5',
             'tr1', 'tr2', 'tr3', 'tr4', 'tr5',
@@ -118,7 +118,7 @@ traps = {
     
     "Single PCB Flipped": {
         "amp": True,
-        "cfile": "./Cfiles/SinglePCBTrap.txt",
+        "cfile": "SinglePCBTrap.txt",
         "electrodes_order": [
             'tl1', 'tl2', 'tl3', 'tl4', 'tl5',
             'tr1', 'tr2', 'tr3', 'tr4', 'tr5',

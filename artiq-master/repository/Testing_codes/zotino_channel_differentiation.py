@@ -6,7 +6,7 @@ import numpy as np
 
 import sys
 sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions")
-from helper_functions import adjust_set_volt
+from helper_functions import calculate_input_voltage
 
 class zotino_channel_differentiation(EnvExperiment):
 
@@ -42,7 +42,7 @@ class zotino_channel_differentiation(EnvExperiment):
         channels = np.arange(0, 28)
         voltages = 0.1 * channels
         for i in range(len(voltages)):
-            voltages[i] = adjust_set_volt(i, voltages[i])
+            voltages[i] = calculate_input_voltage(i, voltages[i], use_amp = False)
         print(channels)
         print(voltages)
 

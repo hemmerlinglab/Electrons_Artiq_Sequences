@@ -4,7 +4,7 @@ import time
 
 import sys
 sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions")
-from helper_functions import adjust_set_volt
+from helper_functions import calculate_input_voltage
 
 class Switch_power_supply(EnvExperiment):
 
@@ -89,7 +89,7 @@ class Switch_power_supply(EnvExperiment):
                     voltages[2] = max(voltages[2] - 100, 0)
 
                 for i in range(len(voltages)):
-                    self.voltages[i] = adjust_set_volt(self.channels[i], voltages[i]/500)
+                    self.voltages[i] = calculate_input_voltage(self.channels[i], voltages[i]/500, use_amp = False)
                     #print(self.channels[i], voltages[i], self.voltages[i])
                 
                 self.set_voltages()
