@@ -77,10 +77,16 @@ class Electrodes(object):
         return (np.array(channel_list, dtype = int), np.array(voltage_list, dtype = float))
     
     
-    def get_control_voltage(self, multipole_vector):
+    def get_control_voltage(self, multipole_vector, amp=None):
 
-        vec = self.getVoltageMatrix(multipole_vector)
-        control_signal = adjust_control_voltages(vec, self.amp)
+        if amp is None:
+            amp = self.amp
+
+        if amp:
+            vec = self.getVoltageMatrix(multipole_vector)
+            control_signal = adjust_control_voltages(vec, amp)
+        else:
+            control_signal = self.getVoltageMatrix(multipole_vector)
 
         return control_signal
 
