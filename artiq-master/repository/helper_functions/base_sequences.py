@@ -2,7 +2,6 @@ from artiq.experiment import *
 #import artiq.coredevice.sampler as splr
 import numpy as np
 import os
-from helper_functions import adjust_set_volt
 
 
 ############################################################
@@ -60,11 +59,7 @@ def set_multipoles(self):
         }
 
     # get dc voltages
-    (chans, voltages) = self.electrodes.getVoltageMatrix(self.multipole_vector)
-
-    # adjust voltage setpoint using calibrating data
-    for i in range(len(chans)-1):
-        voltages[i+1] = adjust_set_volt(chans[i+1], voltages[i+1])
+    (chans, voltages) = self.electrodes.get_control_voltage(self.multipole_vector)
 
     # set Zotino voltages
     set_electrode_voltages(self, chans, voltages)
