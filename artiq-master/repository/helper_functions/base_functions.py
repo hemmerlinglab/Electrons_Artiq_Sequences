@@ -14,6 +14,8 @@ from base_sequences import *
 from helper_functions import *
 from scan_functions import scan_parameter
 
+list_of_traps = ["UCB 3 PCB", "Single PCB"]
+
 ############################################################
 
 def my_setattr(self, arg, val, scanable = True):
@@ -91,6 +93,7 @@ def load_parameters(self):
     my_setattr(self, 'wait_time', NumberValue(default=40,unit='us',scale=1,ndecimals=0,step=1))
     my_setattr(self, 'load_time', NumberValue(default=300,unit='us',scale=1,ndecimals=0,step=1))
     my_setattr(self, 'no_of_repeats', NumberValue(default=10000,unit='',scale=1,ndecimals=0,step=1))
+    my_setattr(self, 'trap', EnumerationValue(list_of_traps, default = "Single PCB"))
     my_setattr(self, 'flip_electrodes', BooleanValue(default=False))
 
     my_setattr(self, 'tickle_level', NumberValue(default=-5,unit='dBm',scale=1,ndecimals=1,step=1))
@@ -259,10 +262,7 @@ def base_build(self):
 
     load_parameters(self)
 
-    if not self.flip_electrodes:
-        self.electrodes = Electrodes()
-    else:
-        self.electrodes = Flipped_Electrodes()
+    self.electrodes = Electrodes(trap = self.trap, filpped = self.flip_electrodes)
 
     return
 
