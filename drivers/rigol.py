@@ -5,7 +5,7 @@ from base_instruments import base_visa_instrument
 
 # Rigol Function Generator
 
-class Rigol_DSG821(base_visa_instrument):
+class DSG821(base_visa_instrument):
 
     # electron rigol IP: .65
     # molecules rigol IP: .46
@@ -25,7 +25,7 @@ class Rigol_DSG821(base_visa_instrument):
 
         return
 
-    def set_level(self, level):
+    def set_ampl(self, level):
 
         self.write(':LEV {0}'.format(float(level)))
 
@@ -54,7 +54,7 @@ if __name__ == "__main__":
 
     import matplotlib.pyplot as plt
 
-    fg = Rigol_DSG821()
+    fg = DSG821()
 
     fg.id()
 

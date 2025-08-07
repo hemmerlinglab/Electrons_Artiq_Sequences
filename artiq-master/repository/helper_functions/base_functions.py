@@ -7,7 +7,7 @@ from dc_electrodes import *
 
 # instruments
 from bk_4053 import BK4053
-from rigol   import Rigol_DSG821
+from rigol   import DSG821
 from rs      import RS
 
 from base_sequences import *
@@ -40,7 +40,7 @@ def load_instruments(self):
     self.ext_pulser = BK4053()
 
     # tickle pulse generator
-    self.tickler   = Rigol_DSG821()
+    self.tickler   = DSG821()
 
     # trap drive
     self.RF_driver = RS()
@@ -175,7 +175,7 @@ def prepare_initial_instruments(self):
     # Set the tickling pulse
     if self.tickle_on:
         self.tickler.on()
-        self.tickler.set_level(self.tickle_level)
+        self.tickler.set_ampl(self.tickle_level)
         self.tickler.set_freq(self.tickle_frequency)
     else:
         self.tickler.off()

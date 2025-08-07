@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import datetime
 import os
 
-from rs import RS
+from rigol import DSG821
 from keysight_spectrum import Keysight
 
 if __name__ == '__main__':
@@ -13,14 +13,14 @@ if __name__ == '__main__':
     ############################
     ##### Experiment setup #####
     ############################
-    low_freq = 1200e+06
-    high_freq = 2400e+06
-    steps = 1201
+    low_freq = 1100e+06
+    high_freq = 2100e+06
+    steps = 1001
     amplitude = 8.0
     spec_span = 50e+06
     spec_ref = None
-    experiment_name = 'CopperFoil_R'
-    folder_suffix = ''
+    experiment_name = 'Coupling'
+    folder_suffix = '_rigol'
     
     ################################
     ##### Exp parameters Setup #####
@@ -33,7 +33,7 @@ if __name__ == '__main__':
     INIT_REF = 10
     SPEC_DIV = 0.5
     
-    init_min = -75
+    init_min = -85
     init_max = +23
     running_min = -85
     thres_min = 0.25
@@ -52,7 +52,7 @@ if __name__ == '__main__':
     #####################################
     ##### Experiment initialization #####
     #####################################
-    rf = RS()
+    rf = DSG821()
     spec = Keysight()
     
     rf.set_ampl(amplitude)
@@ -86,7 +86,7 @@ if __name__ == '__main__':
 
                 if spec_span is not None:
                     spec.set_center_freq(freq)
-                rf.set_freq(freq)
+                rf.set_freq(freq/1e+6)
         
                 if i < INIT_POINTS:
                     if i == 0: spec.set_ref_ampl(INIT_REF)
