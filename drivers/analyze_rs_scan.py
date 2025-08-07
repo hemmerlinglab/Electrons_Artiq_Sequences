@@ -3,8 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 path = "/home/electrons/software/Electrons_Artiq_Sequences/drivers/data/"
-date = "20250806"
-experiment_name = "Unwanted"
+date = "20250807_ripple_research"
+experiment_name = "TrapOut_Atten20dB_In-2dBm"
 basefilename = path + date + '/' + experiment_name
 
 freq = np.genfromtxt(basefilename + "_x.csv")

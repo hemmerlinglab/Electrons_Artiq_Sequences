@@ -16,11 +16,11 @@ if __name__ == '__main__':
     low_freq = 1200e+06
     high_freq = 2400e+06
     steps = 1201
-    amplitude = 8.0
+    amplitude = -2.0
     spec_span = 50e+06
     spec_ref = None
-    experiment_name = 'CopperFoil_R'
-    folder_suffix = ''
+    experiment_name = 'TrapOut_Atten20dB_In-2dBm'
+    folder_suffix = '_ripple_research'
     
     ################################
     ##### Exp parameters Setup #####
