@@ -19,7 +19,7 @@ if __name__ == '__main__':
     amplitude = -2.0
     spec_span = 50e+06
     spec_ref = None
-    experiment_name = 'LowP_Al_withfoil_T'
+    experiment_name = 'LowP_Al_withfoil_R'
     folder_suffix = ''
     
     ################################
