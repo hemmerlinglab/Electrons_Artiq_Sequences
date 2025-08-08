@@ -19,14 +19,15 @@ if __name__ == '__main__':
     amplitude = -2.0
     spec_span = 50e+06
     spec_ref = None
-    experiment_name = 'TrapOut_Atten20dB_In-2dBm'
-    folder_suffix = '_ripple_research'
+    experiment_name = 'LowP_Al_withfoil_T'
+    folder_suffix = ''
     
     ################################
     ##### Exp parameters Setup #####
     ################################
     init_wait_time = 0.5
     wait_time = 0.1
+
 
     MAX_ATTEMPTS = 10
     INIT_POINTS = 6
