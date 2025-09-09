@@ -17,7 +17,7 @@ class Switch_power_supply(EnvExperiment):
         self.setattr_argument('front_voltage', NumberValue(default=200,unit='V',scale=1,ndecimals=0,step=1))
 
         self.channels = [28, 29, 30]
-        self.voltages = [0, 0, 0]
+        self.control_voltages = [0, 0, 0]
         
     @kernel
     def set_voltages(self):
@@ -31,7 +31,7 @@ class Switch_power_supply(EnvExperiment):
             self.zotino0.write_gain_mu(self.channels[i], 65000)
             self.zotino0.load()
             delay(200*us)
-            self.zotino0.write_dac(self.channels[i], self.voltages[i])
+            self.zotino0.write_dac(self.channels[i], self.control_voltages[i])
             self.zotino0.load()
             delay(200*us)
 
@@ -52,17 +52,18 @@ class Switch_power_supply(EnvExperiment):
                     voltages = [(i+1)*100]*3
                 elif i < (f_ind + 20):
                     voltages[0] = self.front_voltage
-                    voltages[1] = (i+1)*100 - 8
-                    voltages[2] = (i+1)*100
+                    voltages[1] = (i+1)*100 - 4
+                    voltages[2] = (i+1)*100 * 1.05
                 else:
                     voltages[0] = self.front_voltage
-                    voltages[1] = self.front_voltage + 2000 - 10
-                    voltages[2] = min((i+1)*100, self.front_voltage + 2200)
+                    voltages[1] = self.front_voltage + 2000 - 6
+                    voltages[2] = min((i+1)*100*1.05, (self.front_voltage+2200)*1.05)
 
                 for i in range(len(voltages)):
-                    self.voltages[i] = adjust_set_volt(self.channels[i], voltages[i]/500)
-                    #print(self.channels[i], voltages[i], self.voltages[i])
+                    self.control_voltages[i] = calculate_input_voltage(self.channels[i], voltages[i]/500, use_amp=False)
+                    print(f"Sending control signal {self.control_voltages[i]:.2f} to channel {self.channels[i]} for achieving voltage {voltages[i]}")
                 
+                print('\n')
                 self.set_voltages()
             
         else:
@@ -71,7 +72,7 @@ class Switch_power_supply(EnvExperiment):
             voltages = [self.front_voltage, self.front_voltage+2000, self.front_voltage+2200]
             for i in range(len(voltages)):
                 #print(self.channels[i], voltages[i])
-                self.voltages[i] = adjust_set_volt(self.channels[i], voltages[i]/500)
+                self.control_voltages[i] = calculate_input_voltage(self.channels[i], voltages[i]/500, use_amp=False)
             self.set_voltages()
 
             for i in range(f_ind+23):
@@ -89,8 +90,9 @@ class Switch_power_supply(EnvExperiment):
                     voltages[2] = max(voltages[2] - 100, 0)
 
                 for i in range(len(voltages)):
-                    self.voltages[i] = calculate_input_voltage(self.channels[i], voltages[i]/500, use_amp = False)
-                    #print(self.channels[i], voltages[i], self.voltages[i])
-                
+                    self.control_voltages[i] = calculate_input_voltage(self.channels[i], voltages[i]/500, use_amp = False)
+                    print(f"Sending control signal {self.control_voltages[i]:.2f} to channel {self.channels[i]} for achieving voltage {voltages[i]}")
+                    
+                print('\n')
                 self.set_voltages()
 
