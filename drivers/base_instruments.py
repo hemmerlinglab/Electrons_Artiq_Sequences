@@ -29,7 +29,7 @@ class base_visa_instrument:
 
     def wait_finished(self):
 
-        while not self.query('*OPC?') == '1':
+        while self.query('*OPC?').strip() != '1':
             pass
 
         return
