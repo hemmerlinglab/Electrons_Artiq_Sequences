@@ -59,7 +59,7 @@ if __name__ == "__main__":
     fg.id()
 
     fg.set_freq(8.0)
-    fg.set_level(0.0)
+    fg.set_ampl(0.0)
 
     fg.close()
 
