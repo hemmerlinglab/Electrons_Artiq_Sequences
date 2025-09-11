@@ -1,22 +1,22 @@
 from artiq.experiment import *
+import numpy as np
 import sys
-sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/drivers")
-
-
-from dc_electrodes import *
 
 # instruments
+sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/drivers")
 from bk_4053 import BK4053
 from rigol   import DSG821
 from rs      import RS
 
-from base_sequences import *
-from helper_functions import *
+# something within the same directory
+from dc_electrodes import Electrodes
+from base_sequences import set_multipoles, update_detection_time, set_mesh_voltage, set_MCP_voltages, set_extraction_pulse, set_loading_pulse
+from helper_functions import get_basefilename, save_all
 from scan_functions import scan_parameter
 
 list_of_traps = ["Single PCB", "UCB 3 PCB"]
 
-############################################################
+## -1. Set Attribute with config saving  ############################
 
 def my_setattr(self, arg, val, scanable = True):
     
@@ -40,10 +40,13 @@ def load_instruments(self):
     self.ext_pulser = BK4053()
 
     # tickle pulse generator
-    self.tickler   = DSG821()
+    self.tickler    = DSG821()
 
     # trap drive
-    self.RF_driver = RS()
+    self.RF_driver  = RS()
+    
+    # Zotino DC controller
+    self.electrodes = Electrodes(trap = self.trap, flipped = self.flip_electrodes)
 
     return
 
@@ -86,14 +89,14 @@ def load_parameters(self):
     my_setattr(self, 'bin_width', NumberValue(default=1.0,unit='us',scale=1,ndecimals=1,step=0.1), scanable = False)
     my_setattr(self, 'histogram_refresh', NumberValue(default=1000,unit='',scale=1,ndecimals=0,step=1), scanable = False)
 
-    # Setting mesh voltage
+    my_setattr(self, 'trap', EnumerationValue(['Single PCB', 'UCB 3 PCB'], default='Single PCB'))
     my_setattr(self, 'mesh_voltage', NumberValue(default=450,unit='V',scale=1,ndecimals=0,step=1))
     my_setattr(self, 'MCP_front', NumberValue(default=400,unit='V',scale=1,ndecimals=0,step=1))
     
     my_setattr(self, 'wait_time', NumberValue(default=40,unit='us',scale=1,ndecimals=0,step=1))
     my_setattr(self, 'load_time', NumberValue(default=300,unit='us',scale=1,ndecimals=0,step=1))
     my_setattr(self, 'no_of_repeats', NumberValue(default=10000,unit='',scale=1,ndecimals=0,step=1))
-    my_setattr(self, 'trap', EnumerationValue(list_of_traps, default = list_of_traps[0]))
+    #my_setattr(self, 'trap', EnumerationValue(list_of_traps, default = list_of_traps[0]))
     my_setattr(self, 'flip_electrodes', BooleanValue(default=False))
 
     my_setattr(self, 'tickle_level', NumberValue(default=-5,unit='dBm',scale=1,ndecimals=1,step=1))
@@ -125,6 +128,9 @@ def load_parameters(self):
     my_setattr(self, 'steps', NumberValue(default=100,unit='steps to scan',scale=1,ndecimals=0,step=1))
  
     my_setattr(self, 'scanning_parameter', EnumerationValue(list_of_parameters, default = list_of_parameters[0]))
+    
+    print(self.trap)
+    print(list_of_traps[0])
     
     return
 
@@ -254,10 +260,10 @@ def prepare_datasets(self):
 
 def base_build(self):
 
-    load_instruments(self)
     load_variables(self)
     load_attributes(self)
     load_parameters(self)
+    load_instruments(self)
 
     return
 
@@ -269,9 +275,6 @@ def my_prepare(self):
     prepare_datasets(self)
     prepare_initial_instruments(self)
     prepare_saving_configuration(self)
-    
-    # self attributes must be referenced after `build` was done, otherwise it will be None
-    self.electrodes = Electrodes(trap = self.trap, flipped = self.flip_electrodes)
 
     return
 
@@ -298,14 +301,7 @@ def my_analyze(self):
     if self.scan_ok:
 
         print('Saving data...')
-        save_all_data(self)
-
-        # overwrite config file with complete configuration
-        self.config_dict.append({'par' : 'Status', 'val' : True, 'cmt' : 'Run finished.'})
-        save_config(self.basefilename, self.config_dict)
-
-        add_scan_to_list(self)
-        
+        save_all(self)
         print('Experiment ' + self.basefilename + ' finished.')
         print('Experiment finished.')
 
@@ -314,6 +310,4 @@ def my_analyze(self):
         print('Scan terminated.')
 
     return
-
-
 

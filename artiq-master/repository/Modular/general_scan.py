@@ -1,14 +1,12 @@
 from artiq.experiment import *
 import numpy as np
 
-import socket
-import time
 import sys
-sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions")
+import os
 
-from helper_functions import *
-from base_sequences import *
-from base_functions import *
+sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions")
+from base_sequences import count_histogram
+from base_functions import base_build, my_prepare, my_analyze
 from scan_functions import scan_parameter
 
 class General_Scan(EnvExperiment):

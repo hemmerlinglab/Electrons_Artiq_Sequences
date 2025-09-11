@@ -1,8 +1,7 @@
 from artiq.experiment import *
-#import artiq.coredevice.sampler as splr
 import numpy as np
-import os
 
+from helper_functions import calculate_input_voltage
 
 ############################################################
 def set_extraction_pulse(self):
@@ -121,9 +120,9 @@ def set_MCP_voltages(self, front_voltage):
     chan = [28, 29, 30]
 
     vols = [0, 0, 0]
-    vols[0] = adjust_set_volt(chan[0], front_voltage/500)
-    vols[1] = adjust_set_volt(chan[1], (front_voltage+2000)/500)
-    vols[2] = adjust_set_volt(chan[2], (front_voltage+2200)/500)
+    vols[0] = calculate_input_voltage(chan[0], front_voltage/500, use_amp=False)
+    vols[1] = calculate_input_voltage(chan[1], (front_voltage+2000)/500, use_amp=False)
+    vols[2] = calculate_input_voltage(chan[2], (front_voltage+2200)/500, use_amp=False)
 
     #print(chan, vols)
     set_electrode_voltages(self, chan, vols)

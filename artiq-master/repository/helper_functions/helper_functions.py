@@ -6,6 +6,9 @@ from configparser import ConfigParser
 import socket
 from amp_zotino_params import fit_parameters, old_coeffs
 
+###################################################################
+################  Old Functions for Laser Control  ################
+###################################################################
 
 def get_laser_frequencies():
 
@@ -38,7 +41,6 @@ def get_laser_frequencies():
 
     return freqs
 
-
 def switch_fiber_channel(channel):
 
     #print('Getting laser frequencies ...')
@@ -55,7 +57,13 @@ def switch_fiber_channel(channel):
 
     return
 
+def get_optimal_frequencies(mesh_voltage):
 
+    return freq_422, freq_390
+
+#####################################################################
+################  Functions for Data Saving Control  ################
+#####################################################################
 
 def get_basefilename(self, extension = ''):
     my_timestamp = datetime.datetime.today()
@@ -73,6 +81,18 @@ def get_basefilename(self, extension = ''):
     self.scan_timestamp = str(my_timestamp.strftime('%Y%m%d_%H%M%S'))
 
     self.basefilename = self.datafolder + basefolder + '/' + self.scan_timestamp # 20220707_150655
+
+def save_all(self):
+
+    # save all data
+    save_all_data(self)
+
+    # save all config
+    self.config_dict.append({'par' : 'Status', 'val' : True, 'cmt' : 'Run finished.'})
+    save_config(self)
+    
+    # add scan to list
+    add_scan_to_list(self)
 
 def save_all_data(self):
     # loops over data_to_save and saves all data sets in the array self.data_to_save
@@ -96,61 +116,59 @@ def save_all_data(self):
 
         f_hlp.close()
 
-
-
 def add_scan_to_list(self):
+
     # Write Data to Files
     f_hlp = open(self.datafolder + '/' + self.today + '/' + 'scan_list_' + self.today, 'a')
     f_hlp.write(self.scan_timestamp + '\n')
     f_hlp.close()
 
+def save_config(self):
 
-def save_config(basefilename, var_dict):
+    # save run configuration
+    # creates and overwrites config file
+    # self should has a config_dict
+    # self.config_dict is an array of dictionaries
+    # self.config_dict[0] = {
+    #    'par': <parameter name>,
+    #    'val': <parameter value>,
+    #    'unit': <parameter unit>, (optional)
+    #    'cmt': <parameter comment> (optional)
+    #    }
 
-        # save run configuration
-        # creates and overwrites config file
-        # var_dict is an array of dictionaries
-        # var_dict[0] = {
-        #    'par': <parameter name>,
-        #    'val': <parameter value>,
-        #    'unit': <parameter unit>, (optional)
-        #    'cmt': <parameter comment> (optional)
-        #    }
+    optional_parameters = ['unit', 'cmt']        
+    conf_filename = self.basefilename + '_conf'
 
-        optional_parameters = ['unit', 'cmt']        
-        conf_filename = basefilename + '_conf'
+    # use ConfigParser to save config options
+    config = ConfigParser()
 
-        # use ConfigParser to save config options
-        config = ConfigParser()
+    # create config file
+    conf_file = open(conf_filename, 'w')
+    print('Config file written.')
 
-        # create config file
-        conf_file = open(conf_filename, 'w')
-        print('Config file written.')
+    # add scan name to config file
+    config['Scan'] = {'filename' : self.basefilename}
 
-        # add scan name to config file
-        config['Scan'] = {'filename' : basefilename}
+    # toggle through dictionary and add the config categories
+    for d in self.config_dict:
+        config[d['par']] = {'val' : d['val']}
 
-        # toggle through dictionary and add the config categories
-        for d in var_dict:
-            config[d['par']] = {'val' : d['val']}
+        for opt in optional_parameters:
+            if opt in d.keys():
+                config[d['par']].update({opt : d[opt]})
 
-            for opt in optional_parameters:
-                if opt in d.keys():
-                    config[d['par']].update({opt : d[opt]})
+    config.write(conf_file)
 
-        config.write(conf_file)
+    # save also the sequence file 
+    #print(config['sequence_file']['val'])
+    #print(self.basefilename + '_sequence')
+    shutil.copyfile(config['sequence_file']['val'], self.basefilename + '_sequence')
 
-        # save also the sequence file 
-        #print(config['sequence_file']['val'])
-        #print(basefilename + '_sequence')
-        shutil.copyfile(config['sequence_file']['val'], basefilename + '_sequence')
-        
-        conf_file.close()
-        
-def get_optimal_frequencies(mesh_voltage):
+    conf_file.close()
 
-    return freq_422, freq_390
-
+####################################################################
+################  Functions for DC Voltage Control  ################
+####################################################################
 
 def calculate_input_voltage(chan, volt, use_amp = True):
 
