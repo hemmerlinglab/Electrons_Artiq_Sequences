@@ -3,7 +3,11 @@ import numpy as np
 
 from helper_functions import calculate_input_voltage
 
-############################################################
+###########################################################
+##  Control Widgets  ######################################
+###########################################################
+
+# =============  Extraction Pulse Control  ============= #
 def set_extraction_pulse(self):
 
     # Set extraction pulse frequency (for robustness)
@@ -19,9 +23,8 @@ def set_extraction_pulse(self):
 
     return
 
+# ===========  AOM Modulation Pulse Control  =========== #
 def set_loading_pulse(self):
-  
-    # set the loading pulse
     
     ext_freq = 1e6 / (self.detection_time+100)
 
@@ -30,9 +33,7 @@ def set_loading_pulse(self):
 
     return
 
-
-############################################################
-
+# ====  Calculate Detection Time Based on Set Times  ==== #
 def update_detection_time(self):
 
     # detect all the time + 10 us extraction pulse
@@ -40,8 +41,7 @@ def update_detection_time(self):
 
     return
 
-############################################################
-
+# ===============  DC Multipoles Control  =============== #
 def set_multipoles(self):
 
     # Compute the voltages of DC electrodes we want
@@ -65,26 +65,7 @@ def set_multipoles(self):
 
     return
 
-
-#####################################################################
-
-@kernel
-def set_mesh_voltage(self, voltage):
-
-    #print('Setting mesh voltage')
-    
-    self.core.break_realtime()
-    self.zotino0.init()
-    delay(200*us)
-    self.zotino0.write_gain_mu(31, 65000)
-    self.zotino0.write_dac(31, 1.0/198.946 * (voltage + 14.6027))
-    self.zotino0.load()
-
-    return
-
-
-#####################################################################
-
+# ================  DC Voltages Control  ================ #
 @kernel
 def set_electrode_voltages(self, channel_list, voltage_list):
 
@@ -108,9 +89,22 @@ def set_electrode_voltages(self, channel_list, voltage_list):
 
     return
 
+# ===============  Mesh Voltage Control  =============== #
+@kernel
+def set_mesh_voltage(self, voltage):
 
-#####################################################################
+    #print('Setting mesh voltage')
+    
+    self.core.break_realtime()
+    self.zotino0.init()
+    delay(200*us)
+    self.zotino0.write_gain_mu(31, 65000)
+    self.zotino0.write_dac(31, 1.0/198.946 * (voltage + 14.6027))
+    self.zotino0.load()
 
+    return
+
+# ===============  MCP Voltages Control  =============== #
 def set_MCP_voltages(self, front_voltage):
 
     '''This function takes adjusted voltages, remember
@@ -129,9 +123,11 @@ def set_MCP_voltages(self, front_voltage):
     
     return 0
 
+###########################################################
+##  Experiment Sequences  #################################
+###########################################################
 
-#####################################################################
-
+# =======  Experiment Sequences - histogram off  ======= #
 @kernel
 def count_events(self):
     
@@ -153,62 +149,11 @@ def count_events(self):
                 tload_start = now_mu()
                 tload_end = self.ttl3.gate_rising(self.load_time*us)
 
-                delay((self.detection_time-self.load_time)*us)
-
-                t_start = now_mu()
-                t_end = self.ttl3.gate_rising(10*us)
-                
-            with sequential:
-
-                # Loading: TTL to switch on AOM
-                self.ttl11.pulse(self.load_time * us)
-
-            # Extraction pulse
-            with sequential:
-                
-                delay((self.load_time+self.wait_time) * us)
-                self.ttl6.pulse(1*us)
-
-            # Tickling pulse
-            with sequential:
-                
-                delay(self.load_time * us)
-                
-                delay(5 * us)
-                
-                self.ttl8.pulse(self.tickle_pulse_length * us)
-
-        read_only_timestamps(self, tload_start, t_end, 'timestamps')
-
-    return
-
-
-#####################################################################
-
-@kernel
-def count_events(self):
-    
-    ind_count = 0
-    # Time Sequence
-    for i in range(self.no_of_repeats):
-
-        self.core.break_realtime()
-
-        with parallel:
-
-            with sequential:
-                # Overall start TTL of sequence
-                self.ttl4.pulse(2*us)
-
-            # Gate counting to count MCP pulses
-            with sequential:             
-
-                tload_start = now_mu()
-                tload_end = self.ttl3.gate_rising(self.load_time*us)
-
+                #delay((self.detection_time-self.load_time)*us)      # Old Logic
                 delay((self.wait_time-3)*us)
 
                 t_start = now_mu()
+                #t_end = self.ttl3.gate_rising(10*us)                # Old Logic
                 t_end = self.ttl3.gate_rising((self.ext_pulse_length // 1000 + 8)*us)
                 
             with sequential:
@@ -235,8 +180,19 @@ def count_events(self):
 
     return
 
-#####################################################################
+@kernel
+def read_only_timestamps(self, t_start, t_end, which_data_set):
 
+    tstamp = self.ttl3.timestamp_mu(t_end)
+    while tstamp != -1:
+        timestamp = self.core.mu_to_seconds(tstamp) - self.core.mu_to_seconds(t_start)
+        timestamp_us = timestamp * 1e6
+        self.append_to_dataset(which_data_set, timestamp_us) # store the timestamps in microsecond
+        tstamp = self.ttl3.timestamp_mu(t_end) # read the timestamp of another event
+
+    return
+
+# ========  Experiment Sequences - histogram on  ======== #
 @kernel
 def count_histogram(self):
     
@@ -283,24 +239,6 @@ def count_histogram(self):
 
     return
 
-
-#####################################################################
-
-@kernel
-def read_only_timestamps(self, t_start, t_end, which_data_set):
-
-    tstamp = self.ttl3.timestamp_mu(t_end)
-    while tstamp != -1:
-        timestamp = self.core.mu_to_seconds(tstamp) - self.core.mu_to_seconds(t_start)
-        timestamp_us = timestamp * 1e6
-        self.append_to_dataset(which_data_set, timestamp_us) # store the timestamps in microsecond
-        tstamp = self.ttl3.timestamp_mu(t_end) # read the timestamp of another event
-
-    return
-
-
-#####################################################################
-
 @kernel
 def read_histogram_timestamps(self, t_start, t_end, i):
 
@@ -317,9 +255,7 @@ def read_histogram_timestamps(self, t_start, t_end, i):
 
     return
 
-
-############################################################
-
+# =============  Calculate Histogram Data  ============= #
 def make_histogram(self):
     
     # for display
@@ -332,6 +268,4 @@ def make_histogram(self):
     self.set_dataset('hist_xs', b, broadcast=True)
 
     return
-
-
 
