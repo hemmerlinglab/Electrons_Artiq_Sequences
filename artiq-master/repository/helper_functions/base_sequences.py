@@ -1,11 +1,38 @@
 from artiq.experiment import *
 import numpy as np
+import socket
 
 from helper_functions import calculate_input_voltage
 
 ###########################################################
 ##  Control Widgets  ######################################
 ###########################################################
+
+# ===================  Laser Control  =================== #
+"""
+# ---- Temporary Notes ---- #
+What I need to do to build laser control into the script?
+1. Update with input parameters, instead of self attributes
+2. In prepare stage, send frequency setpoint defined by self
+   attributes to the laser lock desktop
+3. In analyze stage, send frequency setpoint defined by self
+   attributes to the laser lock desktop to pull it back
+4. Do not modify self attributes for laser frequencies during
+   experiment run
+
+Tips:
+IP Address for laser lock desktop (1041_RGA): 192.168.42.26 / 192.168.42.136
+PORT Number used in the laser lock program: 63700
+Expected Format for the laser lock program: 
+
+Write a code to test out the actual address for socket
+"""
+def set_laser_frequency(self, laser, frequency):
+
+    if laser not in [422, 390]:
+        raise ValueError(f"We only have laser 422 and 390, received {laser}!")
+
+    return
 
 # =============  Extraction Pulse Control  ============= #
 def set_extraction_pulse(self):

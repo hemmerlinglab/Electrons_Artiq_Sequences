@@ -52,6 +52,19 @@ def limit_check(par, scan_values, limits):
 ##  -- Scanning Functions  --  ######################################
 #####################################################################
 """
+Fatal Problem: The `reset_value` mode would not work if the scan function's
+logic is to update self.<parameter>. Functions associated with this problem
+include:
+ - _scan_load_time: Does not matter, because it is meaningless to set load
+   time back. (single experiment parameter, not an external parameter)
+ - _scan_wait_time: Does not matter, because it is meaningless to set wait
+   time back. (single experiment parameter, not an external parameter)
+ - _scan_frequency_422: Remember to build this part correctly
+ - _scan_frequency_390: Remember to build this part correctly
+ - _scan_ext_pulse_length: Remember to fix this problem
+ - _scan_ext_pulse_amplitude:  Remember to fix this problem
+ - All functions for DC multipoles: Remember to fix this problem
+
 To build scanning functions:
 1. make sure function name matches f"_scan_{parameter_name}"
 2. The function must take 4 parameters:
@@ -171,8 +184,7 @@ def _scan_frequency_422(self, val, scan_values, scan_check = False):
     
     else:
         
-        self.frequency_422 = val
-        #set_laser_frequencies(self)
+        #set_laser_frequency(self, 422, val) # It is fine to use 422 or '422' for laserid
         
         return 1
 
@@ -182,8 +194,8 @@ def _scan_frequency_390(self, val, scan_values, scan_check = False):
         return limit_check(self.scanning_parameter, scan_values, [766.100000, 769.600000])
     
     else:
-        self.frequency_390 = val
-        #set_laser_frequencies(self)
+
+        #set_laser_frequency(self, 390, val)
         
         return 1
 
