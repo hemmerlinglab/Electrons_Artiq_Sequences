@@ -50,7 +50,7 @@ class LaserClient:
             self._send(message)
             return self._recv()
 
-    def set_laser_frequency(self, laserid, setpoint: float, max_attempt: int = 3) -> None:
+    def set_frequency(self, laserid, setpoint: float, max_attempt: int = 3) -> None:
         """
         Send laser setpoint to the server
         It is fine to use int or str laserid
@@ -64,9 +64,9 @@ class LaserClient:
                 print(f"Successfully sent setpoint {setpoint:.6f} THz to laser {laserid}!")
                 return
 
-        raise RuntimeError(f"Failed to set laser {laserid} to {setpoint:.6f} THz after {max_attempt} tries!")
+        raise RuntimeError(f"Failed to set laser {laserid} to {setpoint:.6f} THz after {max_attempt} attempts!")
 
-    def get_laser_frequency(self, laserid, max_attempt: int = 3) -> float:
+    def get_frequency(self, laserid, max_attempt: int = 3) -> float:
         """
         Get last value of frequency of laser `laserid` from remote server.
         Not that on the remote end the laser switching is manual, so the
@@ -89,7 +89,7 @@ class LaserClient:
             except Exception:
                 continue
 
-        print(f"Failed to get last frequency of laser {laserid} after {max_attempt} tries!")
+        print(f"Failed to get last frequency of laser {laserid} after {max_attempt} attempts!")
 
         return 0.0
 
@@ -103,15 +103,18 @@ class LaserClient:
 
 if __name__ == "__main__":
 
+    import time
+
     laser_controller = LaserClient()
 
     try:
         for i in range(2):
-            reply = laser_controller.set_laser_frequency(422, 709.078240)
+            reply = laser_controller.set_frequency(422, 709.078240)
+            time.sleep(15)
 
-        freq_422 = laser_controller.get_laser_frequency(422)
+        freq_422 = laser_controller.get_frequency(422)
         print(f"422 frequency: {freq_422:.6f} THz")
-        freq_390 = laser_controller.get_laser_frequency(390)
+        freq_390 = laser_controller.get_frequency(390)
         print(f"390 frequency: {freq_390:.6f} THz")
 
     finally:

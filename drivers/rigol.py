@@ -20,8 +20,6 @@ class DSG821(base_visa_instrument):
     def set_freq(self, freq):
 
         self.write(':FREQ {0}MHz'.format(float(freq)))
-        
-        #time.sleep(1)
 
         return
 
@@ -43,7 +41,11 @@ class DSG821(base_visa_instrument):
 
         return
 
+    def close(self):
 
+        super().close()
+
+        return
 
 
 ##################################################################################################

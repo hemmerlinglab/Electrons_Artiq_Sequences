@@ -27,10 +27,17 @@ Expected Format for the laser lock program:
 
 Write a code to test out the actual address for socket
 """
-def set_laser_frequency(self, laser, frequency):
+def record_laser_frequencies(self, idx):
+    """
+    Fetch Last Frequencies of each laser from Laser Lock GUI and record them into dataset.
+    When failed to fetch frequency, 0.0 will be returned according to the function.
+    """
 
-    if laser not in [422, 390]:
-        raise ValueError(f"We only have laser 422 and 390, received {laser}!")
+    freq_422 = self.laser.get_frequency(422)
+    freq_390 = self.laser.get_frequency(390)
+
+    self.mutate_dataset('last_frequency_422', idx, freq_422)
+    self.mutate_dataset('last_frequency_390', idx, freq_390)
 
     return
 
@@ -64,7 +71,9 @@ def set_loading_pulse(self):
 def update_detection_time(self):
 
     # detect all the time + 10 us extraction pulse
-    self.detection_time = self.load_time + self.wait_time + self.ext_pulse_length // 1000 + 10
+    # in trapping mode, unit is us, but in counting mode, unit is ms
+    if self.mode == 'Trapping':
+        self.detection_time = self.load_time + self.wait_time + self.ext_pulse_length // 1000 + 10
 
     return
 
@@ -153,6 +162,18 @@ def set_MCP_voltages(self, front_voltage):
 ###########################################################
 ##  Experiment Sequences  #################################
 ###########################################################
+
+# =======  Experiment Sequences - bare counting  ======= #
+@kernel
+def bare_counting(self):
+
+    self.core.break_realtime()
+
+    # Use detection_time as detection time, standalone mode for counting
+    # unit is ms (us for trapping mode)
+    ev = self.ttl3.gate_rising(self.detection_time * ms)
+
+    return self.ttl3.count(ev)
 
 # =======  Experiment Sequences - histogram off  ======= #
 @kernel

@@ -1,5 +1,6 @@
 import time
 import numpy as np
+import time
 
 from base_sequences import set_mesh_voltage, set_multipoles, set_loading_pulse, set_extraction_pulse, set_MCP_voltages, update_detection_time
 
@@ -52,19 +53,7 @@ def limit_check(par, scan_values, limits):
 ##  -- Scanning Functions  --  ######################################
 #####################################################################
 """
-Fatal Problem: The `reset_value` mode would not work if the scan function's
-logic is to update self.<parameter>. Functions associated with this problem
-include:
- - _scan_load_time: Does not matter, because it is meaningless to set load
-   time back. (single experiment parameter, not an external parameter)
- - _scan_wait_time: Does not matter, because it is meaningless to set wait
-   time back. (single experiment parameter, not an external parameter)
- - _scan_frequency_422: Remember to build this part correctly
- - _scan_frequency_390: Remember to build this part correctly
- - _scan_ext_pulse_length: Remember to fix this problem
- - _scan_ext_pulse_amplitude:  Remember to fix this problem
- - All functions for DC multipoles: Remember to fix this problem
-
+# ---- Temporary Notes ---- #
 To build scanning functions:
 1. make sure function name matches f"_scan_{parameter_name}"
 2. The function must take 4 parameters:
@@ -90,9 +79,7 @@ How scanning functions work?
 3. In analyze stage:
   - In `general_scan.py`, `analyze` calls `my_analyze` in `base_functions.py`
   - In `base_functions.py`, `my_analyze` calls `reset_scan_parameter`, then 
-    `reset_scan_parameter` calls `scan_parameter` in reset mode
-  - `scan_parameter` calls target function in ordinary mode and set it to
-    the initial value sent by ARTIQ Dashboard
+    `reset_scan_parameter` calls correct scan function to reset the value.
 """
 # 1. Detector Parameters  ----------------------------------------------------#
 #-----------------------------------------------------------------------------#
@@ -184,7 +171,8 @@ def _scan_frequency_422(self, val, scan_values, scan_check = False):
     
     else:
         
-        #set_laser_frequency(self, 422, val) # It is fine to use 422 or '422' for laserid
+        self.laser.set_frequency(422, val) # It is fine to use 422 or '422' for laserid
+        time.sleep(1)
         
         return 1
 
@@ -195,7 +183,8 @@ def _scan_frequency_390(self, val, scan_values, scan_check = False):
     
     else:
 
-        #set_laser_frequency(self, 390, val)
+        self.laser.set_frequency(390, val)
+        time.sleep(1)
         
         return 1
 
