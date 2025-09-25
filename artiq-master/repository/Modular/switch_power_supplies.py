@@ -53,11 +53,11 @@ class Switch_power_supply(EnvExperiment):
                 elif i < (f_ind + 20):
                     voltages[0] = self.front_voltage
                     voltages[1] = (i+1)*100 - 4
-                    voltages[2] = (i+1)*100 * 1.05
+                    voltages[2] = (i+1)*100
                 else:
                     voltages[0] = self.front_voltage
                     voltages[1] = self.front_voltage + 2000 - 6
-                    voltages[2] = min((i+1)*100*1.05, (self.front_voltage+2200)*1.05)
+                    voltages[2] = min((i+1)*100, self.front_voltage+2200)
 
                 for i in range(len(voltages)):
                     self.control_voltages[i] = calculate_input_voltage(self.channels[i], voltages[i]/500, use_amp=False)

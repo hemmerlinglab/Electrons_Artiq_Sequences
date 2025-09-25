@@ -102,7 +102,7 @@ def load_parameters(self):
 
     # 6. Laser Settings
     #------------------------------------------------------
-    my_setattr(self, 'frequency_422', NumberValue(default=709.078240,unit='THz',scale=1,ndecimals=6,step=1e-6))
+    my_setattr(self, 'frequency_422', NumberValue(default=709.078300,unit='THz',scale=1,ndecimals=6,step=1e-6))
     my_setattr(self, 'frequency_390', NumberValue(default=766.928560,unit='THz',scale=1,ndecimals=6,step=1e-6))
 
     # 7. Tickle Settings
@@ -115,7 +115,7 @@ def load_parameters(self):
     # 8. RF Settings
     #------------------------------------------------------
     my_setattr(self, 'RF_amplitude', NumberValue(default=8,unit='dBm',scale=1,ndecimals=1,step=.1))
-    my_setattr(self, 'RF_frequency', NumberValue(default=1.761,unit='GHz',scale=1,ndecimals=4,step=.0001))
+    my_setattr(self, 'RF_frequency', NumberValue(default=1.738,unit='GHz',scale=1,ndecimals=4,step=.0001))
 
     # 9. Extraction Pulse Settings
     #------------------------------------------------------
@@ -162,7 +162,7 @@ def my_prepare(self):
 # 2) Subfunctions for prepare
 def prepare_instruments(self):
 
-    self.ext_pulser = BK4053()      # extraction pulse generator
+    self.ext_pulser = BK4053()      # extraction pulse generator and AOM controller
     self.tickler    = DSG821()      # tickle pulse generator
     self.RF_driver  = RS()          # trap drive
     self.laser      = LaserClient() # Laser Lock GUI client
@@ -347,7 +347,8 @@ def close_instruments(self):
     self.RF_driver.close()
     
     # 4) Close Extraction Pulser (BK4053)
-    self.ext_pulser.off()
+    # Should not turn off ext_pulser because it could kill the AOM
+    #self.ext_pulser.off()
     self.ext_pulser.close()
     
     return

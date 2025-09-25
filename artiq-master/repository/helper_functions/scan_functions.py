@@ -234,7 +234,7 @@ def _scan_RF_frequency(self, val, scan_values, scan_check = False):
 
     if scan_check:
 
-        return limit_check(self.scanning_parameter, scan_values, [1.5, 1.7])
+        return limit_check(self.scanning_parameter, scan_values, [1.0, 2.4])
     
     else:
         
@@ -246,7 +246,7 @@ def _scan_RF_amplitude(self, val, scan_values, scan_check = False):
 
     if scan_check:
 
-        return limit_check(self.scanning_parameter, scan_values, [-30, 8])
+        return limit_check(self.scanning_parameter, scan_values, [-30, 11])
     
     else:
         
@@ -293,7 +293,7 @@ def _scan_U2(self, val, scan_values, scan_check = False):
 
     if scan_check:
 
-        return limit_check(self.scanning_parameter, scan_values, [-0.69, +0.69])
+        return limit_check(self.scanning_parameter, scan_values, [-1.0, +1.0])
     
     else:
         
@@ -307,7 +307,7 @@ def _scan_U1(self, val, scan_values, scan_check = False):
 
     if scan_check:
 
-        return limit_check(self.scanning_parameter, scan_values, [-3.33, +3.33])
+        return limit_check(self.scanning_parameter, scan_values, [-2.0, +2.0])
     
     else:
         
@@ -321,7 +321,7 @@ def _scan_U4(self, val, scan_values, scan_check = False):
 
     if scan_check:
 
-        return limit_check(self.scanning_parameter, scan_values, [-0.73, +0.73])
+        return limit_check(self.scanning_parameter, scan_values, [-0.5, +0.5])
     
     else:
         
@@ -335,7 +335,7 @@ def _scan_U5(self, val, scan_values, scan_check = False):
 
     if scan_check:
 
-        return limit_check(self.scanning_parameter, scan_values, [-0.07, +0.07])
+        return limit_check(self.scanning_parameter, scan_values, [-2.5, +2.5])
     
     else:
         
@@ -349,7 +349,7 @@ def _scan_U3(self, val, scan_values, scan_check = False):
 
     if scan_check:
 
-        return limit_check(self.scanning_parameter, scan_values, [-0.13, +0.13])
+        return limit_check(self.scanning_parameter, scan_values, [-0.8, +0.8])
     
     else:
         
@@ -363,7 +363,7 @@ def _scan_Ex(self, val, scan_values, scan_check = False):
 
     if scan_check:
 
-        return limit_check(self.scanning_parameter, scan_values, [-0.05, +0.05])
+        return limit_check(self.scanning_parameter, scan_values, [-1.0, +1.0])
     
     else:
         
@@ -377,7 +377,7 @@ def _scan_Ey(self, val, scan_values, scan_check = False):
 
     if scan_check:
 
-        return limit_check(self.scanning_parameter, scan_values, [-0.73, +0.73])
+        return limit_check(self.scanning_parameter, scan_values, [-0.2, +0.2])
     
     else:
         
@@ -391,7 +391,7 @@ def _scan_Ez(self, val, scan_values, scan_check = False):
 
     if scan_check:
 
-        return limit_check(self.scanning_parameter, scan_values, [-0.65, +0.65])
+        return limit_check(self.scanning_parameter, scan_values, [-0.8, +0.8])
     
     else:
         
