@@ -38,7 +38,9 @@ class SamplerTest(EnvExperiment):
 
         self.core.reset()
 
-        self.zotino_out(27, 2.7)
+        self.zotino_out(28, 2.8)
+        self.zotino_out(29, 2.9)
+        self.zotino_out(30, 3.0)
 
         self.sampler_read()
         result = self.get_dataset("sampler_voltages")

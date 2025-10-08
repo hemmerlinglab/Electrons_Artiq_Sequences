@@ -85,7 +85,7 @@ def load_parameters(self):
 
     # 3. Detector Settings
     #------------------------------------------------------
-    my_setattr(self, 'mesh_voltage', NumberValue(default=150,unit='V',scale=1,ndecimals=0,step=1))
+    my_setattr(self, 'mesh_voltage', NumberValue(default=108,unit='V',scale=1,ndecimals=0,step=1))
     my_setattr(self, 'MCP_front',    NumberValue(default=300,unit='V',scale=1,ndecimals=0,step=1))
 
     # 4. Sequence Settings
@@ -107,13 +107,14 @@ def load_parameters(self):
 
     # 7. Tickle Settings
     #------------------------------------------------------
+    my_setattr(self, 'tickle_on',           BooleanValue(default=False), scanable = False)
     my_setattr(self, 'tickle_level',        NumberValue(default=-5,unit='dBm',scale=1,ndecimals=1,step=1))
     my_setattr(self, 'tickle_frequency',    NumberValue(default=64,unit='MHz',scale=1,ndecimals=4,step=.0001))
     my_setattr(self, 'tickle_pulse_length', NumberValue(default=50,unit='us',scale=1,ndecimals=1,step=1))
-    my_setattr(self, 'tickle_on',           BooleanValue(default=False), scanable = False)
 
     # 8. RF Settings
     #------------------------------------------------------
+    my_setattr(self, 'RF_on', BooleanValue(default=False))
     my_setattr(self, 'RF_amplitude', NumberValue(default=8,unit='dBm',scale=1,ndecimals=1,step=.1))
     my_setattr(self, 'RF_frequency', NumberValue(default=1.738,unit='GHz',scale=1,ndecimals=4,step=.0001))
 
@@ -185,9 +186,9 @@ def prepare_initialization(self):
     #------------------------------------------------------
     self.RF_driver.set_ampl(self.RF_amplitude)
     self.RF_driver.set_freq(self.RF_frequency * 1e9)
-    if self.mode == 'Trapping':
+    if self.RF_on:
         self.RF_driver.on()
-    elif self.mode == 'Counting':
+    else:
         self.RF_driver.off()
 
     # 2. DC voltages
