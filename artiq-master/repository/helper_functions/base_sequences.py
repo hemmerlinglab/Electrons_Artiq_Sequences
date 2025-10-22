@@ -62,8 +62,19 @@ def set_loading_pulse(self):
     
     ext_freq = 1e6 / (self.detection_time+100)
 
+    # Parts to set
     self.ext_pulser.set_carr_freq(1, ext_freq)
     self.ext_pulser.set_carr_width(1, ext_freq, self.load_time * 1e-6)
+
+    # Parts to ensure
+    self.ext_pulser.set_carr_delay(1, 0.0)
+    self.ext_pulser.set_carr_ampl(1, 1.0)
+    self.ext_pulser.set_carr_offset(1, 0.5)
+    
+    # Make sure the pulser is on
+    # both channel is switched here because we do not want this recurring
+    self.ext_pulser.on(1)
+    self.ext_pulser.on(2)
 
     return
 

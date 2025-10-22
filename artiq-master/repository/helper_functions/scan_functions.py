@@ -150,7 +150,7 @@ def _scan_wait_time(self, val, scan_values, scan_check = False):
 
     if scan_check:
 
-        return limit_check(self.scanning_parameter, scan_values, [0, 10000])
+        return limit_check(self.scanning_parameter, scan_values, [0, 1000000])
     
     else:
         
@@ -211,7 +211,7 @@ def _scan_tickle_level(self, val, scan_values, scan_check = False):
     
     else:
         
-        self.tickler.set_level(val)
+        self.tickler.set_ampl(val)
 
         return 1
 

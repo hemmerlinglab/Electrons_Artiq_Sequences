@@ -16,7 +16,7 @@ class Individual_Zotino_Control(EnvExperiment):
         self.core.break_realtime()
         self.zotino0.init()
         delay(200*us)
-        self.zotino0.write_gain_mu(channel, 65000)
+        self.zotino0.write_gain_mu(channel, 65535)
         self.zotino0.write_dac(channel, level)
         self.zotino0.load()
 

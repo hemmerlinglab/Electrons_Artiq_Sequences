@@ -44,31 +44,23 @@ class BK4053:
 
         return self.msg
 
-    def on(self):
+    def on(self, channel):
 
-        self.send('OUTP ON')        
+        self.send(f"C{channel}:OUTP ON")        
 
-    def off(self):
+    def off(self, channel):
 
-        self.send('OUTP OFF')
-
-    def set_freq(self, freq):
-
-        self.send('FREQ ' + str(freq) + ' Hz')
-
-    def set_ampl(self, ampl):
-
-        self.send(':POW ' + str(ampl))
+        self.send(f"C{channel}:OUTP OFF")
 
     def set_carr_delay(self, channel, delay):
 
-        self.send('C' + str(channel) + ':BTWV CARR,DLY,' + str(delay))
+        self.send(f"C{channel}:BTWV CARR,DLY,{delay}")
 
         return
 
     def set_carr_freq(self, channel, frequency):
 
-        self.send('C' + str(channel) + ':BTWV CARR,FRQ,' + str(frequency))
+        self.send(f"C{channel}:BTWV CARR,FRQ,{frequency}")
 
         return
         
@@ -76,19 +68,19 @@ class BK4053:
     
         duty = 100 * width / (1/freq)
         
-        self.send('C' + str(channel) + ':BTWV CARR,DUTY,' + str(duty))
+        self.send(f"C{channel}:BTWV CARR,DUTY,{duty}")
         
         return
         
     def set_carr_ampl(self, channel, amplitude):
     
-    	self.send('C' + str(channel) + ':BTWV CARR,AMP,' + str(amplitude))
+    	self.send(f"C{channel}:BTWV CARR,AMP,{amplitude}")
     	
     	return
     	
     def set_carr_offset(self, channel, offset):
     
-    	self.send('C' + str(channel) + ':BTWV CARR,OFST,' + str(offset))
+    	self.send(f"C{channel}:BTWV CARR,OFST,{offset}")
     	
     	return
 

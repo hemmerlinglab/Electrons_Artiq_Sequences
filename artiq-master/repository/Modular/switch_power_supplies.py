@@ -49,7 +49,7 @@ class Switch_power_supply(EnvExperiment):
 
                 voltages = [0, 0, 0]
                 if i < f_ind:
-                    voltages = [(i+1)*100]*3
+                    voltages = [(i+1)*100] * 3
                 elif i < (f_ind + 20):
                     voltages[0] = self.front_voltage
                     voltages[1] = (i+1)*100 - 4

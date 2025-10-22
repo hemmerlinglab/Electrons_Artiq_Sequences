@@ -1,6 +1,7 @@
 from artiq.experiment import *
 import numpy as np
 
+import time
 import sys
 import os
 
@@ -37,6 +38,9 @@ class General_Scan(EnvExperiment):
             for my_ind in range(len(self.scan_values)):
 
                 self.scheduler.pause()
+                
+                # Time cost tracker
+                t0 = time.time()
 
                 # set the new parameter
                 scan_parameter(self, my_ind)
@@ -120,6 +124,9 @@ class General_Scan(EnvExperiment):
 
                     cts = bare_counting(self)
                     self.mutate_dataset('scan_result', my_ind, cts)
+
+                # time cost tracker
+                self.mutate_dataset('time_cost', my_ind, time.time() - t0)
 
         return
 

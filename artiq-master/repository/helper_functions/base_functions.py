@@ -108,7 +108,7 @@ def load_parameters(self):
     # 7. Tickle Settings
     #------------------------------------------------------
     my_setattr(self, 'tickle_on',           BooleanValue(default=False), scanable = False)
-    my_setattr(self, 'tickle_level',        NumberValue(default=-5,unit='dBm',scale=1,ndecimals=1,step=1))
+    my_setattr(self, 'tickle_level',        NumberValue(default=-10,unit='dBm',scale=1,ndecimals=1,step=1))
     my_setattr(self, 'tickle_frequency',    NumberValue(default=64,unit='MHz',scale=1,ndecimals=4,step=.0001))
     my_setattr(self, 'tickle_pulse_length', NumberValue(default=50,unit='us',scale=1,ndecimals=1,step=1))
 
@@ -231,7 +231,8 @@ def prepare_saving_configuration(self):
             {'var' : 'ratio_signal',       'name' : 'array of trapped counts / loading counts'},
             {'var' : 'ratio_lost',         'name' : 'array of lost counts / loading counts'},
             {'var' : 'scan_x',             'name' : 'array of setpoints for counting mode, duplicate but in order to be compatible with applet'},
-            {'var' : 'scan_result',        'name' : 'array of recorded counts for counting mode'}
+            {'var' : 'scan_result',        'name' : 'array of recorded counts for counting mode'},
+            {'var' : 'time_cost',          'name' : 'array of time cost for each experiment scan'}
             ]
 
     # save sequence file name
@@ -290,6 +291,9 @@ def prepare_datasets(self):
     # counting mode datasets
     self.set_dataset('scan_x',             self.scan_values, broadcast=True)
     self.set_dataset('scan_result',        [0] * self.steps, broadcast=True)
+    
+    # experiment metadataset
+    self.set_dataset('time_cost',          [0] * self.steps, broadcast=True)
 
     return
 
