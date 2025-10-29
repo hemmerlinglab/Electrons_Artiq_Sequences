@@ -11,7 +11,7 @@ from laser_controller import LaserClient
 
 # something within the same directory
 from dc_electrodes import Electrodes
-from base_sequences import set_multipoles, update_detection_time, set_mesh_voltage, set_MCP_voltages, set_extraction_pulse, set_loading_pulse
+from base_sequences import set_multipoles, update_detection_time, set_mesh_voltage, set_MCP_voltages, set_extraction_pulse, set_loading_pulse, get_MCP_voltages
 from helper_functions import get_basefilename, save_all
 from scan_functions import scan_parameter
 
@@ -67,6 +67,7 @@ def load_attributes(self):
     
     self.setattr_device('scheduler') # For "Terminate Instances" from Dashboard
     self.setattr_device('zotino0')   # For setting voltages of the mesh and DC electrodes
+    self.setattr_device('sampler0')  # For reading current MCP high voltage control signal
 
     return
 
@@ -233,7 +234,7 @@ def prepare_saving_configuration(self):
             {'var' : 'scan_x',             'name' : 'array of setpoints for counting mode, duplicate but in order to be compatible with applet'},
             {'var' : 'scan_result',        'name' : 'array of recorded counts for counting mode'},
             {'var' : 'time_cost',          'name' : 'array of time cost for each experiment scan'}
-            ]
+    ]
 
     # save sequence file name
 
@@ -281,6 +282,7 @@ def prepare_datasets(self):
     # monitoring recurring during each scan
     self.set_dataset('last_frequency_422', [0] * self.steps, broadcast=True)
     self.set_dataset('last_frequency_390', [0] * self.steps, broadcast=True)
+    self.set_dataset('MCP_voltages',       [0] * 3,          broadcast=True)
     
     self.set_dataset('trapped_signal',     [0] * self.steps, broadcast=True)
     self.set_dataset('loading_signal',     [0] * self.steps, broadcast=True)

@@ -1,8 +1,7 @@
 import time
 import numpy as np
-import time
 
-from base_sequences import set_mesh_voltage, set_multipoles, set_loading_pulse, set_extraction_pulse, set_MCP_voltages, update_detection_time
+from base_sequences import set_mesh_voltage, set_multipoles, set_loading_pulse, set_extraction_pulse, set_MCP_voltages, update_detection_time, get_MCP_voltages
 
 #####################################################################
 ##  -- Master Scanning Function  --  ################################
@@ -103,7 +102,12 @@ def _scan_MCP_front(self, val, scan_values, scan_check = False):
         return limit_check(self.scanning_parameter, scan_values, [0.0, 700.0])
     
     else:
+
+        self.current_MCP_front = val
+        set_MCP_voltages(self, val)
+
         
+        """
         if val > self.current_MCP_front:
             val_steps = np.arange(self.current_MCP_front, val, 50)
             for v in val_steps[1:]:
@@ -124,6 +128,7 @@ def _scan_MCP_front(self, val, scan_values, scan_check = False):
             print('Setting MCP front to: ' + str(val) + 'V\n')
             self.current_MCP_front = val
             set_MCP_voltages(self, val)
+        """
 
         return 1
 

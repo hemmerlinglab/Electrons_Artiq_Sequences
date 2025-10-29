@@ -1,8 +1,9 @@
 from artiq.experiment import *
 import numpy as np
 import socket
+import time
 
-from helper_functions import calculate_input_voltage
+from helper_functions import calculate_input_voltage, calculate_Vsampler, calculate_HighV, calculate_Vin, safe_check
 
 ###########################################################
 ##  Control Widgets  ######################################
@@ -152,23 +153,83 @@ def set_mesh_voltage(self, voltage):
     return
 
 # ===============  MCP Voltages Control  =============== #
-def set_MCP_voltages(self, front_voltage):
+def set_MCP_voltages(self, val):
 
     '''This function takes adjusted voltages, remember
     to divide the setpoint by 500 and make calibration
     adjustment when using.'''
 
     chan = [28, 29, 30]
+    vols = [0.0, 0.0, 0.0]
 
-    vols = [0, 0, 0]
-    vols[0] = calculate_input_voltage(chan[0], front_voltage/500, use_amp=False)
-    vols[1] = calculate_input_voltage(chan[1], (front_voltage+2000)/500, use_amp=False)
-    vols[2] = calculate_input_voltage(chan[2], (front_voltage+2200)/500, use_amp=False)
+    MCP_setpoint = [val, val+2000, val+2200]
+    current_MCP_voltage = get_MCP_voltages(self)
 
-    #print(chan, vols)
-    set_electrode_voltages(self, chan, vols)
+    if safe_check(MCP_setpoint, mode="setpoint"):
+        raise ValueError("Unsafe setpoint!")
+    if safe_check(current_MCP_voltage):
+        raise RuntimeError("Initial state is already unsafe!")
+
+    first_cycle = True
+
+    while current_MCP_voltage != MCP_setpoint:
+        sleep_time = 5
+        for i, vs in enumerate(MCP_setpoint):
+            if abs(vs - current_MCP_voltage[i]) < 50:
+                current_MCP_voltage[i] = MCP_setpoint[i]
+            elif vs - current_MCP_voltage[i] >= 50:
+                current_MCP_voltage[i] += 50
+                sleep_time = 10
+            elif vs - current_MCP_voltage[i] <= -50:
+                current_MCP_voltage[i] -= 50
+
+        if safe_check(current_MCP_voltage):
+            raise RuntimeError("Equipment destroyed!")
+
+        if not first_cycle: time.sleep(sleep_time)
+        first_cycle = False
+
+        print(current_MCP_voltage)
+
+        for i, v in enumerate(current_MCP_voltage):
+            print(v)
+            vols[i] = calculate_Vin(i, v)
+
+        print(chan, vols)
+        set_electrode_voltages(self, chan, vols)
     
     return 0
+
+@kernel
+def sampler_read(self):
+
+    self.core.reset()
+    self.core.break_realtime()
+    self.sampler0.init()
+    delay(200*us)
+    
+    readings = [0.0]*8
+    self.sampler0.sample(readings)
+    self.set_dataset("sampler_voltages", readings, broadcast=True)
+    self.core.break_realtime()
+
+def get_MCP_voltages(self):
+
+    sampler_read(self)
+
+    sampler_voltages = self.get_dataset("sampler_voltages")[:3]
+    control_voltages = [0.0, 0.0, 0.0]
+    high_voltages = [0.0, 0.0, 0.0]
+
+    for i in range(len(sampler_voltages)):
+        control_voltages[i] = calculate_Vsampler(i, sampler_voltages[i])
+
+    for i in range(len(control_voltages)):
+        high_voltages[i] = calculate_HighV(i, control_voltages[i])
+
+    self.set_dataset("MCP_voltages", high_voltages, broadcast=True)
+
+    return high_voltages
 
 ###########################################################
 ##  Experiment Sequences  #################################

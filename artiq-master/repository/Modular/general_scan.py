@@ -26,7 +26,7 @@ class General_Scan(EnvExperiment):
     def analyze(self):
 
         my_analyze(self)
-    
+
         return
 
     def run(self):
@@ -38,7 +38,7 @@ class General_Scan(EnvExperiment):
             for my_ind in range(len(self.scan_values)):
 
                 self.scheduler.pause()
-                
+
                 # Time cost tracker
                 t0 = time.time()
 
