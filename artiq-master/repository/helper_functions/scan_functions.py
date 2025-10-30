@@ -19,18 +19,18 @@ def scan_parameter(self, my_ind, scan_check = False, reset_value = False):
     else:
         # reset the value to the one in the parameter listing
         print('Reseting Scanning parameter ...')
-        val = eval('self.' + self.scanning_parameter)
+        val = eval(f'self.{self.scanning_parameter}')
 
     # Print feedback when in ordinary mode
     if not scan_check and not reset_value:
-        print("Scanning parameter {3}: {2} ({0}/{1})".format(my_ind, len(self.scan_values), val, self.scanning_parameter))\
+        print(f"Scanning parameter {self.scanning_parameter}: {val} ({my_ind}/{len(self.scan_values)})")
 
     # Check if scanning function exist and call
     if self.scanning_parameter in ['mesh_voltage', 'MCP_front', 'frequency_422', 'frequency_390', 'RF_frequency', 'RF_amplitude', 'tickle_frequency', 'tickle_level', 'tickle_pulse_length', 'load_time', 'wait_time', 'ext_pulse_length', 'ext_pulse_amplitude', 'U1', 'U2', 'U3', 'U4', 'U5', 'Ex', 'Ey', 'Ez']:
-        return eval('_scan_' + self.scanning_parameter + '(self, val, self.scan_values, scan_check = scan_check)')
+        return eval(f'_scan_{self.scanning_parameter}(self, val, self.scan_values, scan_check = scan_check)')
 
     else:
-        print('Parameter to scan {0} has no scanning function yet'.format(self.scanning_parameter))
+        print(f'Parameter to scan {self.scanning_parameter} has no scanning function yet')
         return 0
 
     return 
