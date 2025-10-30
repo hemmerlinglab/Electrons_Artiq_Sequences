@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import datetime
 import sys
+import os
 
 # instruments within the `drivers` directory
 sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/drivers")
@@ -14,7 +15,6 @@ from laser_controller import LaserClient
 # something within the same directory
 from dc_electrodes import Electrodes
 from base_sequences import set_multipoles, update_detection_time, set_mesh_voltage, set_MCP_voltages, set_extraction_pulse, set_loading_pulse
-from helper_functions import load_DOE_setpoints
 from scan_functions import scan_parameter
 
 # ===================================================================
@@ -167,6 +167,9 @@ def prepare_common_datasets(self):
     self.set_dataset('lost_signal',        [0] * self.steps, broadcast=True)
     self.set_dataset('ratio_signal',       [0] * self.steps, broadcast=True)
     self.set_dataset('ratio_lost',         [0] * self.steps, broadcast=True)
+
+    # counting mode datasets
+    self.set_dataset('scan_result',        [0] * self.steps, broadcast=True)
     
     # experiment metadataset
     self.set_dataset('time_cost',          [0] * self.steps, broadcast=True)
@@ -186,22 +189,22 @@ def prepare_ofat_datasets(self):
 
     # counting mode datasets
     self.set_dataset('scan_x',             self.scan_values, broadcast=True)
-    self.set_dataset('scan_result',        [0] * self.steps, broadcast=True)
 
     return
 
 def prepare_doe_datasets(self):
 
     allowed_params = [x['par'] for x in self.config_dict if x['scanable']]
+    self.doe_file = self.doe_file_path + self.doe_file_name
     self.setpoints, self.fields_to_fill, self.steps = \
-        load_DOE_setpoints(self.doe_file_path, allowed_params)
+        load_doe_setpoints(self.doe_file, allowed_params)
     self.scan_ok = True
 
     return
 
 # ===================================================================
 # 3) Helper Functions
-def load_DOE_setpoints(file_path, allowed_params):
+def load_doe_setpoints(file_path, allowed_params):
 
     full_table = pd.read_csv(file_path)
 

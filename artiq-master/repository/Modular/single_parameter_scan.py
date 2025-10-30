@@ -9,8 +9,8 @@ sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/artiq-master
 from base_sequences import bare_counting, record_laser_frequencies
 from build_functions import ofat_build
 from prepare_functions import ofat_prepare
-from analyze_functions import my_analyze
-from base_functions import trapping_with_histogram, trapping_without_histogram
+from analyze_functions import ofat_analyze
+from run_functions import trapping_with_histogram, trapping_without_histogram, store_to_dataset
 from scan_functions import scan_parameter
 
 class SingleParamScan(EnvExperiment):
@@ -30,7 +30,7 @@ class SingleParamScan(EnvExperiment):
 
     def analyze(self):
 
-        my_analyze(self)
+        ofat_analyze(self)
     
         return
 
@@ -40,7 +40,7 @@ class SingleParamScan(EnvExperiment):
 
         if self.scan_ok:
 
-            for my_ind in range(len(self.scan_values)):
+            for ind in range(len(self.scan_values)):
 
                 self.scheduler.pause()
                 
@@ -48,30 +48,19 @@ class SingleParamScan(EnvExperiment):
                 t0 = time.time()
 
                 # set the new parameter
-                scan_parameter(self, my_ind)
-                record_laser_frequencies(self, my_ind)
+                scan_parameter(self, ind)
+                record_laser_frequencies(self, ind)
 
                 if self.mode == 'Trapping':
 
                     if self.histogram_on:
-                        cts_trapped, cts_lost, cts_loading = trapping_with_histogram(self, my_ind)
+                        cts_trapped, cts_lost, cts_loading = trapping_with_histogram(self, ind)
 
                     else:
-                        cts_trapped, cts_lost, cts_loading = trapping_without_histogram(self, my_ind)
+                        cts_trapped, cts_lost, cts_loading = trapping_without_histogram(self, ind)
 
                     # store result
-                    self.mutate_dataset('trapped_signal', my_ind, cts_trapped)
-                    self.mutate_dataset('lost_signal', my_ind, cts_lost)
-                    self.mutate_dataset('loading_signal', my_ind, cts_loading)
-
-                    # calculate ratios
-                    self.mutate_dataset('ratio_signal', my_ind, cts_trapped / cts_loading)
-                    self.mutate_dataset('ratio_lost', my_ind, cts_lost / cts_loading)
-
-                    # reset timestamps
-                    self.set_dataset('timestamps', [], broadcast=True)
-                    self.set_dataset('timestamps_loading', [], broadcast=True)
-
+                    store_to_dataset(self, ind, cts_trapped, cts_lost, cts_loading)
 
                 elif self.mode == 'Counting':
                     """
@@ -91,11 +80,9 @@ class SingleParamScan(EnvExperiment):
                     """
 
                     cts = bare_counting(self)
-                    self.mutate_dataset('scan_result', my_ind, cts)
+                    self.mutate_dataset('scan_result', ind, cts)
 
                 # time cost tracker
-                self.mutate_dataset('time_cost', my_ind, time.time() - t0)
+                self.mutate_dataset('time_cost', ind, time.time() - t0)
 
         return
-
-

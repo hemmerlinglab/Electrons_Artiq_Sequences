@@ -1,27 +1,26 @@
-import os.path
-import datetime
+import numpy as np
 import shutil
 from configparser import ConfigParser
 
+import scan_functions as sf
+
 # ===================================================================
 # 1) Master function for analyze
-def my_analyze(self):
+def ofat_analyze(self):
 
-    # reset scan value to setting in parameter
     reset_scan_parameter(self)
     close_instruments(self)
+    save_data_or_exit(self)
 
-    # Save data
+    return
+
+def doe_analyze(self):
+
+    reset_all_parameters(self)
+    close_instruments(self)
+    save_data_or_exit(self)
     if self.scan_ok:
-
-        print('Saving data...')
-        save_all(self)
-        print('Experiment ' + self.basefilename + ' finished.')
-        print('Experiment finished.')
-
-    else:
-
-        print('Scan terminated.')
+        save_to_doe_table(self)
 
     return
 
@@ -33,13 +32,29 @@ def reset_scan_parameter(self):
 
     # Get correct value and tool for reseting
     initial_value = next((e['val'] for e in self.config_dict if e.get('par') == name), None)
-    #exec(f"import scan_functions._scan_{name} as func")
-    #func = globals().get(f"_scan_{name}")
-    import scan_functions as sf
+
     func = getattr(sf, f"_scan_{name}", None)
 
     # Reset scanning parameter
     func(self, initial_value, [initial_value], scan_check=False)
+
+def reset_all_parameters(self):
+
+    print("Resetting all parameters to their default values ...")
+
+    for item in self.config_dict:
+        if item.get("scanable", False):
+            param_name = item["par"]
+            default_val = item["val"]
+
+            scan_func = getattr(sf, f"_scan_{param_name}", None)
+
+            if scan_func:
+                scan_func(self, default_val, [default_val], scan_check=False)
+            else:
+                print(f"Parameter {param_name} not reset, because there is no scan function for it.")
+            
+    print("All paramters with scan functions reset to default")
 
 def close_instruments(self):
 
@@ -64,6 +79,37 @@ def close_instruments(self):
 
 # ===================================================================
 # 3) Functions for saving data
+def save_data_or_exit(self):
+
+    # Save data
+    if self.scan_ok:
+
+        print('Saving data...')
+        save_all(self)
+        print('Experiment ' + self.basefilename + ' finished.')
+        print('Experiment finished.')
+
+    else:
+
+        print('Scan terminated.')
+
+    return
+
+def save_to_doe_table(self):
+
+    results = self.setpoints.copy()
+
+    for col_name in self.fields_to_fill:
+        try:
+            results[col_name] = self.get_dataset(col_name)
+        except Exception:
+            print(f"Failed to save data column {col_name}: No such dataset!")
+
+    output_file = f"{self.basefilename}_DOE_results_table.csv"
+    results.to_csv(output_file, index=False)
+
+    return
+
 def save_all(self):
 
     # save all data

@@ -45,3 +45,24 @@ def trapping_without_histogram(self, my_ind):
     cts_lost = 0
 
     return cts_trapped, cts_lost, cts_loading
+
+def store_to_dataset(self, my_ind, cts_trapped, cts_lost, cts_loading):
+
+    # store result
+    self.mutate_dataset('trapped_signal', my_ind, cts_trapped)
+    self.mutate_dataset('lost_signal', my_ind, cts_lost)
+    self.mutate_dataset('loading_signal', my_ind, cts_loading)
+
+    # calculate ratios
+    if cts_loading > 0:
+        self.mutate_dataset('ratio_signal', my_ind, cts_trapped / cts_loading)
+        self.mutate_dataset('ratio_lost', my_ind, cts_lost / cts_loading)
+    else:
+        self.mutate_dataset('ratio_signal', my_ind, 0.0)
+        self.mutate_dataset('ratio_lost', my_ind, 0.0)
+
+    # reset timestamps
+    self.set_dataset('timestamps', [], broadcast=True)
+    self.set_dataset('timestamps_loading', [], broadcast=True)
+
+    return
