@@ -204,6 +204,11 @@ def prepare_doe_datasets(self):
     self.setpoints, self.fields_to_fill, self.steps = \
         load_doe_setpoints(self.doe_file, allowed_params)
     self.scan_ok = True
+    
+    # To let `arr_or_setpoints` and `scan_x` based applet to run
+    xaxis = np.arange(self.steps)
+    self.set_dataset('arr_of_setpoints', xaxis, broadcast=True)
+    self.set_dataset('scan_x',           xaxis, broadcast=True)
 
     return
 
