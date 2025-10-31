@@ -3,7 +3,7 @@ import numpy as np
 import socket
 import time
 
-from helper_functions import calculate_input_voltage, calculate_Vsampler, calculate_HighV, calculate_Vin, safe_check
+from helper_functions import calculate_Vsampler, calculate_HighV, calculate_Vin, safe_check
 
 ###########################################################
 ##  Control Widgets  ######################################

@@ -2,7 +2,7 @@ import time
 import numpy as np
 import sys
 
-from base_sequences import set_mesh_voltage, set_multipoles, set_loading_pulse, set_extraction_pulse, set_MCP_voltages, update_detection_time, get_MCP_voltages
+from base_sequences import set_mesh_voltage, set_multipoles, set_loading_pulse, set_extraction_pulse, set_MCP_voltages, update_detection_time
 
 #####################################################################
 ##  -- Master Scanning Function  --  ################################
@@ -12,31 +12,57 @@ def scan_parameter(self, my_ind, scan_check = False, reset_value = False):
     """
     scanning any parameter
     easy extension by adding more scanning functions
-    de-evalized
+    removed eval() in the new code
     """
-
+    
     this_module = sys.modules[__name__]
+    param_name = self.scanning_parameter
 
     # Deal with value reset mode
     if not reset_value:
         val = self.scan_values[my_ind]
     else:
         # reset the value to the one in the parameter listing
-        print('Reseting Scanning parameter ...')
-        val = getattr(self, self.scanning_parameter)
+        print('Resetting Scanning parameter ...')
+        val = getattr(self, param_name)
 
     # Print feedback when in ordinary mode
     if not scan_check and not reset_value:
-        print("Scanning parameter {3}: {2} ({0}/{1})".format(my_ind, len(self.scan_values), val, self.scanning_parameter))\
+        print(f"Scanning parameter {self.scanning_parameter}: {val} ({my_ind+1}/{len(self.scan_values)})")
 
-    func_name = f"_scan_{self.scanning_parameter}"
-    func = getattr(this_module, func_name, None)
+    # Search for the scanning function dynamically
+    scan_func_name = f"_scan_{param_name}"
+    func = getattr(this_module, scan_func_name, None)
 
     if func:
-        return func(self, val, self.scan_values, scan_check = scan_check)
+        return func(self, val, self.scan_values, scan_check=scan_check)
     else:
-        print(f"Parameter {self.scanning_parameter} has no scanning function yet.")
+        print(f"Parameter to scan {param_name} has no scanning function yet!")
         return 0
+
+def set_doe_parameters(self, row, ind, steps):
+    """
+    set multiple parameters for DOE scans
+    """
+
+    this_module = sys.modules[__name__]
+
+    print(f"Setting step {ind+1}/{steps} ...")
+
+    for param_name in row.index:
+        val = row[param_name]
+        scan_func_name = f"_scan_{param_name}"
+
+        func = getattr(this_module, scan_func_name, None)
+
+        if func:
+            func(self, val, [val], scan_check=False)
+            print(f"    Set {param_name} = {val}")
+        else:
+            print(f"Parameter {param_name} has no scanning function yet!")
+            return 0
+        
+    return 1
 
 #####################################################################
 ##  -- Utility Function  --  ########################################
