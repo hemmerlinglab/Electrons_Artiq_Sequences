@@ -36,7 +36,7 @@ def doe_prepare(self):
 
     if self.utility_mode == "DOE Scan":
         prepare_doe_datasets(self)
-    elif self.utility_mode == "Single Parameter Scan":
+    elif self.utility_mode == "Single Experiment":
         self.steps = 1
         self.scan_ok = True
     prepare_common_datasets(self)

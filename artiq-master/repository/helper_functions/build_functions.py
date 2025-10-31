@@ -149,7 +149,7 @@ def load_doe_parameters(self):
 
     # DOE Scan Settings
     #------------------------------------------------------
-    my_setattr(self, 'utility_mode',  EnumerationValue(['Single Parameter Scan', 'DOE Scan'], default='DOE Scan'), scanable=False)
+    my_setattr(self, 'utility_mode',  EnumerationValue(['Single Experiment', 'DOE Scan'], default='DOE Scan'), scanable=False)
     my_setattr(self, 'doe_file_path', StringValue(default='/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/DOE_configs/'), scanable=False)
     my_setattr(self, 'doe_file_name', StringValue(default='doe_table.csv'), scanable=False)
 
