@@ -34,7 +34,10 @@ class DOEScan(EnvExperiment):
 
     def run(self):
 
-        if self.scan_ok:
+        if not self.scan_ok:
+            return
+
+        if self.utility_mode == "DOE Scan":
 
             for ind, row in self.setpoints.iterrows():
 
@@ -47,7 +50,6 @@ class DOEScan(EnvExperiment):
                 if self.mode == "Trapping":
                     if self.histogram_on:
                         cts_trapped, cts_lost, cts_loading = trapping_with_histogram(self, ind)
-
                     else:
                         cts_trapped, cts_lost, cts_loading = trapping_without_histogram(self, ind)
 
@@ -75,3 +77,27 @@ class DOEScan(EnvExperiment):
 
                 # time cost tracker
                 self.mutate_dataset('time_cost', ind, time.time() - t0)
+
+        elif self.utility_mode == "Single Experiment":
+
+            ind = 0
+            t0 = time.time()
+
+            print("Running experiment using parameters in dashboard")
+            record_laser_frequencies(self, ind)
+
+            if self.mode == "Trapping":
+                if self.histogram_on:
+                    cts_trapped, cts_lost, cts_loading = trapping_with_histogram(self, ind)
+                else:
+                    cts_trapped, cts_lost, cts_loading = trapping_without_histogram(self, ind)
+                store_to_dataset(self, ind, cts_trapped, cts_lost, cts_loading)
+                print(f"Trapped: {cts_trapped}, Lost: {cts_lost}, Loading: {cts_loading}")
+
+            elif self.mode == "Counting":
+                cts = bare_counting(self)
+                self.mutate_dataset('scan_result', ind, cts)
+                print(f"Recorded Number of electrons: {cts}")
+
+            # time cost tracker
+            self.mutate_dataset('time_cost', ind, time.time() - t0)

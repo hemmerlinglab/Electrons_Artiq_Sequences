@@ -33,7 +33,12 @@ def ofat_prepare(self):
 def doe_prepare(self):
 
     prepare_instruments(self)
-    prepare_doe_datasets(self)
+
+    if self.utility_mode == "DOE Scan":
+        prepare_doe_datasets(self)
+    elif self.utility_mode == "Single Parameter Scan":
+        self.steps = 1
+        self.scan_ok = True
     prepare_common_datasets(self)
     prepare_initialization(self)
     prepare_saving_configuration(self)
