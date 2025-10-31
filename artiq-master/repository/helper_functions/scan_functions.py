@@ -1,5 +1,6 @@
 import time
 import numpy as np
+import sys
 
 from base_sequences import set_mesh_voltage, set_multipoles, set_loading_pulse, set_extraction_pulse, set_MCP_voltages, update_detection_time, get_MCP_voltages
 
@@ -11,29 +12,31 @@ def scan_parameter(self, my_ind, scan_check = False, reset_value = False):
     """
     scanning any parameter
     easy extension by adding more scanning functions
+    de-evalized
     """
-    
+
+    this_module = sys.modules[__name__]
+
     # Deal with value reset mode
     if not reset_value:
         val = self.scan_values[my_ind]
     else:
         # reset the value to the one in the parameter listing
         print('Reseting Scanning parameter ...')
-        val = eval('self.' + self.scanning_parameter)
+        val = getattr(self, self.scanning_parameter)
 
     # Print feedback when in ordinary mode
     if not scan_check and not reset_value:
         print("Scanning parameter {3}: {2} ({0}/{1})".format(my_ind, len(self.scan_values), val, self.scanning_parameter))\
 
-    # Check if scanning function exist and call
-    if self.scanning_parameter in ['mesh_voltage', 'MCP_front', 'frequency_422', 'frequency_390', 'RF_frequency', 'RF_amplitude', 'tickle_frequency', 'tickle_level', 'tickle_pulse_length', 'load_time', 'wait_time', 'ext_pulse_length', 'ext_pulse_amplitude', 'U1', 'U2', 'U3', 'U4', 'U5', 'Ex', 'Ey', 'Ez']:
-        return eval('_scan_' + self.scanning_parameter + '(self, val, self.scan_values, scan_check = scan_check)')
+    func_name = f"_scan_{self.scanning_parameter}"
+    func = getattr(this_module, func_name, None)
 
+    if func:
+        return func(self, val, self.scan_values, scan_check = scan_check)
     else:
-        print('Parameter to scan {0} has no scanning function yet'.format(self.scanning_parameter))
+        print(f"Parameter {self.scanning_parameter} has no scanning function yet.")
         return 0
-
-    return 
 
 #####################################################################
 ##  -- Utility Function  --  ########################################
