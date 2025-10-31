@@ -80,13 +80,13 @@ def load_common_parameters(self):
 
     # 3. Detector Settings
     #------------------------------------------------------
-    my_setattr(self, 'mesh_voltage', NumberValue(default=108,unit='V',scale=1,ndecimals=0,step=1))
-    my_setattr(self, 'MCP_front',    NumberValue(default=300,unit='V',scale=1,ndecimals=0,step=1))
+    my_setattr(self, 'mesh_voltage', NumberValue(default=120,unit='V',scale=1,ndecimals=0,step=1))
+    my_setattr(self, 'MCP_front',    NumberValue(default=400,unit='V',scale=1,ndecimals=0,step=1))
 
     # 4. Sequence Settings
     #------------------------------------------------------
-    my_setattr(self, 'wait_time',      NumberValue(default=40,unit='us',scale=1,ndecimals=0,step=1))
-    my_setattr(self, 'load_time',      NumberValue(default=300,unit='us',scale=1,ndecimals=0,step=1))
+    my_setattr(self, 'wait_time',      NumberValue(default=90,unit='us',scale=1,ndecimals=0,step=1))
+    my_setattr(self, 'load_time',      NumberValue(default=210,unit='us',scale=1,ndecimals=0,step=1))
     my_setattr(self, 'no_of_repeats',  NumberValue(default=10000,unit='',scale=1,ndecimals=0,step=1))
     my_setattr(self, 'detection_time', NumberValue(default=1000,unit='ms for counting mode only',scale=1,ndecimals=0,step=1))
 
@@ -98,35 +98,35 @@ def load_common_parameters(self):
     # 6. Laser Settings
     #------------------------------------------------------
     my_setattr(self, 'frequency_422', NumberValue(default=709.078300,unit='THz',scale=1,ndecimals=6,step=1e-6))
-    my_setattr(self, 'frequency_390', NumberValue(default=766.928560,unit='THz',scale=1,ndecimals=6,step=1e-6))
+    my_setattr(self, 'frequency_390', NumberValue(default=768.708843,unit='THz',scale=1,ndecimals=6,step=1e-6))
 
     # 7. Tickle Settings
     #------------------------------------------------------
     my_setattr(self, 'tickle_on',           BooleanValue(default=False), scanable = False)
     my_setattr(self, 'tickle_level',        NumberValue(default=-10,unit='dBm',scale=1,ndecimals=1,step=1))
     my_setattr(self, 'tickle_frequency',    NumberValue(default=64,unit='MHz',scale=1,ndecimals=4,step=.0001))
-    my_setattr(self, 'tickle_pulse_length', NumberValue(default=50,unit='us',scale=1,ndecimals=1,step=1))
+    my_setattr(self, 'tickle_pulse_length', NumberValue(default=80,unit='us',scale=1,ndecimals=1,step=1))
 
     # 8. RF Settings
     #------------------------------------------------------
     my_setattr(self, 'RF_on', BooleanValue(default=False))
-    my_setattr(self, 'RF_amplitude', NumberValue(default=8,unit='dBm',scale=1,ndecimals=1,step=.1))
-    my_setattr(self, 'RF_frequency', NumberValue(default=1.738,unit='GHz',scale=1,ndecimals=4,step=.0001))
+    my_setattr(self, 'RF_amplitude', NumberValue(default=4,unit='dBm',scale=1,ndecimals=1,step=.1))
+    my_setattr(self, 'RF_frequency', NumberValue(default=1.732,unit='GHz',scale=1,ndecimals=4,step=.0001))
 
     # 9. Extraction Pulse Settings
     #------------------------------------------------------
     my_setattr(self, 'ext_pulse_length',    NumberValue(default=900,unit='ns',scale=1,ndecimals=0,step=1))
-    my_setattr(self, 'ext_pulse_amplitude', NumberValue(default=10,unit='V',scale=1,ndecimals=2,step=.01))
+    my_setattr(self, 'ext_pulse_amplitude', NumberValue(default=15,unit='V',scale=1,ndecimals=2,step=.01))
 
     # 10. DC Settings
     #------------------------------------------------------
     # 1) 1st Order Multipoles
-    my_setattr(self, 'Ex', NumberValue(default=0,unit='V',scale=1,ndecimals=3,step=.001))
-    my_setattr(self, 'Ey', NumberValue(default=-0,unit='V',scale=1,ndecimals=3,step=.001))
+    my_setattr(self, 'Ex', NumberValue(default=-0.15,unit='V',scale=1,ndecimals=3,step=.001))
+    my_setattr(self, 'Ey', NumberValue(default=0.14,unit='V',scale=1,ndecimals=3,step=.001))
     my_setattr(self, 'Ez', NumberValue(default=0,unit='V',scale=1,ndecimals=3,step=.001))
     # 2) 2nd Order Multipoles
     my_setattr(self, 'U1', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.001))
-    my_setattr(self, 'U2', NumberValue(default=-0.45,unit='V',scale=1,ndecimals=3,step=.001))
+    my_setattr(self, 'U2', NumberValue(default=-0.13,unit='V',scale=1,ndecimals=3,step=.001))
     my_setattr(self, 'U3', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.001))
     my_setattr(self, 'U4', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.001))
     my_setattr(self, 'U5', NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.001))
@@ -150,7 +150,7 @@ def load_doe_parameters(self):
     # DOE Scan Settings
     #------------------------------------------------------
     my_setattr(self, 'utility_mode',  EnumerationValue(['Single Experiment', 'DOE Scan'], default='DOE Scan'), scanable=False)
-    my_setattr(self, 'doe_file_path', StringValue(default='/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/DOE_configs/'), scanable=False)
+    my_setattr(self, 'doe_file_path', StringValue(default='/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/doe_configs/'), scanable=False)
     my_setattr(self, 'doe_file_name', StringValue(default='doe_table.csv'), scanable=False)
 
     return

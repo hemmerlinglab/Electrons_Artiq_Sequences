@@ -19,7 +19,7 @@ def doe_analyze(self):
     reset_all_parameters(self)
     close_instruments(self)
     save_data_or_exit(self)
-    if self.scan_ok:
+    if self.scan_ok and self.utility_mode == "DOE Scan":
         save_to_doe_table(self)
 
     return
