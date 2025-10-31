@@ -35,7 +35,7 @@ class Keysight:
 
         self.msg = self.socket.recv(1024)
 
-        return self.msg
+        return self.msgKeysight
 
     def query(self, msg):
 

@@ -23,7 +23,7 @@ def scan_parameter(self, my_ind, scan_check = False, reset_value = False):
         val = self.scan_values[my_ind]
     else:
         # reset the value to the one in the parameter listing
-        print('Reseting Scanning parameter ...')
+        print('Resetting Scanning parameter ...')
         val = getattr(self, param_name)
 
     # Print feedback when in ordinary mode
@@ -39,8 +39,6 @@ def scan_parameter(self, my_ind, scan_check = False, reset_value = False):
     else:
         print(f"Parameter to scan {param_name} has no scanning function yet!")
         return 0
-
-    return 
 
 def set_doe_parameters(self, row, ind, steps):
     """
