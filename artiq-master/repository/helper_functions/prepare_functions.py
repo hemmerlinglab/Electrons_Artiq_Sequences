@@ -1,4 +1,3 @@
-from artiq.experiment import *
 import numpy as np
 import pandas as pd
 import datetime

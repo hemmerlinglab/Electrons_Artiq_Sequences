@@ -1,4 +1,4 @@
-from artiq.experiment import *
+from artiq.experiment import NumberValue, EnumerationValue, BooleanValue, StringValue
 
 list_of_traps = ["Single PCB", "UCB 3 PCB"]
 
@@ -71,7 +71,6 @@ def load_common_parameters(self):
     #------------------------------------------------------
     my_setattr(self, 'mode',            EnumerationValue(['Trapping', 'Counting'],default='Trapping'), scanable = False)
     my_setattr(self, 'histogram_on',    BooleanValue(default=True), scanable=False)
-    my_setattr(self, 'short_detection', BooleanValue(default=False), scanable = False)
 
     # 2. Display Settings
     #------------------------------------------------------
@@ -133,6 +132,8 @@ def load_common_parameters(self):
 
     return
 
+def load_experiment_parameters(self):
+
 def load_ofat_parameters(self):
 
     # OFAT Scan Settings
@@ -152,5 +153,12 @@ def load_doe_parameters(self):
     my_setattr(self, 'utility_mode',  EnumerationValue(['Single Experiment', 'DOE Scan'], default='DOE Scan'), scanable=False)
     my_setattr(self, 'doe_file_path', StringValue(default='/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/doe_configs/'), scanable=False)
     my_setattr(self, 'doe_file_name', StringValue(default='doe_table.csv'), scanable=False)
+
+    return
+
+def load_optimizer_parameters(self):
+
+    # Optimizer Settings
+    #------------------------------------------------------
 
     return

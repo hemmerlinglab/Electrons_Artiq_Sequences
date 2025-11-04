@@ -1,4 +1,4 @@
-from artiq.experiment import *
+from artiq.experiment import EnvExperiment
 import time
 import sys
 import os

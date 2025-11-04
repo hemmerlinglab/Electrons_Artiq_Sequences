@@ -1,4 +1,3 @@
-from artiq.experiment import *
 import numpy as np
 from base_sequences import count_histogram, count_events
 
@@ -19,10 +18,7 @@ def trapping_with_histogram(self, my_ind):
 
     # calculate kicked out count
     ind_l = (xs > (self.load_time + 4))[:-1]
-    if self.short_detection:
-        ind_u = (xs < min(self.load_time + 15, self.load_time + self.tickle_pulse_length + 3))[:-1]
-    else:
-        ind_u = (xs < (self.load_time + self.tickle_pulse_length + 3))[:-1]
+    ind_u = (xs < (self.load_time + self.tickle_pulse_length + 3))[:-1]
     print(ys[ind_l*ind_u])
     cts_lost = np.sum(ys[ind_l*ind_u])
 
