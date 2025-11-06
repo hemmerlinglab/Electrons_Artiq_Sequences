@@ -1,4 +1,3 @@
-from artiq.experiment import *
 import numpy as np
 import pandas as pd
 import datetime
@@ -36,11 +35,30 @@ def doe_prepare(self):
 
     prepare_instruments(self)
 
+    # Prepare Datasets
     if self.utility_mode == "DOE Scan":
         prepare_doe_datasets(self)
     elif self.utility_mode == "Single Experiment":
         self.steps = 1
         self.scan_ok = True
+
+    prepare_common_datasets(self)
+    prepare_initialization(self)
+    prepare_saving_configuration(self)
+
+    return
+
+def optimizer_prepare(self):
+
+    # Initial E components
+    self.Ex = self.initial_Ex
+    self.Ey = self.initial_Ey
+    self.Ez = self.initial_Ez
+    self.current_E = np.array([self.Ex, self.Ey, self.Ez])
+
+    # General Preparations
+    prepare_instruments(self)
+    prepare_optimizer_datesets(self)
     prepare_common_datasets(self)
     prepare_initialization(self)
     prepare_saving_configuration(self)
@@ -153,11 +171,10 @@ def prepare_saving_configuration(self):
 
 def prepare_ofat_saving_configuration(self):
 
-    ofat_data_to_save = [
-        {'var' : 'arr_of_setpoints',   'name' : 'array of setpoints'},
-        {'var' : 'scan_x',             'name' : 'array of setpoints for counting mode, duplicate but in order to be compatible with applet'},
-    ]
-    self.data_to_save.extend(ofat_data_to_save)
+    self.data_to_save.append({'var' : 'arr_of_setpoints',   'name' : 'array of setpoints'})
+
+    if self.mode == 'Counting':
+        self.data_to_save.append({'var' : 'scan_x', 'name' : 'array of setpoints for counting mode, duplicate but in order to be compatible with applet'})
 
     return
 
@@ -221,12 +238,38 @@ def prepare_doe_datasets(self):
     self.doe_file = self.doe_file_path + self.doe_file_name
     self.setpoints, self.fields_to_fill, self.steps = \
         load_doe_setpoints(self.doe_file, allowed_params)
+
+    # Safety: perform scan check for all parameters
     self.scan_ok = True
+    for param_to_scan in self.setpoints.columns:
+        self.scan_values = self.setpoints[param_to_scan].to_numpy()
+        self.scanning_parameter = param_to_scan
+        self.scan_ok = self.scan_ok and scan_parameter(self, 0, scan_check = True)
     
     # To let `arr_or_setpoints` and `scan_x` based applet to run
     xaxis = np.arange(self.steps)
     self.set_dataset('arr_of_setpoints', xaxis, broadcast=True)
     self.set_dataset('scan_x',           xaxis, broadcast=True)
+
+    return
+
+def prepare_optimizer_datesets(self):
+
+    if self.method == 'central':
+        meas_per_step = 6
+    elif self.method == 'forward':
+        meas_per_step = 4
+    else:
+        raise RuntimeError(f"Method `{self.method}` is not supported!")
+
+    # 1 point gap between measurements to better visualize the results
+    self.steps = self.max_iteration * (meas_per_step + 1)
+
+    xaxis = np.arange(self.steps)
+    self.set_dataset('arr_of_setpoints', xaxis, broadcast=True)
+    self.set_dataset('e_trace'         , [ np.array([]) for _ in range(self.steps) ], broadcast=True)
+
+    self.scan_ok = True    # Safety check to be built (a little bit tricky)
 
     return
 
