@@ -4,7 +4,7 @@ import sys
 import os
 
 sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions")
-from base_sequences import bare_counting, record_laser_frequencies
+from base_sequences import bare_counting, record_laser_frequencies, keysight_markers
 from build_functions import doe_build
 from prepare_functions import doe_prepare
 from analyze_functions import doe_analyze
@@ -46,6 +46,7 @@ class DOEScan(EnvExperiment):
 
                 set_doe_parameters(self, row, ind, self.steps)
                 record_laser_frequencies(self, ind)
+                keysight_markers(self, ind)
 
                 if self.mode == "Trapping":
                     if self.histogram_on:

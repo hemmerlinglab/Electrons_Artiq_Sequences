@@ -6,7 +6,7 @@ import sys
 import os
 
 sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions")
-from base_sequences import bare_counting, record_laser_frequencies
+from base_sequences import bare_counting, record_laser_frequencies, keysight_markers
 from build_functions import ofat_build
 from prepare_functions import ofat_prepare
 from analyze_functions import ofat_analyze
@@ -50,7 +50,11 @@ class SingleParamScan(EnvExperiment):
 
             # set the new parameter
             scan_parameter(self, ind)
+            
             record_laser_frequencies(self, ind)
+
+            # Keysight marker
+            keysight_markers(self, ind)
 
             if self.mode == 'Trapping':
 

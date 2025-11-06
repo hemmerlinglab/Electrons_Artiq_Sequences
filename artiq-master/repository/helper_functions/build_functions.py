@@ -6,15 +6,19 @@ list_of_traps = ["Single PCB", "UCB 3 PCB"]
 # - Set Attribute with Config Saving
 
 def my_setattr(self, arg, val, scanable = True):
-    
+
     # define the attribute
     self.setattr_argument(arg, val)
 
-    # add each attribute to the config dictionary
-    if hasattr(val, 'unit'):
-        exec("self.config_dict.append({'par' : arg, 'val' : self." + arg + ", 'unit' : '" + str(val.unit) + "', 'scanable' : " + str(scanable) + "})")
-    else:
-        exec("self.config_dict.append({'par' : arg, 'val' : self." + arg + ", 'scanable' : " + str(scanable) + "})")
+    # get current attribute value from artiq object
+    current_val = getattr(self, arg)
+
+    # create config_dict entry
+    entry = {"par": arg, "val": current_val, "scanable": str(scanable)}
+    if hasattr(val, "unit"): entry["unit"] = str(val.unit)
+
+    # append the entry to config dict
+    self.config_dict.append(entry)
 
     return
 

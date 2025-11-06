@@ -11,11 +11,13 @@ from bk_4053 import BK4053
 from rigol   import DSG821
 from rs      import RS
 from laser_controller import LaserClient
+from keysight_spectrum import Keysight
 
 # something within the same directory
 from dc_electrodes import Electrodes
 from base_sequences import set_multipoles, update_detection_time, set_mesh_voltage, set_MCP_voltages, set_extraction_pulse, set_loading_pulse
 from scan_functions import scan_parameter
+
 
 # ===================================================================
 # 1) Master function for prepare
@@ -53,6 +55,7 @@ def prepare_instruments(self):
     self.tickler    = DSG821()      # tickle pulse generator
     self.RF_driver  = RS()          # trap drive
     self.laser      = LaserClient() # Laser Lock GUI client
+    self.keysight   = Keysight()    # Keysight
 
     # Zotino DC controller
     self.electrodes = Electrodes(trap = self.trap, flipped = self.flip_electrodes)
@@ -101,7 +104,18 @@ def prepare_initialization(self):
     else:
         self.tickler.off()
 
+    # 7. Keysight Windows and Amplitude Division
+    #------------------------------------------------------
+    self.divA = 1
+    self.span = 50e+06
+    self.keysight.set_ref_ampl(min(self.RF_amplitude+16,18))
+    self.keysight.set_div_ampl(self.divA)
+    self.keysight.set_span(self.span)
+    self.keysight.set_center_freq(self.RF_frequency * 1e9)
+    self.keysight.marker_on(1)
+
     return
+    
 
 def prepare_saving_configuration(self):
     
@@ -116,7 +130,8 @@ def prepare_saving_configuration(self):
             {'var' : 'ratio_signal',       'name' : 'array of trapped counts / loading counts'},
             {'var' : 'ratio_lost',         'name' : 'array of lost counts / loading counts'},
             {'var' : 'scan_result',        'name' : 'array of recorded counts for counting mode'},
-            {'var' : 'time_cost',          'name' : 'array of time cost for each experiment scan'}
+            {'var' : 'time_cost',          'name' : 'array of time cost for each experiment scan'},
+            {'var' : 'keysight_amplitude', 'name' : 'array of actual RF amplitude'}
     ]
 
     # save sequence file name
@@ -178,6 +193,9 @@ def prepare_common_datasets(self):
     
     # experiment metadataset
     self.set_dataset('time_cost',          [0] * self.steps, broadcast=True)
+
+    # keysight amplitude
+    self.set_dataset('keysight_amplitude', [0] * self.steps, broadcast=True)
 
     return
 

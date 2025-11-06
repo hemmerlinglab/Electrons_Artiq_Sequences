@@ -9,7 +9,7 @@ from helper_functions import calculate_Vsampler, calculate_HighV, calculate_Vin,
 ##  Control Widgets  ######################################
 ###########################################################
 
-# ===================  Laser Control  =================== #
+# ===================  Recording  =================== #
 """
 # ---- Temporary Notes ---- #
 What I need to do to build laser control into the script?
@@ -42,6 +42,13 @@ def record_laser_frequencies(self, idx):
 
     return
 
+def keysight_markers(self, idx):
+
+    _, ampl, _ = self.keysight.marker_measure(1, wait_time = None)
+    self.mutate_dataset('keysight_amplitude', idx, ampl)
+    
+    return
+
 # =============  Extraction Pulse Control  ============= #
 def set_extraction_pulse(self):
 
@@ -55,6 +62,9 @@ def set_extraction_pulse(self):
 
     # Set extraction pulse amplitude
     self.ext_pulser.set_carr_ampl(2, self.ext_pulse_amplitude)
+    
+    # Parts to ensure
+    self.ext_pulser.set_burst_mode(2, True)
 
     return
 
@@ -71,6 +81,7 @@ def set_loading_pulse(self):
     self.ext_pulser.set_carr_delay(1, 0.0)
     self.ext_pulser.set_carr_ampl(1, 1.0)
     self.ext_pulser.set_carr_offset(1, 0.5)
+    self.ext_pulser.set_burst_mode(2, True)
     
     # Make sure the pulser is on
     # both channel is switched here because we do not want this recurring

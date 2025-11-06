@@ -273,6 +273,7 @@ def _scan_RF_frequency(self, val, scan_values, scan_check = False):
     else:
         
         self.RF_driver.set_freq(val * 1e9)
+        self.keysight.set_center_freq(val * 1e9)
 
         return 1
 
@@ -285,6 +286,7 @@ def _scan_RF_amplitude(self, val, scan_values, scan_check = False):
     else:
         
         self.RF_driver.set_ampl(val)
+        self.keysight.set_ref_ampl(min(val+16,18))
 
         return 1
 
@@ -434,4 +436,3 @@ def _scan_Ez(self, val, scan_values, scan_check = False):
         set_multipoles(self)
 
         return 1
-
