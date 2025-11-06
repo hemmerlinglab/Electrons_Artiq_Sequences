@@ -53,7 +53,7 @@ def set_extraction_pulse(self):
     self.ext_pulser.set_carr_width(2, ext_freq, self.ext_pulse_length * 1e-9)
 
     # Set extraction pulse amplitude
-    self.ext_pulser.set_carr_ampl(2, self.ext_pulse_amplitude)
+    self.ext_pulser.set_carr_ampl(2, self.ext_pulse_level)
 
     return
 

@@ -306,7 +306,7 @@ def _scan_ext_pulse_length(self, val, scan_values, scan_check = False):
 
         return 1
 
-def _scan_ext_pulse_amplitude(self, val, scan_values, scan_check = False):
+def _scan_ext_pulse_level(self, val, scan_values, scan_check = False):
 
     if scan_check:
 
@@ -314,7 +314,7 @@ def _scan_ext_pulse_amplitude(self, val, scan_values, scan_check = False):
     
     else:
         
-        self.ext_pulse_amplitude = val
+        self.ext_pulse_level = val
 
         set_extraction_pulse(self)
 
