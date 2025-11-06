@@ -1,5 +1,6 @@
 *.pyc
 *.hd5
+__pycache__/
 artiq-master/results
 artiq-master/last_rid.pyon
 drivers/data
