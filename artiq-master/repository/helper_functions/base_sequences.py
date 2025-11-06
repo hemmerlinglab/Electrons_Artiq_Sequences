@@ -1,6 +1,5 @@
-from artiq.experiment import *
+from artiq.experiment import kernel, delay, now_mu, us, ms, parallel, sequential
 import numpy as np
-import socket
 import time
 
 from helper_functions import calculate_Vsampler, calculate_HighV, calculate_Vin, safe_check
@@ -61,7 +60,7 @@ def set_extraction_pulse(self):
     self.ext_pulser.set_carr_width(2, ext_freq, self.ext_pulse_length * 1e-9)
 
     # Set extraction pulse amplitude
-    self.ext_pulser.set_carr_ampl(2, self.ext_pulse_amplitude)
+    self.ext_pulser.set_carr_ampl(2, self.ext_pulse_level)
     
     # Parts to ensure
     self.ext_pulser.set_burst_mode(2, True)
