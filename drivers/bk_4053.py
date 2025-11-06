@@ -51,6 +51,10 @@ class BK4053:
     def off(self, channel):
 
         self.send(f"C{channel}:OUTP OFF")
+        
+    def set_burst_mode(self, channel, burst):
+    
+        self.send(f"C{channel}:BTWV STATE, {'ON' if burst else 'OFF'}")
 
     def set_carr_delay(self, channel, delay):
 

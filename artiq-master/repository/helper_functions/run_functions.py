@@ -2,7 +2,7 @@ import numpy as np
 import sys
 import time
 
-from base_sequences import count_histogram, count_events, record_laser_frequencies, bare_counting, set_multipoles
+from base_sequences import count_histogram, count_events, record_laser_frequencies, bare_counting, set_multipoles, keysight_markers
 
 # ===================================================================
 # 1) Master Functions for Run (For Experiment)
@@ -12,6 +12,7 @@ def measure(self, ind, print_result = False):
 
     t0 = time.time()
     record_laser_frequencies(self, ind)
+    keysight_markers(self, ind)
 
     if self.mode == "Trapping":
         if self.histogram_on:
