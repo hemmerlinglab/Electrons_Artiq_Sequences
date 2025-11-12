@@ -1,6 +1,8 @@
 from artiq.experiment import EnvExperiment
+from artiq.coredevice.exceptions import RTIOOverflow, RTIOUnderflow
 import sys
 import os
+import time
 
 sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions")
 from build_functions   import ofat_build
@@ -42,14 +44,13 @@ class SingleParamScan(EnvExperiment):
 
         for ind in range(len(self.scan_values)):
 
+            retries = 0
+
             scan_parameter(self, ind)
 
             while True:
 
-                retries = 0
-
-                try:
-                    measure(self, ind)
+                try: measure(self, ind)
 
                 # Handle RTIO errors from ARTIQ (e.g. overflow due to unstable MCP amplifier)
                 except (RTIOOverflow, RTIOUnderflow) as e:
@@ -59,22 +60,23 @@ class SingleParamScan(EnvExperiment):
                     err = (ind, type(e).__name__)
                     self.err_list.append(err)
 
-                    try:
-                        self.core.reset()
-                    except Exception:
-                        pass
+                    # Reset ArtiQ coredevice
+                    self.core.reset()
 
+                    # Wait for a period of time (e.g. wait for the unstable amplifier behavior to disappear)
                     time.sleep(HOST_SLEEP_S)
                     retries += 1
 
-                    if retries <= self.MAX_RETRIES:
+                    # Not exceed maximum retries: retry the experiment for current set point
+                    if retries <= MAX_RETRIES:
                         print(f"Retrying ({retries}/{MAX_RETRIES}) ...")
                         continue
-                    else:
-                        print(f"Failed after {MAX_RETRIES} trials, terminating experiment ...")
-                        return
 
-                else:
-                    break
+                    # Exceed maximum retries: abort and save
+                    print(f"Failed after {MAX_RETRIES} trials, terminating experiment ...")
+                    return
+
+                # If success, just continue for the next set point
+                else: break
 
         return
