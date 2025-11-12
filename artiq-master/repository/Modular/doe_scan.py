@@ -37,8 +37,20 @@ class DOEScan(EnvExperiment):
 
         if self.utility_mode == "DOE Scan":
             for ind, row in self.setpoints.iterrows():
+            
                 set_doe_parameters(self, row, ind, self.steps)
-                measure(self, ind)
+                
+                try:
+                    measure(self, ind)
+                except (RTIOOverflow, RTIOUnderflow) as e:
+                    print(f"RTIO error, terminating experiment ({e})")
+                    entry = {"par": "error", "val": f"{type(e).__name__} at experiment {ind}"}
+                    self.config_dict.append(entry)
+                    try:
+                        self.core.reset()
+                    except Exception:
+                        pass
+                    break
 
         elif self.utility_mode == "Single Experiment":
             ind = 0

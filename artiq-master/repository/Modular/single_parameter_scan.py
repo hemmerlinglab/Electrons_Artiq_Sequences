@@ -9,6 +9,9 @@ from analyze_functions import ofat_analyze
 from run_functions     import measure
 from scan_functions    import scan_parameter
 
+MAX_RETRIES = 3
+HOST_SLEEP_S = 5
+
 class SingleParamScan(EnvExperiment):
 
     def build(self):
@@ -38,7 +41,40 @@ class SingleParamScan(EnvExperiment):
             return
 
         for ind in range(len(self.scan_values)):
+
             scan_parameter(self, ind)
-            measure(self, ind)
+
+            while True:
+
+                retries = 0
+
+                try:
+                    measure(self, ind)
+
+                # Handle RTIO errors from ARTIQ (e.g. overflow due to unstable MCP amplifier)
+                except (RTIOOverflow, RTIOUnderflow) as e:
+
+                    # Save error messages
+                    print(f"RTIO error ({e})")
+                    err = (ind, type(e).__name__)
+                    self.err_list.append(err)
+
+                    try:
+                        self.core.reset()
+                    except Exception:
+                        pass
+
+                    time.sleep(HOST_SLEEP_S)
+                    retries += 1
+
+                    if retries <= self.MAX_RETRIES:
+                        print(f"Retrying ({retries}/{MAX_RETRIES}) ...")
+                        continue
+                    else:
+                        print(f"Failed after {MAX_RETRIES} trials, terminating experiment ...")
+                        return
+
+                else:
+                    break
 
         return

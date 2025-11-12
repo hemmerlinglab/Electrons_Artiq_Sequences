@@ -67,6 +67,7 @@ def optimizer_build(self):
 def load_variables(self):
 
     self.config_dict = []
+    self.err_list = []
     self.wavemeter_frequencies = []
     self.data_to_save = []
 

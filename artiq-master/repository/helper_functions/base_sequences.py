@@ -131,7 +131,7 @@ def set_electrode_voltages(self, channel_list, voltage_list):
     
     voltage = 0
 
-    self.core.reset()
+    #self.core.reset()
     self.core.break_realtime()
     self.zotino0.init()
     delay(200*us)
@@ -213,7 +213,7 @@ def set_MCP_voltages(self, val):
 @kernel
 def sampler_read(self):
 
-    self.core.reset()
+    #self.core.reset()
     self.core.break_realtime()
     self.sampler0.init()
     delay(200*us)

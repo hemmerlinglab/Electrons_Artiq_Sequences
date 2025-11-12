@@ -81,6 +81,11 @@ def close_instruments(self):
 # 3) Functions for saving data
 def save_data_or_exit(self):
 
+    # If there are error records, append to config_dict
+    if self.err_list:
+        err_entry = {"par": "errors", "val": self.err_list}
+        self.config_dict.append(err_entry)
+
     # Save data
     if self.scan_ok:
 
