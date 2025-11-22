@@ -1,18 +1,25 @@
+from artiq.language.core import TerminationRequested
 import numpy as np
 import sys
 import time
 
-from base_sequences import count_histogram, count_events, record_laser_frequencies, bare_counting, set_multipoles, keysight_markers
+from base_sequences import count_histogram, count_events, record_laser_frequencies, bare_counting, set_multipoles, record_RF_amplitude
 
 # ===================================================================
 # 1) Master Functions for Run (For Experiment)
-def measure(self, ind, print_result = False):
+def measure(self, ind, print_result = False, validate_390 = False, validate_422 = True):
 
-    self.scheduler.pause()
+    if self.scheduler.check_pause():
+        raise TerminationRequested("Termination requested during scan")
 
-    t0 = time.time()
-    record_laser_frequencies(self, ind)
-    keysight_markers(self, ind)
+    status_390, status_422 = record_laser_frequencies(self, ind)
+    record_RF_amplitude(self, ind)
+
+    # Validate laser frequencies
+    if validate_390 and not status_390:
+        raise RuntimeError("Laser frequency of 390 is off, please fix it manually!")
+    if validate_422 and not status_422:
+        raise RuntimeError("Laser frequency of 422 is off, please fix it manually!")
 
     if self.mode == "Trapping":
         if self.histogram_on:
@@ -26,21 +33,19 @@ def measure(self, ind, print_result = False):
             print(f"Trapped: {cts_trapped}, Lost: {cts_lost}, Loading: {cts_loading}")
 
     elif self.mode == 'Counting':
-        """
-        Counting mode information sheet:
-        laser: Controlled
-        tickle: As long as `tickle_on` was set to off, it would be fine
-        RF Drive: Kept off
-        DC multipoles: Controlled, so set to 0 if not wanted
-        extraction pulse: Not triggered
-        mesh: Controlled
-        MCP front: Controlled
+        # Counting mode information sheet:
+        # laser: Controlled
+        # tickle: As long as `tickle_on` was set to off, it would be fine
+        # RF Drive: Kept off
+        # DC multipoles: Controlled, so set to 0 if not wanted
+        # extraction pulse: Not triggered
+        # mesh: Controlled
+        # MCP front: Controlled
         
-        Tips:
-        1. I know RF could increase electron count, but I would prefer not
-            to introduce extra attributes now, so turn it on from code if you
-            really need it, or just add this attribute if you want.
-        """
+        # Tips:
+        # 1. I know RF could increase electron count, but I would prefer not
+        #     to introduce extra attributes now, so turn it on from code if you
+        #     really need it, or just add this attribute if you want.
 
         cts = bare_counting(self)
         self.mutate_dataset('scan_result', ind, cts)
@@ -48,85 +53,34 @@ def measure(self, ind, print_result = False):
         if print_result:
             print(f"Recorded Number of electrons: {cts}")
 
-    # time cost tracker
-    self.mutate_dataset('time_cost', ind, time.time() - t0)
+    return 
+
+def handle_laser_jump(self, laser_to_fix = 422, tol = 1e-5):
+    """
+    When laser frequency was off (mode hopping), wait for the user to fix it manually.
+    """
+
+    act_freq = self.laser.get_frequency(laser_to_fix)
+    setpoint = getattr(self, f"frequency_{laser_to_fix}")
+
+    while abs(act_freq - setpoint) > tol:
+
+        if self.scheduler.check_pause():
+            raise TerminationRequested("Termination requested during laser jump handling")
+
+        time.sleep(1.0)
+        act_freq = self.laser.get_frequency(laser_to_fix)
 
     return
 
 # ===================================================================
 # 2) For Optimizer
-def backtracking_ascent(self, current_step):
 
-    return
-
-def get_gradient(self, current_step):
-
-    self.mutate_dataset('e_trace', current_step, self.current_E)
-    
-    this_module = sys.modules[__name__]
-    grad_func = getattr(this_module, f"gradient_{self.method}")
-    gradient, fc = grad_func(self, current_step)
-  
-    return gradient, fc
-
-def gradient_central(self, current_step):
-
-    I = np.eye(3)
-    g = np.zeros(3, dtype=float)
-    h = self.diff_step
-    ind = current_step * 7
-    fc = 0
-
-    for k in range(3):
-
-        # Forward Point
-        self.Ex, self.Ey, self.Ez = self.current_E + h * I[k]
-        set_multipoles(self)
-        fp = trap_optimize(self, ind)
-        ind += 1
-
-        # Backward Point
-        self.Ex, self.Ey, self.Ez = self.current_E - h * I[k]
-        set_multipoles(self)
-        fm = trap_optimize(self, ind)
-        ind += 1
-
-        # Calculate Derivative
-        g[k] = (fp - fm) / (2 * h)
-
-        # Accumulate fc
-        fc += fp + fm
-
-    return g, fc / 6
-
-def gradient_forward(self, current_step):
-
-    I = np.eye(3)
-    g = np.zeros(3, dtype=float)
-    h = self.diff_step
-    ind = current_step * 5
-
-    # Center Point
-    self.Ex, self.Ey, self.Ez = self.current_E
-    set_multipoles(self)
-    fc = trap_optimize(self, ind)
-    ind += 1
-
-    for k in range(3):
-        self.Ex, self.Ey, self.Ez = self.current_E + h * I[k]
-        set_multipoles(self)
-        fp = trap_optimize(self, ind)
-        ind += 1
-
-        g[k] = (fp - fc) / h
-
-    return g, fc
 
 def trap_optimize(self, ind):
 
-    self.scheduler.pause()
-
-    t0 = time.time()
+    if self.scheduler.check_pause():
+        raise TerminationRequested("Termination requested during scan")
 
     if self.histogram_on:
         cts_trapped, cts_lost, cts_loading = trap_with_histogram(self, ind)
@@ -134,8 +88,6 @@ def trap_optimize(self, ind):
         cts_trapped, cts_lost, cts_loading = trap_without_histogram(self, ind)
 
     store_to_dataset(self, ind, cts_trapped, cts_lost, cts_loading)
-    
-    self.mutate_dataset('time_cost', ind, time.time() - t0)
 
     if self.optimize_target == "trapped_signal":
         return cts_trapped

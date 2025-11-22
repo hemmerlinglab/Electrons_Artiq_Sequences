@@ -2,32 +2,14 @@ from artiq.experiment import kernel, delay, now_mu, us, ms, parallel, sequential
 import numpy as np
 import time
 
-from helper_functions import calculate_Vsampler, calculate_HighV, calculate_Vin, safe_check
+from helper_functions import calculate_input_voltage, calculate_Vsampler, calculate_HighV, calculate_Vin, safe_check
 
 ###########################################################
 ##  Control Widgets  ######################################
 ###########################################################
 
-# ===================  Recording  =================== #
-"""
-# ---- Temporary Notes ---- #
-What I need to do to build laser control into the script?
-1. Update with input parameters, instead of self attributes
-2. In prepare stage, send frequency setpoint defined by self
-   attributes to the laser lock desktop
-3. In analyze stage, send frequency setpoint defined by self
-   attributes to the laser lock desktop to pull it back
-4. Do not modify self attributes for laser frequencies during
-   experiment run
-
-Tips:
-IP Address for laser lock desktop (1041_RGA): 192.168.42.26 / 192.168.42.136
-PORT Number used in the laser lock program: 63700
-Expected Format for the laser lock program: 
-
-Write a code to test out the actual address for socket
-"""
-def record_laser_frequencies(self, idx):
+# ==============  Recording and Validating ============== #
+def record_laser_frequencies(self, idx, tol = 1e-5):
     """
     Fetch Last Frequencies of each laser from Laser Lock GUI and record them into dataset.
     When failed to fetch frequency, 0.0 will be returned according to the function.
@@ -39,12 +21,15 @@ def record_laser_frequencies(self, idx):
     self.mutate_dataset('last_frequency_422', idx, freq_422)
     self.mutate_dataset('last_frequency_390', idx, freq_390)
 
-    return
+    status_422 = (abs(freq_422 - self.frequency_422) <= tol)
+    status_390 = (abs(freq_390 - self.frequency_390) <= tol)
 
-def keysight_markers(self, idx):
+    return status_390, status_422
 
-    _, ampl, _ = self.keysight.marker_measure(1, wait_time = None)
-    self.mutate_dataset('keysight_amplitude', idx, ampl)
+def record_RF_amplitude(self, idx):
+
+    _, ampl, _ = self.spectrum_analyzer.marker_measure(1, wait_time = None)
+    self.mutate_dataset('act_RF_amplitude', idx, ampl)
     
     return
 
@@ -99,6 +84,28 @@ def update_detection_time(self):
 
     return
 
+# =============  General Zotino Controller  ============= #
+@kernel
+def zotino_initialization(self):
+
+    self.core.break_realtime()
+    self.zotino0.init()
+    delay(200*us)
+
+    return
+
+@kernel
+def zotino_write(self, channel, voltage):
+
+    self.core.break_realtime()
+    self.zotino0.write_gain_mu(channel, 65000)
+    delay(200*us)
+    self.zotino0.write_dac(channel, voltage)
+    self.zotino0.load()
+    delay(200*us)
+
+    return
+
 # ===============  DC Multipoles Control  =============== #
 def set_multipoles(self):
 
@@ -124,23 +131,16 @@ def set_multipoles(self):
     return
 
 # ================  DC Voltages Control  ================ #
+# This function must be standalone instead of calling zotino_write
+# because otherwise it would be extremely slow (causing 5s overhead)
 @kernel
 def set_electrode_voltages(self, channel_list, voltage_list):
-
-    #print('Setting DC electrode voltages')
     
-    voltage = 0
-
-    #self.core.reset()
     self.core.break_realtime()
-    self.zotino0.init()
-    delay(200*us)
-            
-    for k in range(len(channel_list)):
 
+    for k in range(len(channel_list)):
         self.zotino0.write_gain_mu(channel_list[k], 65000)
-        self.zotino0.load()
-        delay(200*us)
+        delay(100*us)
         self.zotino0.write_dac(channel_list[k], voltage_list[k])
         self.zotino0.load()
         delay(200*us)
@@ -148,17 +148,20 @@ def set_electrode_voltages(self, channel_list, voltage_list):
     return
 
 # ===============  Mesh Voltage Control  =============== #
-@kernel
 def set_mesh_voltage(self, voltage):
 
-    #print('Setting mesh voltage')
-    
-    self.core.break_realtime()
-    self.zotino0.init()
-    delay(200*us)
-    self.zotino0.write_gain_mu(31, 65000)
-    self.zotino0.write_dac(31, 1.0/198.946 * (voltage + 14.6027))
-    self.zotino0.load()
+    CHANNEL_MESH = 31
+    control_signal = 1.0/198.946 * (voltage + 14.6027)
+    zotino_write(self, CHANNEL_MESH, control_signal)
+
+    return
+
+# ============  Threhold Voltages Control  ============= #
+def set_threshold_voltage(self, voltage):
+
+    CHANNEL_THRES = 27
+    control_signal = calculate_input_voltage(CHANNEL_THRES, voltage, use_amp=False)
+    zotino_write(self, CHANNEL_THRES, control_signal)
 
     return
 
@@ -208,12 +211,11 @@ def set_MCP_voltages(self, val):
         print(chan, vols)
         set_electrode_voltages(self, chan, vols)
     
-    return 0
+    return
 
 @kernel
 def sampler_read(self):
 
-    #self.core.reset()
     self.core.break_realtime()
     self.sampler0.init()
     delay(200*us)

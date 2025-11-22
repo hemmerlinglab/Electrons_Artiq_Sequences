@@ -1,4 +1,4 @@
-tickle_level,tickle_pulse_length,tickle_frequency,wait_time,ratio_signal,ratio_lost,loading_signal,trapped_signal,lost_signal,time_cost,keysight_amplitude
+tickle_level,tickle_pulse_length,tickle_frequency,wait_time,act_RF_amplitude,ratio_signal,ratio_lost,loading_signal,trapped_signal,lost_signal,time_cost
 -10,80,58,90,,,,,,,
 -15,80,33,90,,,,,,,
 -5,250,55,260,,,,,,,

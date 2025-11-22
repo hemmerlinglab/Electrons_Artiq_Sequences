@@ -1,32 +1,30 @@
-from artiq.experiment import *
+from artiq.experiment import EnvExperiment
 import numpy as np
-
-import socket
-import time
 import sys
-sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions")
+import os
 
-from helper_functions import *
-from base_sequences import *
-from base_functions import *
-from scan_functions import scan_parameter
+sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions")
+from build_functions   import ofat_build
+from prepare_functions import ofat_prepare
+from analyze_functions import ofat_analyze
+from scan_functions    import scan_parameter
 
 class Dummy_Sequence(EnvExperiment):
     
     def build(self):
 
-        base_build(self)
+        ofat_build(self)
         self.sequence_filename = os.path.abspath(__file__)
 
         return
 
     def prepare(self):
 
-        my_prepare(self)
+        ofat_prepare(self)
 
     def analyze(self):
 
-        my_analyze(self)
+        ofat_analyze(self)
     
         return
 

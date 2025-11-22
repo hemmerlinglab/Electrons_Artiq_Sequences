@@ -7,7 +7,7 @@ import os
 sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions")
 from build_functions   import optimizer_build
 from prepare_functions import optimizer_prepare
-from run_functions     import get_gradient
+from run_functions     import 
 
 class FindOptimalE(EnvExperiment):
 
@@ -32,14 +32,12 @@ class FindOptimalE(EnvExperiment):
 
         if not self.scan_ok:
             return
-        
-        t_start = time.time()
-        
+
         for current_step in range(self.max_iteration):
 
-            gradient, center_value = get_gradient(self, current_step)
-            g_norm = np.linalg.norm(gradient, ord=np.inf)
-            
-            if g_norm < self.rtol * center_value + self.atol:
-                break
+            t0 = time.time()
+
+            # BO logic here
+
+            self.mutate_dataset("time_cost", current_step, time.time() - t0)
         

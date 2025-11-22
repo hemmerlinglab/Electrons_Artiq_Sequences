@@ -14,7 +14,7 @@ from keysight_spectrum import Keysight
 
 # something within the same directory
 from dc_electrodes import Electrodes
-from base_sequences import set_multipoles, update_detection_time, set_mesh_voltage, set_MCP_voltages, set_extraction_pulse, set_loading_pulse
+from base_sequences import zotino_initialization, set_multipoles, update_detection_time, set_mesh_voltage, set_threshold_voltage, set_MCP_voltages, set_extraction_pulse, set_loading_pulse
 from scan_functions import scan_parameter
 
 
@@ -50,18 +50,13 @@ def doe_prepare(self):
 
 def optimizer_prepare(self):
 
-    # Initial E components
-    self.Ex = self.initial_Ex
-    self.Ey = self.initial_Ey
-    self.Ez = self.initial_Ez
-    self.current_E = np.array([self.Ex, self.Ey, self.Ez])
-
     # General Preparations
     prepare_instruments(self)
     prepare_optimizer_datesets(self)
     prepare_common_datasets(self)
     prepare_initialization(self)
     prepare_saving_configuration(self)
+    # prepare optimizer saving configuration if needed
 
     return
 
@@ -69,11 +64,11 @@ def optimizer_prepare(self):
 # 2) Subfunctions for prepare
 def prepare_instruments(self):
 
-    self.ext_pulser = BK4053()      # extraction pulse generator and AOM controller
-    self.tickler    = DSG821()      # tickle pulse generator
-    self.RF_driver  = RS()          # trap drive
-    self.laser      = LaserClient() # Laser Lock GUI client
-    self.keysight   = Keysight()    # Keysight
+    self.ext_pulser        = BK4053()      # extraction pulse generator and AOM controller
+    self.tickler           = DSG821()      # tickle pulse generator
+    self.RF_driver         = RS()          # trap drive
+    self.laser             = LaserClient() # Laser Lock GUI client
+    self.spectrum_analyzer = Keysight()    # Keysight N9000B spectrum analyzer
 
     # Zotino DC controller
     self.electrodes = Electrodes(trap = self.trap, flipped = self.flip_electrodes)
@@ -100,13 +95,15 @@ def prepare_initialization(self):
 
     # 2. DC voltages
     #------------------------------------------------------
+    zotino_initialization(self)
     set_multipoles(self)
 
-    # 3. Mesh and MCP voltage
+    # 3. Mesh, MCP, and Threshold voltage
     #------------------------------------------------------
     set_mesh_voltage(self, self.mesh_voltage)
     self.current_MCP_front = self.MCP_front
     set_MCP_voltages(self, self.MCP_front)
+    set_threshold_voltage(self, self.threshold_voltage*1e-3)
 
     # 4. Extraction Pulse
     #------------------------------------------------------
@@ -126,11 +123,11 @@ def prepare_initialization(self):
     #------------------------------------------------------
     self.divA = 1
     self.span = 50e+06
-    self.keysight.set_ref_ampl(min(self.RF_amplitude+16,18))
-    self.keysight.set_div_ampl(self.divA)
-    self.keysight.set_span(self.span)
-    self.keysight.set_center_freq(self.RF_frequency * 1e9)
-    self.keysight.marker_on(1)
+    self.spectrum_analyzer.set_ref_ampl(min(self.RF_amplitude+16,18))
+    self.spectrum_analyzer.set_div_ampl(self.divA)
+    self.spectrum_analyzer.set_span(self.span)
+    self.spectrum_analyzer.set_center_freq(self.RF_frequency * 1e9)
+    self.spectrum_analyzer.marker_on(1)
 
     return
     
@@ -149,7 +146,7 @@ def prepare_saving_configuration(self):
             {'var' : 'ratio_lost',         'name' : 'array of lost counts / loading counts'},
             {'var' : 'scan_result',        'name' : 'array of recorded counts for counting mode'},
             {'var' : 'time_cost',          'name' : 'array of time cost for each experiment scan'},
-            {'var' : 'keysight_amplitude', 'name' : 'array of actual RF amplitude'}
+            {'var' : 'act_RF_amplitude',   'name' : 'array of actual RF amplitude'}
     ]
 
     # save sequence file name
@@ -212,7 +209,7 @@ def prepare_common_datasets(self):
     self.set_dataset('time_cost',          [0] * self.steps, broadcast=True)
 
     # keysight amplitude
-    self.set_dataset('keysight_amplitude', [0] * self.steps, broadcast=True)
+    self.set_dataset('act_RF_amplitude', [0] * self.steps, broadcast=True)
 
     return
 
@@ -255,17 +252,10 @@ def prepare_doe_datasets(self):
 
 def prepare_optimizer_datesets(self):
 
-    if self.method == 'central':
-        meas_per_step = 6
-    elif self.method == 'forward':
-        meas_per_step = 4
-    else:
-        raise RuntimeError(f"Method `{self.method}` is not supported!")
+    # How to prepare?
 
-    # 1 point gap between measurements to better visualize the results
-    self.steps = self.max_iteration * (meas_per_step + 1)
-
-    xaxis = np.arange(self.steps)
+    # Codes below does not work
+    xaxis = np.arange(self.step)
     self.set_dataset('arr_of_setpoints', xaxis, broadcast=True)
     self.set_dataset('e_trace'         , [ np.array([]) for _ in range(self.steps) ], broadcast=True)
 

@@ -8,7 +8,7 @@ sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/artiq-master
 from build_functions   import ofat_build
 from prepare_functions import ofat_prepare
 from analyze_functions import ofat_analyze
-from run_functions     import measure
+from run_functions     import measure, handle_laser_jump
 from scan_functions    import scan_parameter
 
 MAX_RETRIES = 3
@@ -44,12 +44,15 @@ class SingleParamScan(EnvExperiment):
 
         for ind in range(len(self.scan_values)):
 
+            t0 = time.time()
             retries = 0
 
+            # Apply current setpoint
             scan_parameter(self, ind)
 
             while True:
 
+                # Do experiment
                 try: measure(self, ind)
 
                 # Handle RTIO errors from ARTIQ (e.g. overflow due to unstable MCP amplifier)
@@ -76,7 +79,19 @@ class SingleParamScan(EnvExperiment):
                     print(f"Failed after {MAX_RETRIES} trials, terminating experiment ...")
                     return
 
+                except RuntimeError as e:
+
+                    # Save error messages
+                    print(f"Laser error ({e})")
+                    err = (ind, type(e).__name__)
+                    self.err_list.append(err)
+
+                    # Logic for laser error handling, only works for 422 now
+                    handle_laser_jump(self)
+
                 # If success, just continue for the next set point
                 else: break
+
+            self.mutate_dataset("time_cost", ind, time.time() - t0)
 
         return

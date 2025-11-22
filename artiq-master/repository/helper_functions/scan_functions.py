@@ -2,7 +2,7 @@ import time
 import numpy as np
 import sys
 
-from base_sequences import set_mesh_voltage, set_multipoles, set_loading_pulse, set_extraction_pulse, set_MCP_voltages, update_detection_time
+from base_sequences import set_mesh_voltage, set_threshold_voltage, set_multipoles, set_loading_pulse, set_extraction_pulse, set_MCP_voltages, update_detection_time
 
 #####################################################################
 ##  -- Master Scanning Function  --  ################################
@@ -14,7 +14,7 @@ def scan_parameter(self, my_ind, scan_check = False, reset_value = False):
     easy extension by adding more scanning functions
     removed eval() in the new code
     """
-    
+
     this_module = sys.modules[__name__]
     param_name = self.scanning_parameter
 
@@ -92,22 +92,6 @@ To build scanning functions:
 3. The function must have two modes, controlled by `scan_check`:
   - Ordinary Mode: To scan the parameter
   - Scan Check Mode: To check if the scanning range works
-
-How scanning functions work?
-1. In prepare stage:
-  - In `general_scan.py`, `prepare` calls `my_prepare` in `base_functions.py`
-  - In `base_functions.py`, `my_prepare` calls `prepare_datasets`, then 
-    `prepare_datasets` calls `scan_parameter` in scan check mode
-  - `scan_parameter` calls target function in scan check mode to get feedback
-    about scanning range
-2. In run stage:
-  - `general_scan.py` calls `scan_parameter` in the main loop in `run`
-  - `scan_parameter` function calls target function in ordinary mode to set
-    target parameter to current value
-3. In analyze stage:
-  - In `general_scan.py`, `analyze` calls `my_analyze` in `base_functions.py`
-  - In `base_functions.py`, `my_analyze` calls `reset_scan_parameter`, then 
-    `reset_scan_parameter` calls correct scan function to reset the value.
 """
 # 1. Detector Parameters  ----------------------------------------------------#
 #-----------------------------------------------------------------------------#
@@ -124,6 +108,18 @@ def _scan_mesh_voltage(self, val, scan_values, scan_check = False):
 
         return 1
 
+def _scan_threshold_voltage(self, val, scan_values, scan_check = False):
+
+    if scan_check:
+
+        return limit_check(self.scanning_parameter, scan_values, [0.0, 10001])
+
+    else:
+
+        set_threshold_voltage(self, val*1e-3)
+
+        return 1
+
 def _scan_MCP_front(self, val, scan_values, scan_check = False):
 
     if scan_check:
@@ -135,32 +131,7 @@ def _scan_MCP_front(self, val, scan_values, scan_check = False):
         self.current_MCP_front = val
         set_MCP_voltages(self, val)
 
-        
-        """
-        if val > self.current_MCP_front:
-            val_steps = np.arange(self.current_MCP_front, val, 50)
-            for v in val_steps[1:]:
-                print('Setting MCP front to: '  + str(v) + 'V (Intermediate steps)')
-                set_MCP_voltages(self, v)
-                time.sleep(15)
-            print('Setting MCP front to: ' + str(val) + 'V\n')
-            self.current_MCP_front = val
-            set_MCP_voltages(self, val)
-            time.sleep(5)
-
-        else:
-            val_steps = np.arange(self.current_MCP_front, val, -50)
-            for v in val_steps[1:]:
-                print('Setting MCP front to: ' + str(v) + 'V (Intermediate steps)')
-                set_MCP_voltages(self, v)
-                time.sleep(5)
-            print('Setting MCP front to: ' + str(val) + 'V\n')
-            self.current_MCP_front = val
-            set_MCP_voltages(self, val)
-        """
-
         return 1
-
 
 # 2. Sequence Parameters  ----------------------------------------------------#
 #-----------------------------------------------------------------------------#
@@ -273,7 +244,7 @@ def _scan_RF_frequency(self, val, scan_values, scan_check = False):
     else:
         
         self.RF_driver.set_freq(val * 1e9)
-        self.keysight.set_center_freq(val * 1e9)
+        self.spectrum_analyzer.set_center_freq(val * 1e9)
 
         return 1
 
@@ -286,7 +257,7 @@ def _scan_RF_amplitude(self, val, scan_values, scan_check = False):
     else:
         
         self.RF_driver.set_ampl(val)
-        self.keysight.set_ref_ampl(min(val+16,18))
+        self.spectrum_analyzer.set_ref_ampl(min(val+16,18))
 
         return 1
 

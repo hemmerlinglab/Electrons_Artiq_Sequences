@@ -67,3 +67,45 @@ def safe_check(V, mode = "act_voltages"):
     elif mode == "setpoint":
         return abs(V[1]-V[0])>2000 or V[2]< V[1]
 
+####################################################################
+######  Functions for compensation field Bayesian Optimizer  #######
+####################################################################
+
+def latin_hypercube(n_samples, bounds, seed=None):
+    """
+    Latin Hypercube Sampling
+    ------------------------------
+    1) Parameters
+       n_samples (int): number of points to sample
+       bounds (d x 2 list): range to sample, d is number of dimensions
+       seed (int or None): for reproducing the same result
+    ------------------------------
+    2) Returns
+       samples (n_samples x d numpy.ndarray): sampled points
+    """
+
+    # Create a random number generator (RNG)
+    rng = np.random.default_rng(seed)
+
+    # Initialization
+    bounds = np.array(bounds, dtype=float)
+    dim = bounds.shape[0]
+    samples = np.zeros((n_samples, dim))
+
+    cut = np.linspace(0, 1, n_samples + 1)
+
+    for j in range(dim):
+
+        # Get n_sample random points in each dimension in the range of [0, 1]
+        u = rng.random(n_samples)
+        points_1d = cut[:-1] + u * (cut[1:] - cut[:-1])
+
+        # Shuffle points in each dimension
+        rng.shuffle(points_1d)
+
+        # Map [-1, 1] to the actual range
+        low, high = bounds[j]
+        samples[:, j] = low + points_1d * (high - low)
+
+    return samples
+

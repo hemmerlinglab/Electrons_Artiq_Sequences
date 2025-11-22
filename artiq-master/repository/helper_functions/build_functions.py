@@ -14,7 +14,7 @@ def my_setattr(self, arg, val, scanable = True):
     current_val = getattr(self, arg)
 
     # create config_dict entry
-    entry = {"par": arg, "val": current_val, "scanable": str(scanable)}
+    entry = {"par": arg, "val": current_val, "scanable": scanable}
     if hasattr(val, "unit"): entry["unit"] = str(val.unit)
 
     # append the entry to config dict
@@ -101,6 +101,7 @@ def load_common_parameters(self):
     #------------------------------------------------------
     my_setattr(self, 'mesh_voltage',      NumberValue(default=120,unit='V',scale=1,ndecimals=0,step=1))
     my_setattr(self, 'MCP_front',         NumberValue(default=400,unit='V',scale=1,ndecimals=0,step=1))
+    my_setattr(self, 'threshold_voltage', NumberValue(default=100,unit='mV',scale=1,ndecimals=0,step=1))
 
     # 3. Sequence Settings
     #------------------------------------------------------
@@ -182,21 +183,17 @@ def load_doe_parameters(self):
 def load_optimizer_parameters(self):
 
     optimization_targets = ['trapped_signal', 'ratio_signal', 'lost_signal', 'ratio_lost', 'loading_signal']
-    methods = ['central', 'forward']
 
     # Optimizer Settings
     #------------------------------------------------------
     my_setattr(self, 'optimize_target', EnumerationValue(optimization_targets, default=optimization_targets[0]), scanable=False) # Which signal to optimize
-    my_setattr(self, 'method',          EnumerationValue(methods, default=methods[0]), scanable=False)                           # Which method to evaluate derivatives
-    my_setattr(self, 'initial_Ex',      NumberValue(default=0.0,unit='',scale=1,ndecimals=3,step=.001), scanable=False)          # First guess on Ex
-    my_setattr(self, 'initial_Ey',      NumberValue(default=0.0,unit='',scale=1,ndecimals=3,step=.001), scanable=False)          # First guess on Ey
-    my_setattr(self, 'initial_Ez',      NumberValue(default=0.0,unit='',scale=1,ndecimals=3,step=.001), scanable=False)          # First guess on Ez
-    my_setattr(self, 'max_iteration',   NumberValue(default=30,unit='',scale=1,ndecimals=0,step=1), scanable=False)              # Max number of iteration allowed
-    my_setattr(self, 'diff_step',       NumberValue(default=0.02,unit='',scale=1,ndecimals=3,step=.001), scanable=False)         # Stepsize to evaluate gradients
-    my_setattr(self, 'alpha0',          NumberValue(default=0.05,unit='',scale=1,ndecimals=3,step=.001), scanable=False)         # Standard stepsize to move
-    my_setattr(self, 'grad_rtol',       NumberValue(default=1e-3,unit='',scale=1,ndecimals=8,step=1e-8), scanable=False)         # Convergence criteria 1: gradient_norm <= rtol * center_value + atol
-    my_setattr(self, 'grad_atol',       NumberValue(default=1e-5,unit='',scale=1,ndecimals=10,step=1e-10), scanable=False)       # Convergence criteria 1: gradient_norm <= rtol * center_value + atol
-    my_setattr(self, 'min_step',        NumberValue(default=5e-3,unit='',scale=1,ndecimals=3,step=.001), scanable=False)         # Convergence criteria 2: |E_new - E_curr| <= min_step
-    my_setattr(self, '')
+    my_setattr(self, 'max_iteration',   NumberValue(default=0,unit='',scale=1,ndecimals=0,step=1), scanable=False)
+    my_setattr(self, 'min_Ex',          NumberValue(default=0.0,unit='',scale=1,ndecimals=3,step=.001), scanable=False)          # Lower bound of Ex
+    my_setattr(self, 'max_Ex',          NumberValue(default=0.0,unit='',scale=1,ndecimals=3,step=.001), scanable=False)          # Upper bound of Ex
+    my_setattr(self, 'min_Ey',          NumberValue(default=0.0,unit='',scale=1,ndecimals=3,step=.001), scanable=False)          # Lower bound of Ey
+    my_setattr(self, 'max_Ey',          NumberValue(default=0.0,unit='',scale=1,ndecimals=3,step=.001), scanable=False)          # Upper bound of Ey
+    my_setattr(self, 'min_Ez',          NumberValue(default=0.0,unit='',scale=1,ndecimals=3,step=.001), scanable=False)          # Lower bound of Ez
+    my_setattr(self, 'max_Ez',          NumberValue(default=0.0,unit='',scale=1,ndecimals=3,step=.001), scanable=False)          # Upper bound of Ez
+    # More parameters to load?
 
     return
