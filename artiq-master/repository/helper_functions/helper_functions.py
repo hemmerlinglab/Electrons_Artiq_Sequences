@@ -293,7 +293,25 @@ def expected_improvement(mu, sigma, y_best, xi=0.01):
 
 def gaussian_process_hyperparameters(X_train, y_train):
     """
-    Fit length_scale, variance, noise, and xi for Gaussian Process
+    Choose GP kernel scales and noise level from data
+    -------------------------------------------------
+    0) Physics mindset
+       The routine tunes the Gaussian Process so that the kernel width and
+       noise match the spread of the measured signals. It scans a small grid
+       of length scales and relative noise levels, then keeps the settings
+       that maximize the log-marginal likelihood of the observations.
+    -------------------------------------------------
+    1) Parameters
+       X_train: [n_sample x n_dimension], normalized coordinates of sampled
+                points
+       y_train: [n_sample], normalized measurements collected at X_train
+    -------------------------------------------------
+    2) Returns
+       best_length_scale: kernel width giving the highest likelihood
+       variance:          overall variance of y_train (used as kernel scale)
+       noise:             per-point noise estimate combining absolute and
+                          relative terms
+       xi:                exploration offset for expected improvement
     """
 
     # Evaluate variance
@@ -349,16 +367,31 @@ def bo_suggest_next(X_observed, y_observed, bounds,
                     xi           = 0.01,
                     seed         = None):
     """
-    Calculate the next point to evaluate using Bayesian Optimization.
-    -----------------------------------------------------------------------
+    Propose the next field setpoint from current BO state
+    -----------------------------------------------------
+    0) Physics mindset
+       Given past measurements of the objective versus electric-field
+       components, the function trains a Gaussian Process surrogate and
+       evaluates the expected improvement (EI) on a fresh Latin Hypercube
+       batch. The candidate with the largest EI is chosen as the next point
+       to test in the experiment.
+    -----------------------------------------------------
     1) Parameters
-       X_observed:   [n_sample x n_dimension], points you have done experiment
-       y_observed:   [n_sample], experiment result on points in X_observed
-       bounds:       [n_dimension x 2], the region you are going to explore
-       n_candidates: How many
-    -----------------------------------------------------------------------
+       X_observed:   [n_sample x n_dimension], measured field settings
+       y_observed:   [n_sample], measured objective values at X_observed
+       bounds:       [n_dimension x 2], limits for each field component
+       n_candidates: int, number of trial points drawn for EI evaluation
+       auto_mode:    bool, fit kernel hyperparameters from data when True
+       length_scale: float, kernel width used when auto_mode is False
+       variance:     float, kernel amplitude used when auto_mode is False
+       noise:        float or array-like, assumed noise on measurements when
+                     auto_mode is False
+       xi:           float, exploration offset for EI when auto_mode is False
+       seed:         int or None, RNG seed for reproducible candidate draws
+    -----------------------------------------------------
     2) Returns
-       candidates[idx]: 
+       candidates[idx]: suggested next point in the original coordinate scale
+       ei[idx]:         expected improvement associated with the suggestion
     """
 
     # Normalize X and y scale for better numerical stability
