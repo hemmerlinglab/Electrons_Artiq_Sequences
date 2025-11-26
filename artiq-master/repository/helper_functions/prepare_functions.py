@@ -56,7 +56,7 @@ def optimizer_prepare(self):
     prepare_common_datasets(self)
     prepare_initialization(self)
     prepare_saving_configuration(self)
-    # prepare optimizer saving configuration if needed
+    prepare_optimizer_saving_configuration(self)
 
     return
 
@@ -175,6 +175,17 @@ def prepare_ofat_saving_configuration(self):
 
     return
 
+def prepare_optimizer_saving_configuration(self):
+
+    optimizer_data_to_save = [
+        {'var' : 'e_trace', 'name' : 'array of electric field trace'},
+        {'var' : 'y_best',  'name' : 'array of best signal until now'},
+        {'var' : 'ei',      'name' : 'array of expected improvement'}
+    ]
+    self.data_to_save.extend(optimizer_data_to_save)
+
+    return
+
 def prepare_common_datasets(self):
 
     update_detection_time(self)
@@ -252,14 +263,26 @@ def prepare_doe_datasets(self):
 
 def prepare_optimizer_datesets(self):
 
-    # How to prepare?
+    # For compatibility with preparing other datasets
+    self.steps = self.max_iteration + self.init_sample_size
+    self.E_sampled = []
+    self.y_sampled = []
 
-    # Codes below does not work
-    xaxis = np.arange(self.step)
-    self.set_dataset('arr_of_setpoints', xaxis, broadcast=True)
-    self.set_dataset('e_trace'         , [ np.array([]) for _ in range(self.steps) ], broadcast=True)
+    # Bounds matrix
+    self.bounds = np.array([
+        [self.min_Ex, self.max_Ex],
+        [self.min_Ey, self.max_Ey],
+        [self.min_Ez, self.max_Ez]
+    ])
 
-    self.scan_ok = True    # Safety check to be built (a little bit tricky)
+    # Datasets for optimizer
+    xaxis = np.arange(self.steps, dtype=float)
+    self.set_dataset("arr_of_setpoints", xaxis, broadcast=True)
+    self.set_dataset("e_trace", [np.zeros(3) for _ in range(self.steps)], broadcast=True)
+    self.set_dataset("y_best", [0] * self.max_iteration, broadcast=True)
+    self.set_dataset("ei", [0] * self.max_iteration, broadcast=True)
+
+    self.scan_ok = True
 
     return
 

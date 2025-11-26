@@ -24,6 +24,14 @@ def doe_analyze(self):
 
     return
 
+def optimizer_analyze(self):
+
+    reset_all_parameters(self)
+    close_instruments(self)
+    save_data_or_exit(self)
+
+    return
+
 # ===================================================================
 # 2) Subfunctions for analyze
 def reset_scan_parameter(self):

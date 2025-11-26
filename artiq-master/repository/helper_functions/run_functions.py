@@ -1,9 +1,9 @@
 from artiq.language.core import TerminationRequested
 import numpy as np
-import sys
 import time
 
-from base_sequences import count_histogram, count_events, record_laser_frequencies, bare_counting, set_multipoles, record_RF_amplitude
+from base_sequences import count_histogram, count_events, record_laser_frequencies, bare_counting, record_RF_amplitude, set_multipoles
+from helper_functions import latin_hypercube, bo_suggest_next
 
 # ===================================================================
 # 1) Master Functions for Run (For Experiment)
@@ -25,7 +25,7 @@ def measure(self, ind, print_result = False, validate_390 = False, validate_422 
         if self.histogram_on:
             cts_trapped, cts_lost, cts_loading = trap_with_histogram(self, ind)
         else:
-            cts_trapped, cts_lost, cts_loading = trap_without_histogram(self, ind)
+            cts_trapped, cts_lost, cts_loading = trap_without_histogram(self)
 
         store_to_dataset(self, ind, cts_trapped, cts_lost, cts_loading)
 
@@ -55,6 +55,25 @@ def measure(self, ind, print_result = False, validate_390 = False, validate_422 
 
     return 
 
+def record_RTIO_error(self, ind, err):
+
+    # constant
+    HOST_SLEEP_S = 5
+
+    # Save errror messages
+    print(f"RTIO error ({err})")
+    err = (ind, type(err).__name__)
+    self.err_list.append(err)
+
+    # Reset ArtiQ coredevice
+    self.core.reset()
+
+    # Wait for a period of time
+    # e.g. wait for the unstable amplifier behavior to disappear
+    time.sleep(HOST_SLEEP_S)
+
+    return
+
 def handle_laser_jump(self, laser_to_fix = 422, tol = 1e-5):
     """
     When laser frequency was off (mode hopping), wait for the user to fix it manually.
@@ -75,7 +94,44 @@ def handle_laser_jump(self, laser_to_fix = 422, tol = 1e-5):
 
 # ===================================================================
 # 2) For Optimizer
+def initial_sampling(self):
 
+    init_points = latin_hypercube(self.init_sample_size, self.bounds)
+
+    for ind, pt in enumerate(init_points):
+        measure_optimize(self, ind, pt)
+
+    return
+
+def bo_sampling(self, ind):
+
+    # calculate the next point to measure
+    E_next, ei = bo_suggest_next(self.E_sampled, self.y_sampled, self.bounds)
+
+    # perform experiment
+    measure_optimize(self, ind + self.init_sample_size, E_next)
+
+    # store BO result
+    self.mutate_dataset("y_best", ind, np.max(self.y_sampled))
+    self.mutate_dataset("ei", ind, ei)
+
+    return ei
+
+def measure_optimize(self, ind, E_field):
+
+    # implement setpoint
+    self.Ex, self.Ey, self.Ez = E_field
+    set_multipoles(self)
+
+    # perform measurement
+    signal = trap_optimize(self, ind)
+
+    # store result
+    self.E_sampled.append(E_field)
+    self.y_sampled.append(signal)
+    self.mutate_dataset("e_trace", ind, E_field)
+
+    return
 
 def trap_optimize(self, ind):
 
@@ -85,7 +141,7 @@ def trap_optimize(self, ind):
     if self.histogram_on:
         cts_trapped, cts_lost, cts_loading = trap_with_histogram(self, ind)
     else:
-        cts_trapped, cts_lost, cts_loading = trap_without_histogram(self, ind)
+        cts_trapped, cts_lost, cts_loading = trap_without_histogram(self)
 
     store_to_dataset(self, ind, cts_trapped, cts_lost, cts_loading)
 
@@ -132,7 +188,7 @@ def trap_with_histogram(self, my_ind):
 
     return cts_trapped, cts_lost, cts_loading
 
-def trap_without_histogram(self, my_ind):
+def trap_without_histogram(self):
 
     # run detection sequence
     count_events(self)

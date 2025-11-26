@@ -187,7 +187,11 @@ def load_optimizer_parameters(self):
     # Optimizer Settings
     #------------------------------------------------------
     my_setattr(self, 'optimize_target', EnumerationValue(optimization_targets, default=optimization_targets[0]), scanable=False) # Which signal to optimize
-    my_setattr(self, 'max_iteration',   NumberValue(default=0,unit='',scale=1,ndecimals=0,step=1), scanable=False)
+    my_setattr(self, 'max_iteration',   NumberValue(default=50,unit='',scale=1,ndecimals=0,step=1), scanable=False)
+    my_setattr(self, 'min_iteration',   NumberValue(default=5,unit='',scale=1,ndecimals=0,step=1), scanable=False)
+    my_setattr(self, 'init_sample_size',NumberValue(default=10,unit='',scale=1,ndecimals=0,step=1), scanable=False)
+    my_setattr(self, 'tolerance',       NumberValue(default=5e-3,unit='',scale=1,ndecimals=6,step=1e-6), scanable=False)
+    my_setattr(self, 'converge_count',  NumberValue(default=3,unit='',scale=1,ndecimals=0,step=1), scanable=False)
     my_setattr(self, 'min_Ex',          NumberValue(default=0.0,unit='',scale=1,ndecimals=3,step=.001), scanable=False)          # Lower bound of Ex
     my_setattr(self, 'max_Ex',          NumberValue(default=0.0,unit='',scale=1,ndecimals=3,step=.001), scanable=False)          # Upper bound of Ex
     my_setattr(self, 'min_Ey',          NumberValue(default=0.0,unit='',scale=1,ndecimals=3,step=.001), scanable=False)          # Lower bound of Ey

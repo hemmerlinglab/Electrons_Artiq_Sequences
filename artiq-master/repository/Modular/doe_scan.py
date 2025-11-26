@@ -8,11 +8,10 @@ sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/artiq-master
 from build_functions   import doe_build
 from prepare_functions import doe_prepare
 from analyze_functions import doe_analyze
-from run_functions     import measure, handle_laser_jump
+from run_functions     import measure, handle_laser_jump, record_RTIO_error
 from scan_functions    import set_doe_parameters
 
 MAX_RETRIES = 3
-HOST_SLEEP_S = 5
 
 class DOEScan(EnvExperiment):
 
@@ -57,20 +56,10 @@ class DOEScan(EnvExperiment):
 
                     # Handle RTIO errors from ARTIQ (e.g. overflow due to unstable MCP amplifier)
                     except (RTIOOverflow, RTIOUnderflow) as e:
-
-                        # Save error messages
-                        print(f"RTIO error ({e})")
-                        err = (ind, type(e).__name__)
-                        self.err_list.append(err)
-
-                        # Reset ArtiQ coredevice
-                        self.core.reset()
-
-                        # Wait for a period of time (e.g. wait for the unstable amplifier behavior to disappear)
-                        time.sleep(HOST_SLEEP_S)
-                        retries += 1
+                        record_RTIO_error(self, ind, e)
 
                         # Not exceed maximum retries: retry the experiment for current set point
+                        retries += 1
                         if retries <= MAX_RETRIES:
                             print(f"Retrying ({retries}/{MAX_RETRIES}) ...")
                             continue
