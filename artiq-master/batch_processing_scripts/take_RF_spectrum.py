@@ -16,9 +16,9 @@ general_config = {
     "wait_time": 90,
     "load_time": 210,
     "trap": "Single PCB",
-    "filp_electrodes": False,
+    "flip_electrodes": False,
     "frequency_422": 709.078300,
-    "freqeuncy_390": 768.708843,
+    "frequency_390": 768.708843,
     "RF_on": True,
     "RF_frequency": 1.732,
     "ext_pulse_length": 900,
@@ -37,14 +37,16 @@ optimizer_config = {
     "n_candidate_anal": 4096,
     "min_Ex": -0.4, "max_Ex": 0.2,
     "min_Ey": -0.1, "max_Ey": 0.2,
-    "min_Ez": -0.1, "max_Ez": 0.1
+    "min_Ez": -0.1, "max_Ez": 0.1,
+    "no_of_repeats": 3000
 }
 
 experiment_config = {
     "utility_mode": "DOE Scan",
     "tickle_on": True,
     "tickle_level": -10.0,
-    "tickle_pulse_length": 80
+    "tickle_pulse_length": 80,
+    "no_of_repeats": 40000
 }
 
 # 3) Scan Settings --------------------------------------------------
