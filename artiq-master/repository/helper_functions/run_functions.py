@@ -151,17 +151,22 @@ def trap_optimize(self, ind):
     store_to_dataset(self, ind, cts_trapped, cts_lost, cts_loading)
 
     if self.optimize_target == "trapped_signal":
-        return cts_trapped
+        signal = cts_trapped
     elif self.optimize_target == "ratio_signal":
-        return cts_trapped / cts_loading
+        signal = cts_trapped / cts_loading
+    elif self.optimize_target == "ratio_weighted":
+        signal = (cts_trapped + 2 * cts_lost) / cts_loading
     elif self.optimize_target == "lost_signal":
-        return cts_lost
+        signal = cts_lost
     elif self.optimize_target == "ratio_lost":
-        return cts_lost / cts_loading
+        signal = cts_lost / cts_loading
     elif self.optimize_target == "loading_signal":
-        return cts_loading
+        signal = cts_loading
     else:
         raise RuntimeError("Optimize target not supported!")
+    
+    print(f"{ind:2d}/{self.init_sample_size + self.max_iteration}: E=[{self.Ex:.3f},\t{self.Ey:.3f},\t{self.Ez:.3f}]:\tsignal={signal:.3f}")
+    return signal
 
 # ===================================================================
 # 3) Basic Components
@@ -183,7 +188,7 @@ def trap_with_histogram(self, my_ind):
     # calculate kicked out count
     ind_l = (xs > (self.load_time + 4))[:-1]
     ind_u = (xs < (self.load_time + self.tickle_pulse_length + 3))[:-1]
-    print(ys[ind_l*ind_u])
+    #print(ys[ind_l*ind_u])
     cts_lost = np.sum(ys[ind_l*ind_u])
 
     # calculate loading count
