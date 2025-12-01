@@ -99,14 +99,19 @@ def initial_sampling(self):
     init_points = latin_hypercube(self.init_sample_size, self.bounds)
 
     for ind, pt in enumerate(init_points):
+        t0 = time.time()
         measure_optimize(self, ind, pt)
+        self.mutate_dataset("time_cost", ind, time.time() - t0)
 
     return
 
 def bo_sampling(self, ind):
 
     # calculate the next point to measure
-    E_next, ei = bo_suggest_next(self.E_sampled, self.y_sampled, self.bounds)
+    E_next, ei = bo_suggest_next(
+        self.E_sampled, self.y_sampled, self.bounds,
+        n_candidates=self.n_candidate_run
+    )
 
     # perform experiment
     measure_optimize(self, ind + self.init_sample_size, E_next)

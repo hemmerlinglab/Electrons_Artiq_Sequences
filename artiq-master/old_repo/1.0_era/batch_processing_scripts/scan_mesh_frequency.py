@@ -27,7 +27,7 @@ if __name__ == "__main__":
         print("\nMesh voltage " + str(v) + "\n")
         print("Scanning 422, center frequency = " + str(frequency_422) + ", 390 frequency = " + str(frequency_390) + "\n")
         cmd = "artiq_run -q ../Electrons/scan_laser_frequency.py frequency_422=" + str(frequency_422) + " frequency_390=" + str(frequency_390) + " scanning_laser='422' min_freq=" + str(-range_radius_422) + " max_freq=" + str(range_radius_422) + " steps=" + str(steps) + " relock_steps=" + str(relock_steps) + " lock_wait_time=" + str(lock_wait_time) + " relock_wait_time=" + str(relock_wait_time) + " mesh_voltage=" + str(v) + " no_of_repeats=" + str(no_of_repeats) + " detection_time=" + str(detection_time)
-            
+
         output = subprocess.getoutput(cmd)
         out = output.split("\n")
         for o in out:

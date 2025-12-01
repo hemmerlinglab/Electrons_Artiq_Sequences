@@ -1,5 +1,13 @@
 import numpy as np
+from math import erf
+erf_vec = np.vectorize(erf)
+
 from amp_zotino_params import fit_parameters, old_coeffs
+
+# Constants
+INV_SQRT2PI = 0.39894228040
+SQRT2 = 1.41421356237
+THRESHOLD = 1e-12
 
 ####################################################################
 ################  Functions for DC Voltage Control  ################
@@ -266,11 +274,6 @@ def expected_improvement(mu, sigma, y_best, xi=0.01):
        ei: Expected improvement at each proposed point
     """
 
-    # Constants
-    SQRT2PI = 2.50662827463
-    SQRT2 = 1.41421356237
-    THRESHOLD = 1e-12
-
     # Avoid division by zero
     sigma_safe = np.where(sigma <= THRESHOLD, THRESHOLD, sigma)
 
@@ -278,10 +281,10 @@ def expected_improvement(mu, sigma, y_best, xi=0.01):
     # ----------------------
     # 1) Normal distribution - Density Function
     def _phi(z):
-        return np.exp(-0.5 * z * z) / SQRT2PI
+        return INV_SQRT2PI * np.exp(-0.5 * z * z)
     # 2) Normal distribution - Cumulative Function
     def _Phi(z):
-        return 0.5 * (1.0 + np.erf(z / SQRT2))
+        return 0.5 * (1.0 + erf_vec(z / SQRT2))
     
     # Calculate expected improvement
     improvement = mu - y_best - xi

@@ -66,7 +66,7 @@ class FindOptimalE(EnvExperiment):
             if ei < self.tolerance: low_ei_count += 1
             else: low_ei_count = 0
 
-            self.mutate_dataset("time_cost", current_step, time.time() - t0)
+            self.mutate_dataset("time_cost", current_step + self.init_sample_size, time.time() - t0)
 
             # if the algorithm was already converged
             if (current_step + 1) >= self.min_iteration \

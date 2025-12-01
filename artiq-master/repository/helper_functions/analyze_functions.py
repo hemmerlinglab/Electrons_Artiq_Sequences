@@ -3,6 +3,7 @@ import shutil
 from configparser import ConfigParser
 
 import scan_functions as sf
+from helper_functions import latin_hypercube, normalize_coordinates, normalize_values, gaussian_process_hyperparameters, gaussian_process_predictor
 
 # ===================================================================
 # 1) Master function for analyze
@@ -29,6 +30,7 @@ def optimizer_analyze(self):
     reset_all_parameters(self)
     close_instruments(self)
     save_data_or_exit(self)
+    printout_final_result(self)
 
     return
 
@@ -84,6 +86,51 @@ def close_instruments(self):
     self.ext_pulser.close()
     
     return
+
+def printout_final_result(self):
+
+    # Extract best observed point
+    idx = np.argmax(self.y_sampled)
+    E_best_obs = self.E_sampled[idx]
+    y_best_obs = self.y_sampled[idx]
+
+    # Extract best model solved point
+    E_best_model, y_best_model = find_model_optimum(self)
+
+    # Printout result
+    print("\n==== Optimization results (find_optimal_E) ====")
+    print("Best observed (incumbent):")
+    print(f"  value = {y_best_obs}")
+    print(f"  E = [{E_best_obs[0]}, {E_best_obs[1]}, {E_best_obs[2]}]")
+    print("Best predicted by GP (posterior mean on candidate grid):")
+    print(f"  mean = {y_best_model}")
+    print(f"  E = [{E_best_model[0]}, {E_best_model[1]}, {E_best_model[2]}]")
+
+    return
+
+def find_model_optimum(self):
+
+    # Extract data for final model
+    E_normalized = normalize_coordinates(self.E_sampled, self.bounds)
+    y_normalized = normalize_values(self.y_sampled)
+    length_scale, variance, noise, xi = gaussian_process_hyperparameters(E_normalized, y_normalized)
+
+    # General testing points for final model
+    candidates = latin_hypercube(self.n_candidate_anal, self.bounds)
+    candidates_normalized = normalize_coordinates(candidates, self.bounds)
+
+    # Predict with final model
+    mu, sigma = gaussian_process_predictor(
+        E_normalized, y_normalized, candidates_normalized,
+        noise=noise, length_scale=length_scale, variance=variance
+    )
+
+    # Final predicted optimum by the model
+    idx = np.argmax(mu)
+    E_best = candidates[idx]
+    y_best = mu[idx]
+
+    return E_best, y_best
 
 # ===================================================================
 # 3) Functions for saving data
