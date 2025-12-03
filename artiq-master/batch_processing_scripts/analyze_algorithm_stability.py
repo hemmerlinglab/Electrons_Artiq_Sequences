@@ -20,18 +20,21 @@ general_config = {
     "ext_pulse_length": 900,
     "ext_pulse_level": 15.0,
     "U1": 0, "U3": 0, "U4": 0, "U5": 0,
+    # Trapping settings
+    "U2": -0.18,
+    "RF_amplitude": 1.0
 }
 optimizer_config = {
     "optimize_target": "ratio_signal",
     "max_iteration": 50,
     "min_iteration": 5,
     "init_sample_size": 10,
-    "tolerance": 1e-3,
+    "tolerance": 5e-3,
     "converge_count": 3,
     "n_candidate_run": 1024,
     "n_candidate_anal": 4096,
-    "min_Ex": -0.4, "max_Ex": 0.2,
-    "min_Ey": -0.1, "max_Ey": 0.2,
+    "min_Ex": -0.25, "max_Ex": 0.05,
+    "min_Ey": -0.05, "max_Ey": 0.2,
     "min_Ez": -0.1, "max_Ez": 0.1,
     "no_of_repeats": 3000,
 }
@@ -75,7 +78,7 @@ def run_many_optimizations(n_runs: int = 10):
     def summarize(label: str, arr: np.ndarray):
         mean = arr.mean(axis=0)
         std = arr.std(axis=0, ddof=1) if arr.shape[0] > 1 else np.zeros(3)
-        median = arr.median(axis=0)
+        median = np.median(arr, axis=0)
         print(f"\n{label}:")
         print(f"  mean   Ex, Ey, Ez = {mean}")
         print(f"  std    Ex, Ey, Ez = {std}")

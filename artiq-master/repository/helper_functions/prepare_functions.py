@@ -281,6 +281,9 @@ def prepare_optimizer_datesets(self):
     self.set_dataset("e_trace", [np.zeros(3) for _ in range(self.steps)], broadcast=True)
     self.set_dataset("y_best", [0] * self.max_iteration, broadcast=True)
     self.set_dataset("ei", [0] * self.max_iteration, broadcast=True)
+    self.set_dataset("length_scale", [0] * self.max_iteration, broadcast=True)
+    self.set_dataset("best_rel_noise", [0] * self.max_iteration, broadcast=True)
+    self.set_dataset("optimizer_x", list(range(self.max_iteration)), broadcast=True)
 
     self.scan_ok = True
 

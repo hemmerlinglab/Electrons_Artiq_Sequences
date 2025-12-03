@@ -7,7 +7,7 @@ from amp_zotino_params import fit_parameters, old_coeffs
 # Constants
 INV_SQRT2PI = 0.39894228040
 SQRT2 = 1.41421356237
-THRESHOLD = 1e-12
+THRESHOLD = 1e-9
 
 ####################################################################
 ################  Functions for DC Voltage Control  ################
@@ -175,7 +175,7 @@ def normalize_values(ys):
 
     y_mean = np.mean(ys)
     y_std = np.std(ys)
-    return (ys - y_mean) / y_std
+    return (ys - y_mean) / y_std, (y_mean, y_std)
 
 def gaussian_process_predictor(X_train, y_train, X_test,
                                noise        = 1e-3,
@@ -289,7 +289,8 @@ def expected_improvement(mu, sigma, y_best, xi=0.01):
     # Calculate expected improvement
     improvement = mu - y_best - xi
     Z = improvement / sigma_safe
-    ei = improvement * _Phi(Z) + sigma * _phi(Z)
+    ei = improvement * _Phi(Z) + sigma_safe * _phi(Z)
+
     ei = np.where(sigma < THRESHOLD, 0.0, ei)
 
     return ei
@@ -323,10 +324,10 @@ def gaussian_process_hyperparameters(X_train, y_train):
     # Evaluate noise
     sigma_y = np.sqrt(variance)
     abs_noise = 0.02 * sigma_y
-    rel_noise_levels = [0.02, 0.03, 0.05]
+    rel_noise_levels = [0.02, 0.03, 0.04, 0.05, 0.06]
 
     # Evaluate length_scale
-    length_scale_levels = [0.1, 0.2, 0.3, 0.4]
+    length_scale_levels = [0.10, 0.15, 0.2, 0.25, 0.3]
 
     best_lml = -np.inf
     best_rel_noise = rel_noise_levels[0]
@@ -359,7 +360,7 @@ def gaussian_process_hyperparameters(X_train, y_train):
     # Final noise
     noise = np.sqrt(abs_noise**2 + (best_rel_noise * y_train)**2)
 
-    return best_length_scale, variance, noise, xi
+    return best_length_scale, variance, noise, xi, best_rel_noise
 
 def bo_suggest_next(X_observed, y_observed, bounds,
                     n_candidates = 256,
@@ -399,7 +400,7 @@ def bo_suggest_next(X_observed, y_observed, bounds,
 
     # Normalize X and y scale for better numerical stability
     X_normalized = normalize_coordinates(X_observed, bounds)
-    y_normalized = normalize_values(y_observed)
+    y_normalized, y_norm_param = normalize_values(y_observed)
 
     # Draw a batch of candidates in the domain
     candidates = latin_hypercube(n_candidates, bounds, seed=seed)
@@ -407,7 +408,7 @@ def bo_suggest_next(X_observed, y_observed, bounds,
 
     # Learn hyperparameters from observation data if auto mode was on
     if auto_mode:
-        length_scale, variance, noise, xi = gaussian_process_hyperparameters(X_normalized, y_normalized)
+        length_scale, variance, noise, xi, best_rel_noise = gaussian_process_hyperparameters(X_normalized, y_normalized)
 
     # Fit GP on current observation data
     mu, sigma = gaussian_process_predictor(X_normalized, y_normalized,
@@ -422,4 +423,9 @@ def bo_suggest_next(X_observed, y_observed, bounds,
 
     # Suggest the next point and its expected improvement
     idx = np.argmax(ei)
-    return candidates[idx], ei[idx]
+    
+    # Temporary
+    print(f"  suggest_next: {mu[idx] * y_norm_param[1] + y_norm_param[0]:.3f}, {sigma[idx]:.3f}")
+    
+    return candidates[idx], ei[idx], (length_scale, best_rel_noise)
+

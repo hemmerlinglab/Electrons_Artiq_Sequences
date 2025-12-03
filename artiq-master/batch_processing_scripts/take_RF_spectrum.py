@@ -27,7 +27,7 @@ general_config = {
 }
 
 optimizer_config = {
-    "optimize_target": "ratio_signal",
+    "optimize_target": "ratio_weighted",
     "max_iteration": 50,
     "min_iteration": 5,
     "init_sample_size": 10,
