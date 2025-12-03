@@ -27,6 +27,21 @@ general_config = {
     "U1": 0, "U3": 0, "U4": 0, "U5": 0
 }
 
+optimizer_config = {
+    "optimize_target": "ratio_weighted",
+    "max_iteration": 50,
+    "min_iteration": 5,
+    "init_sample_size": 10,
+    "tolerance": 1e-3,
+    "converge_count": 3,
+    "n_candidate_run": 1024,
+    "n_candidate_anal": 4096,
+    "min_Ex": -0.4, "max_Ex": 0.2,
+    "min_Ey": -0.1, "max_Ey": 0.2,
+    "min_Ez": -0.1, "max_Ez": 0.1,
+    "no_of_repeats": 3000
+}
+
 experiment_config = {
     "utility_mode": "DOE Scan",
     "tickle_on": True,

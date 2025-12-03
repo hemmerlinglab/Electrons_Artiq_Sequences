@@ -6,10 +6,16 @@ import re
 # =============================================================================
 class ArtiqController:
 
-    def __init__(self, script_path: str = None, command: str = "artiq_run"):
+    def __init__(
+            self,
+            script_path: str = None,
+            command: str = "artiq_run",
+            workdir: str = "/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/"
+        ):
         self.exp_params = {}
         self.command = command
         self.script = script_path
+        self.workdir = workdir    # Must set appropriately otherwise artiq would crash
 
         # In-memory profiles: name -> {"script": ..., "command": ..., "params": {...}}
         self._profiles = {}
@@ -24,6 +30,10 @@ class ArtiqController:
     def set_script(self, script_path: str):
         self.script = script_path
         return self  # allow chaining
+
+    def set_workdir(self, workdir: str):
+        self.workdir = workdir
+        return self
 
     def set_param(self, key: str, val):
         self.exp_params[key] = val
@@ -55,6 +65,7 @@ class ArtiqController:
         self._profiles[name] = {
             "script": self.script,
             "command": self.command,
+            "workdir": self.workdir,
             "params": copy.deepcopy(self.exp_params),
         }
         return self  # allow chaining
@@ -67,6 +78,7 @@ class ArtiqController:
         prof = self._profiles[name]  # let KeyError surface if missing
         self.script = prof["script"]
         self.command = prof["command"]
+        self.workdir = prof["workdir"]
         self.exp_params = copy.deepcopy(prof["params"])
         return self  # allow chaining
 
@@ -106,7 +118,8 @@ class ArtiqController:
         cp = subprocess.run(
             self._construct_args(),
             capture_output=True,
-            text=True
+            text=True,
+            cwd = self.workdir
         )
         return self._extract_timestamps(cp)
 
@@ -253,12 +266,12 @@ class FindOptimalE(ArtiqController):
         converge_count: int = 3,
         n_candidate_run: int = 1024,
         n_candidate_anal: int = 4096,
-        min_Ex: float = 0.0,
-        max_Ex: float = 0.0,
-        min_Ey: float = 0.0,
-        max_Ey: float = 0.0,
-        min_Ez: float = 0.0,
-        max_Ez: float = 0.0,
+        min_Ex: float = -0.25,
+        max_Ex: float = 0.05,
+        min_Ey: float = -0.05,
+        max_Ey: float = 0.20,
+        min_Ez: float = -0.10,
+        max_Ez: float = 0.10,
         no_of_repeats: int = 3000,
         **extra_params,
     ):
@@ -286,7 +299,8 @@ class FindOptimalE(ArtiqController):
         cp = subprocess.run(
             self._construct_args(),
             capture_output=True,
-            text=True
+            text=True,
+            cwd = self.workdir
         )
 
         # Parse both E's from the printed analyze output

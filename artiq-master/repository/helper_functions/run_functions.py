@@ -108,7 +108,7 @@ def initial_sampling(self):
 def bo_sampling(self, ind):
 
     # calculate the next point to measure
-    E_next, ei = bo_suggest_next(
+    E_next, ei, params = bo_suggest_next(
         self.E_sampled, self.y_sampled, self.bounds,
         n_candidates=self.n_candidate_run
     )
@@ -119,6 +119,10 @@ def bo_sampling(self, ind):
     # store BO result
     self.mutate_dataset("y_best", ind, np.max(self.y_sampled))
     self.mutate_dataset("ei", ind, ei)
+
+    # store BO parameters
+    self.mutate_dataset("length_scale", ind, params[0])
+    self.mutate_dataset("best_rel_noise", ind, params[1])
 
     return ei
 
@@ -165,7 +169,7 @@ def trap_optimize(self, ind):
     else:
         raise RuntimeError("Optimize target not supported!")
     
-    print(f"{ind:2d}/{self.init_sample_size + self.max_iteration}: E=[{self.Ex:.3f},\t{self.Ey:.3f},\t{self.Ez:.3f}]:\tsignal={signal:.3f}")
+    print(f"{ind:2d}/{self.init_sample_size + self.max_iteration}: E=({self.Ex:.3f},\t{self.Ey:.3f},\t{self.Ez:.3f}):\tsignal={signal:.3f}")
     return signal
 
 # ===================================================================

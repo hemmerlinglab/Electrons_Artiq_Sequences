@@ -112,8 +112,8 @@ def find_model_optimum(self):
 
     # Extract data for final model
     E_normalized = normalize_coordinates(self.E_sampled, self.bounds)
-    y_normalized = normalize_values(self.y_sampled)
-    length_scale, variance, noise, xi = gaussian_process_hyperparameters(E_normalized, y_normalized)
+    y_normalized, _ = normalize_values(self.y_sampled)
+    length_scale, variance, noise, xi, _ = gaussian_process_hyperparameters(E_normalized, y_normalized)
 
     # General testing points for final model
     candidates = latin_hypercube(self.n_candidate_anal, self.bounds)
