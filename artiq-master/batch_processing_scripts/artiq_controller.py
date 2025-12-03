@@ -149,7 +149,6 @@ class SingleParameterScan(ArtiqController):
         Any additional ARTIQ parameters (Ex, RF_on, etc.) via **extra_params.
         """
 
-        self.clear_params()
         self.load_params({
             "mode": mode,
             "scanning_parameter": scanning_parameter,
@@ -198,7 +197,6 @@ class DoeScan(ArtiqController):
 
         Any additional ARTIQ parameters (Ex, RF_on, etc.) via **extra_params.
         """
-        self.clear_params()
         self.load_params({
             "mode": mode,
             "utility_mode": utility_mode,
@@ -247,7 +245,7 @@ class FindOptimalE(ArtiqController):
     def run(
         self,
         *,
-        optimize_target: str = "trapped_signal",
+        optimize_target: str = "ratio_signal",
         max_iteration: int = 50,
         min_iteration: int = 5,
         init_sample_size: int = 10,
@@ -261,11 +259,10 @@ class FindOptimalE(ArtiqController):
         max_Ey: float = 0.0,
         min_Ez: float = 0.0,
         max_Ez: float = 0.0,
-        no_of_repeats: int = 10000,
+        no_of_repeats: int = 3000,
         **extra_params,
     ):
         # Set parameters
-        self.clear_params()
         self.load_params({
             "optimize_target": optimize_target,
             "max_iteration": max_iteration,

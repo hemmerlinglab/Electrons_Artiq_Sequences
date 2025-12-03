@@ -100,7 +100,6 @@ def run_many_optimizations(n_runs: int = 10):
 
     return obs_arr, model_arr
 
-
 if __name__ == "__main__":
     # change n_runs if you want more/less statistics
     run_many_optimizations(n_runs=10)
