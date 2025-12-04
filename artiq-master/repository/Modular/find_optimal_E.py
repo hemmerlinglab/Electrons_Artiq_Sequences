@@ -15,23 +15,14 @@ MAX_RETRIES = 3
 class FindOptimalE(EnvExperiment):
 
     def build(self):
-
         optimizer_build(self)
         self.sequence_filename = os.path.abspath(__file__)
 
-        return
-
     def prepare(self):
-
         optimizer_prepare(self)
 
-        return
-
     def analyze(self):
-
         optimizer_analyze(self)
-
-        return
 
     def run(self):
 
@@ -72,5 +63,3 @@ class FindOptimalE(EnvExperiment):
             if (current_step + 1) >= self.min_iteration \
                     and low_ei_count >= self.converge_count:
                 break
-
-        return

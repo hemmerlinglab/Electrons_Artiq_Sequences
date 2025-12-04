@@ -3,6 +3,7 @@ import shutil
 from configparser import ConfigParser
 
 import scan_functions as sf
+from base_sequences import set_multipoles
 from helper_functions import latin_hypercube, normalize_coordinates, normalize_values, gaussian_process_hyperparameters, gaussian_process_predictor
 
 # ===================================================================
@@ -13,26 +14,20 @@ def ofat_analyze(self):
     close_instruments(self)
     save_data_or_exit(self)
 
-    return
-
 def doe_analyze(self):
 
-    reset_all_parameters(self)
+    reset_scanned_parameters(self)
     close_instruments(self)
     save_data_or_exit(self)
     if self.scan_ok and self.utility_mode == "DOE Scan":
         save_to_doe_table(self)
 
-    return
-
 def optimizer_analyze(self):
 
-    reset_all_parameters(self)
+    reset_optimizer_parameters(self)
     close_instruments(self)
     save_data_or_exit(self)
     printout_final_result(self)
-
-    return
 
 # ===================================================================
 # 2) Subfunctions for analyze
@@ -43,28 +38,34 @@ def reset_scan_parameter(self):
     # Get correct value and tool for reseting
     initial_value = next((e['val'] for e in self.config_dict if e.get('par') == name), None)
 
-    func = getattr(sf, f"_scan_{name}", None)
+    func = sf._get_scan_function(name)
 
     # Reset scanning parameter
     func(self, initial_value, [initial_value], scan_check=False)
 
-def reset_all_parameters(self):
+def reset_scanned_parameters(self):
 
-    print("Resetting all parameters to their default values ...")
+    print("Resetting all scanned parameters to their default values ...")
 
-    for item in self.config_dict:
-        if item.get("scanable", False):
-            param_name = item["par"]
-            default_val = item["val"]
+    default_values = {item["par"]: item["val"] for item in self.config_dict}
 
-            scan_func = getattr(sf, f"_scan_{param_name}", None)
+    for param_name in self.setpoints.columns:
+        initial_value = default_values[param_name]
 
-            if scan_func:
-                scan_func(self, default_val, [default_val], scan_check=False)
-            else:
-                print(f"Parameter {param_name} not reset, because there is no scan function for it.")
+        func = sf._get_scan_function(param_name)
+        if func:
+            func(self, initial_value, [initial_value], scan_check=False)
+        else:
+            print(f"Parameter {param_name} not reset, because there is no scan function for it.")
             
-    print("All paramters with scan functions reset to default")
+    print("All scannned paramters with scan functions reset to default")
+
+def reset_optimizer_parameters(self):
+
+    print("Resetting Ex, Ey, and Ez to default [0.0, 0.0, 0.0] ...")
+
+    self.Ex, self.Ey, self.Ez = (0.0, 0.0, 0.0)
+    set_multipoles(self)
 
 def close_instruments(self):
 
@@ -84,8 +85,6 @@ def close_instruments(self):
     # Should not turn off ext_pulser because it could kill the AOM
     #self.ext_pulser.off()
     self.ext_pulser.close()
-    
-    return
 
 def printout_final_result(self):
 
@@ -105,8 +104,6 @@ def printout_final_result(self):
     print("Best predicted by GP (posterior mean on candidate grid):")
     print(f"  mean = {y_best_model}")
     print(f"  E = [{E_best_model[0]}, {E_best_model[1]}, {E_best_model[2]}]")
-
-    return
 
 def find_model_optimum(self):
 
@@ -153,8 +150,6 @@ def save_data_or_exit(self):
 
         print('Scan terminated.')
 
-    return
-
 def save_to_doe_table(self):
 
     results = self.setpoints.copy()
@@ -167,8 +162,6 @@ def save_to_doe_table(self):
 
     output_file = f"{self.basefilename}_DOE_results_table.csv"
     results.to_csv(output_file, index=False)
-
-    return
 
 def save_all(self):
 

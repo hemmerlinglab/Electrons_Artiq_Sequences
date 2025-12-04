@@ -1,17 +1,9 @@
-# Common Import
-
-import matplotlib.pyplot as plt
+from artiq.experiment import EnvExperiment, EnumerationValue, NumberValue, kernel, delay, us
 import time
 import sys
 
-from artiq.experiment import *
-
 sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions")
 from helper_functions import calculate_Vsampler, calculate_HighV, calculate_Vin, safe_check
-
-
-
-# 實驗代碼
 
 class MCP_PowerSupply(EnvExperiment):
     
@@ -32,7 +24,6 @@ class MCP_PowerSupply(EnvExperiment):
         self.NumSamples = len(self.SamplerChannels)
         self.V0 = [0.0] * self.NumSamples
         self.SampleResults=[0.0]*8
-        
 
     @kernel
     def read(self):
@@ -45,7 +36,6 @@ class MCP_PowerSupply(EnvExperiment):
         self.sampler0.sample(readings)
         self.set_dataset("sampler_voltages", readings, broadcast=True)
         self.core.break_realtime()
-        
 
     def process(self):
         self.read()
@@ -54,7 +44,6 @@ class MCP_PowerSupply(EnvExperiment):
             self.V0[i] = calculate_Vsampler(i, self.SampleResults[i])
         return self.V0
 
-
     def Vt(self):
         self.process()
         self.Vt = [0.0]*3
@@ -62,6 +51,21 @@ class MCP_PowerSupply(EnvExperiment):
             self.Vt[i] = calculate_HighV(i, self.V0[i])
         return self.Vt
 
+    @kernel
+    def output(self):
+       
+        self.core.reset()
+        self.core.break_realtime()
+        self.zotino0.init()
+        delay(200*us)
+
+        for i in range(len(self.channels)):
+            self.zotino0.write_gain_mu(self.channels[i], 65000)
+            self.zotino0.load()
+            delay(200*us)
+            self.zotino0.write_dac(self.channels[i], self.Vin[i])
+            self.zotino0.load()
+            delay(200*us)
     
     def run(self):
 
@@ -110,23 +114,3 @@ class MCP_PowerSupply(EnvExperiment):
             first_cycle = False
 
             self.output()
-            
-
-    @kernel
-    def output(self):
-       
-        self.core.reset()
-        self.core.break_realtime()
-        self.zotino0.init()
-        delay(200*us)
-
-        for i in range(len(self.channels)):
-            self.zotino0.write_gain_mu(self.channels[i], 65000)
-            self.zotino0.load()
-            delay(200*us)
-            self.zotino0.write_dac(self.channels[i], self.Vin[i])
-            self.zotino0.load()
-            delay(200*us)
-
-        return
-

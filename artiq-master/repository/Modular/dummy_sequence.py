@@ -12,21 +12,14 @@ from scan_functions    import scan_parameter
 class Dummy_Sequence(EnvExperiment):
     
     def build(self):
-
         ofat_build(self)
         self.sequence_filename = os.path.abspath(__file__)
 
-        return
-
     def prepare(self):
-
         ofat_prepare(self)
 
     def analyze(self):
-
         ofat_analyze(self)
-    
-        return
 
     def run(self):
 
@@ -40,7 +33,3 @@ class Dummy_Sequence(EnvExperiment):
 
                 # set the new parameter
                 scan_parameter(self, my_ind)
-
-        return
-
-

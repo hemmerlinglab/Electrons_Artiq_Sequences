@@ -53,8 +53,6 @@ def measure(self, ind, print_result = False, validate_390 = False, validate_422 
         if print_result:
             print(f"Recorded Number of electrons: {cts}")
 
-    return 
-
 def record_RTIO_error(self, ind, err):
 
     # constant
@@ -72,8 +70,6 @@ def record_RTIO_error(self, ind, err):
     # e.g. wait for the unstable amplifier behavior to disappear
     time.sleep(HOST_SLEEP_S)
 
-    return
-
 def handle_laser_jump(self, laser_to_fix = 422, tol = 1e-5):
     """
     When laser frequency was off (mode hopping), wait for the user to fix it manually.
@@ -90,8 +86,6 @@ def handle_laser_jump(self, laser_to_fix = 422, tol = 1e-5):
         time.sleep(1.0)
         act_freq = self.laser.get_frequency(laser_to_fix)
 
-    return
-
 # ===================================================================
 # 2) For Optimizer
 def initial_sampling(self):
@@ -102,8 +96,6 @@ def initial_sampling(self):
         t0 = time.time()
         measure_optimize(self, ind, pt)
         self.mutate_dataset("time_cost", ind, time.time() - t0)
-
-    return
 
 def bo_sampling(self, ind):
 
@@ -139,8 +131,6 @@ def measure_optimize(self, ind, E_field):
     self.E_sampled.append(E_field)
     self.y_sampled.append(signal)
     self.mutate_dataset("e_trace", ind, E_field)
-
-    return
 
 def trap_optimize(self, ind):
 
@@ -233,5 +223,3 @@ def store_to_dataset(self, my_ind, cts_trapped, cts_lost, cts_loading):
     # reset timestamps
     self.set_dataset('timestamps', [], broadcast=True)
     self.set_dataset('timestamps_loading', [], broadcast=True)
-
-    return

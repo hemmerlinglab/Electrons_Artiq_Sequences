@@ -16,23 +16,14 @@ MAX_RETRIES = 3
 class DOEScan(EnvExperiment):
 
     def build(self):
-
         doe_build(self)
         self.sequence_filename = os.path.abspath(__file__)
 
-        return
-
     def prepare(self):
-
         doe_prepare(self)
 
-        return
-
     def analyze(self):
-
         doe_analyze(self)
-
-        return
 
     def run(self):
 
@@ -96,5 +87,3 @@ class DOEScan(EnvExperiment):
                     continue
                 else:
                     break
-
-        return

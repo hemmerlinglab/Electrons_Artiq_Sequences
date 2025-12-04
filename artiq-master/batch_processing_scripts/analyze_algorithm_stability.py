@@ -11,8 +11,6 @@ general_config = {
     "threshold_voltage": 60,
     "wait_time": 90,
     "load_time": 210,
-    "trap": "Single PCB",
-    "flip_electrodes": False,
     "frequency_422": 709.078300,
     "frequency_390": 768.708843,
     "RF_on": True,
@@ -102,7 +100,6 @@ def run_many_optimizations(n_runs: int = 10):
     print(f"  model    E: {model_rms}")
 
     return obs_arr, model_arr
-
 
 if __name__ == "__main__":
     # change n_runs if you want more/less statistics

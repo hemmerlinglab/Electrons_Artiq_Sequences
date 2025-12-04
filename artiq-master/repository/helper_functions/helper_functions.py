@@ -12,7 +12,6 @@ THRESHOLD = 1e-9
 ####################################################################
 ################  Functions for DC Voltage Control  ################
 ####################################################################
-
 def calculate_input_voltage(chan, volt, use_amp = True):
 
     if use_amp: key = 'Input→Amp'
@@ -37,8 +36,7 @@ def adjust_control_voltages(target, use_amp = True):
         input_vector[i] = calculate_input_voltage(channels[i], voltages[i], use_amp)
 
     return (channels, input_vector)
-    
-    
+
 ###########################################################################################
 
 S = np.loadtxt("/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/Table/Sampler.csv", delimiter=",")
@@ -428,4 +426,3 @@ def bo_suggest_next(X_observed, y_observed, bounds,
     print(f"  suggest_next: {mu[idx] * y_norm_param[1] + y_norm_param[0]:.3f}, {sigma[idx]:.3f}")
     
     return candidates[idx], ei[idx], (length_scale, best_rel_noise)
-

@@ -17,7 +17,6 @@ from dc_electrodes import Electrodes
 from base_sequences import zotino_initialization, set_multipoles, update_detection_time, set_mesh_voltage, set_threshold_voltage, set_MCP_voltages, set_extraction_pulse, set_loading_pulse
 from scan_functions import scan_parameter
 
-
 # ===================================================================
 # 1) Master function for prepare
 def ofat_prepare(self):
@@ -28,8 +27,6 @@ def ofat_prepare(self):
     prepare_initialization(self)
     prepare_ofat_saving_configuration(self)
     prepare_saving_configuration(self)
-
-    return
 
 def doe_prepare(self):
 
@@ -46,8 +43,6 @@ def doe_prepare(self):
     prepare_initialization(self)
     prepare_saving_configuration(self)
 
-    return
-
 def optimizer_prepare(self):
 
     # General Preparations
@@ -57,8 +52,6 @@ def optimizer_prepare(self):
     prepare_initialization(self)
     prepare_saving_configuration(self)
     prepare_optimizer_saving_configuration(self)
-
-    return
 
 # ===================================================================
 # 2) Subfunctions for prepare
@@ -72,8 +65,10 @@ def prepare_instruments(self):
 
     # Zotino DC controller
     self.electrodes = Electrodes(trap = self.trap, flipped = self.flip_electrodes)
-
-    return
+    for elec in self.electrodes.elec_dict.keys():
+        param_name = f"offset_{elec}"
+        offset_voltage = getattr(param_name, elec)
+        self.electrodes.set_offset(elec, offset_voltage)
 
 def prepare_initialization(self):
 
@@ -129,9 +124,6 @@ def prepare_initialization(self):
     self.spectrum_analyzer.set_center_freq(self.RF_frequency * 1e9)
     self.spectrum_analyzer.marker_on(1)
 
-    return
-    
-
 def prepare_saving_configuration(self):
     
     # Set the data going to save
@@ -164,16 +156,12 @@ def prepare_saving_configuration(self):
     print("*"*100)
     print("")
 
-    return
-
 def prepare_ofat_saving_configuration(self):
 
     self.data_to_save.append({'var' : 'arr_of_setpoints',   'name' : 'array of setpoints'})
 
     if self.mode == 'Counting':
         self.data_to_save.append({'var' : 'scan_x', 'name' : 'array of setpoints for counting mode, duplicate but in order to be compatible with applet'})
-
-    return
 
 def prepare_optimizer_saving_configuration(self):
 
@@ -183,8 +171,6 @@ def prepare_optimizer_saving_configuration(self):
         {'var' : 'ei',      'name' : 'array of expected improvement'}
     ]
     self.data_to_save.extend(optimizer_data_to_save)
-
-    return
 
 def prepare_common_datasets(self):
 
@@ -222,8 +208,6 @@ def prepare_common_datasets(self):
     # keysight amplitude
     self.set_dataset('act_RF_amplitude', [0] * self.steps, broadcast=True)
 
-    return
-
 def prepare_ofat_datasets(self):
 
     # Scan interval
@@ -238,8 +222,6 @@ def prepare_ofat_datasets(self):
     # counting mode datasets
     self.set_dataset('scan_x',             self.scan_values, broadcast=True)
 
-    return
-
 def prepare_doe_datasets(self):
 
     allowed_params = [x['par'] for x in self.config_dict if x['scanable']]
@@ -253,13 +235,11 @@ def prepare_doe_datasets(self):
         self.scan_values = self.setpoints[param_to_scan].to_numpy()
         self.scanning_parameter = param_to_scan
         self.scan_ok = self.scan_ok and scan_parameter(self, 0, scan_check = True)
-    
+
     # To let `arr_or_setpoints` and `scan_x` based applet to run
     xaxis = np.arange(self.steps)
     self.set_dataset('arr_of_setpoints', xaxis, broadcast=True)
     self.set_dataset('scan_x',           xaxis, broadcast=True)
-
-    return
 
 def prepare_optimizer_datesets(self):
 
@@ -286,8 +266,6 @@ def prepare_optimizer_datesets(self):
     self.set_dataset("optimizer_x", list(range(self.max_iteration)), broadcast=True)
 
     self.scan_ok = True
-
-    return
 
 # ===================================================================
 # 3) Helper Functions
