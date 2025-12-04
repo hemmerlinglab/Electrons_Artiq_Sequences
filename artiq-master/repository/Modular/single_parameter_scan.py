@@ -16,27 +16,16 @@ MAX_RETRIES = 3
 class SingleParamScan(EnvExperiment):
 
     def build(self):
-
         ofat_build(self)
         self.sequence_filename = os.path.abspath(__file__)
 
-        return
-
     def prepare(self):
-
         ofat_prepare(self)
 
-        return
-
     def analyze(self):
-
         ofat_analyze(self)
-    
-        return
 
     def run(self):
-
-        # initiate scan
 
         if not self.scan_ok:
             return
@@ -82,5 +71,3 @@ class SingleParamScan(EnvExperiment):
                 else: break
 
             self.mutate_dataset("time_cost", ind, time.time() - t0)
-
-        return
