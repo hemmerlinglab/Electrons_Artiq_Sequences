@@ -104,8 +104,8 @@ class ArtiqController:
             args.append(f"{key}={repr(value)}")
         return args
 
-    def _extract_timestamps(self, cp) -> str:
-        m = re.search(r"(\d{8}_\d{6})", cp.stdout)
+    def _extract_timestamps(self, stdout: str) -> str:
+        m = re.search(r"(\d{8}_\d{6})", stdout)
         return m.group(1) if m else ""
 
     def print_args(self):
@@ -121,7 +121,7 @@ class ArtiqController:
             text=True,
             cwd = self.workdir
         )
-        return self._extract_timestamps(cp)
+        return self._extract_timestamps(cp.stdout)
 
 
 # 2) Subclass for single_parameter_scan
@@ -295,9 +295,11 @@ class FindOptimalE(ArtiqController):
             cwd = self.workdir
         )
 
-        # Parse both E's from the printed analyze output
+        # Parse both E's and timestamp from the printed analyze output
         E_best_obs, E_best_model = self._parse_optimal_Es(cp.stdout)
-        return E_best_obs, E_best_model
+        timestamp = self._extract_timestamps(cp.stdout)
+
+        return E_best_obs, E_best_model, timestamp
 
 if __name__ == "__main__":
     ac = ArtiqController("general_scan.py")

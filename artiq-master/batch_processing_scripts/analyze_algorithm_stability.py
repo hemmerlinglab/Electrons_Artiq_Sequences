@@ -60,7 +60,7 @@ def run_many_optimizations(n_runs: int = 10):
         run_kwargs.update(optimizer_config)
         run_kwargs.update(general_config)
 
-        E_best_obs, E_best_model = opt.run(**run_kwargs)
+        E_best_obs, E_best_model, _ = opt.run(**run_kwargs)
 
         print(f"Best observed E (Ex, Ey, Ez): {E_best_obs}")
         print(f"Best model    E (Ex, Ey, Ez): {E_best_model}")
