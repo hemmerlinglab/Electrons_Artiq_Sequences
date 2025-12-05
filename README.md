@@ -14,13 +14,13 @@ Our ARTIQ relies on Python in `nix` environment, not conda or system bare Python
    ```
 3. Set the `PYTHONPATH` to ensure ARTIQ uses the correct Python site-packages:
    ```
-   export PYTHONPATH="$HOME/.nix-profile/lib/python3.8/site-packages:$PYTHONPATH"
+   export PYTHONPATH="$HOME/.nix-profile/lib/python3.8/site-packages:$(pwd)/repository:$PYTHONPATH"
    ```
 4. Launch ARTIQ session:
    ```
    artiq_session
    ```
-   
+
 ## How to install packages to Python used by Artiq
 1. Deactivate the Conda environment (to prevent potential Python conflicts):
    ```

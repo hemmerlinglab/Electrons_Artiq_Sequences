@@ -1,4 +1,6 @@
 import numpy as np
+import os
+
 from math import erf
 erf_vec = np.vectorize(erf)
 
@@ -39,8 +41,12 @@ def adjust_control_voltages(target, use_amp = True):
 
 ###########################################################################################
 
-S = np.loadtxt("/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/Table/Sampler.csv", delimiter=",")
-H = np.loadtxt("/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/Table/HighV.csv", delimiter=",")
+# Compute calibration tables path and load them
+base_dir = os.path.dirname(__file__)
+sampler_path = os.path.join(base_dir, "Table", "Sampler.csv")
+higg_v_path = os.path.join(base_dir, "Table", "HighV.csv")
+S = np.loadtxt(sampler_path, delimiter=",")
+H = np.loadtxt(higg_v_path, delimiter=",")
 
 def calculate_Vsampler(chan, V):
     """convert sampler read value into the voltage sent into the sampler."""

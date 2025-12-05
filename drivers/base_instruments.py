@@ -39,8 +39,3 @@ class base_visa_instrument:
         self.device.close()
 
         return
-
-
-
-
-
