@@ -137,6 +137,10 @@ def trap_optimize(self, ind):
     if self.scheduler.check_pause():
         raise TerminationRequested("Termination requested during scan")
 
+    # Record Laser and RF data
+    status_390, status_422 = record_laser_frequencies(self, ind)
+    record_RF_amplitude(self, ind)
+
     if self.histogram_on:
         cts_trapped, cts_lost, cts_loading = trap_with_histogram(self, ind)
     else:

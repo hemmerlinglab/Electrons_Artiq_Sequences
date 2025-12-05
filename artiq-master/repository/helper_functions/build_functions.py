@@ -51,8 +51,9 @@ def optimizer_build(self):
     load_attributes(self)
 
     # Load Parameters
-    load_optimizer_parameters(self)
     load_common_parameters(self)
+    load_optimizer_parameters(self)
+
 
 # 2) Subfunctions for build
 def load_variables(self):
@@ -190,9 +191,9 @@ def load_optimizer_parameters(self):
     #------------------------------------------------------
     my_setattr(self, 'optimize_target', EnumerationValue(optimization_targets, default=optimization_targets[0]), scanable=False) # Which signal to optimize
     my_setattr(self, 'max_iteration',   NumberValue(default=50,unit='',scale=1,ndecimals=0,step=1), group=group_algorithm, scanable=False)
-    my_setattr(self, 'tolerance',       NumberValue(default=1e-3,unit='',scale=1,ndecimals=6,step=1e-6), group=group_algorithm, scanable=False)
+    my_setattr(self, 'tolerance',       NumberValue(default=5e-3,unit='',scale=1,ndecimals=6,step=1e-6), group=group_algorithm, scanable=False)
     my_setattr(self, 'converge_count',  NumberValue(default=3,unit='',scale=1,ndecimals=0,step=1), group=group_algorithm, scanable=False)
-    my_setattr(self, 'min_Ex',          NumberValue(default=-0.25,unit='',scale=1,ndecimals=3,step=.001), group=group_bound, scanable=False)
+    my_setattr(self, 'min_Ex',          NumberValue(default=-0.3,unit='',scale=1,ndecimals=3,step=.001), group=group_bound, scanable=False)
     my_setattr(self, 'max_Ex',          NumberValue(default=0.05,unit='',scale=1,ndecimals=3,step=.001), group=group_bound, scanable=False)
     my_setattr(self, 'min_Ey',          NumberValue(default=-0.05,unit='',scale=1,ndecimals=3,step=.001), group=group_bound, scanable=False)
     my_setattr(self, 'max_Ey',          NumberValue(default=0.2,unit='',scale=1,ndecimals=3,step=.001), group=group_bound, scanable=False)
@@ -209,3 +210,11 @@ def load_optimizer_parameters(self):
     self.tickle_on = False
     self.tickle_pulse_length = 80
     self.tickle_level = -10
+
+    if not self.flip_electrodes: trap_key = self.trap
+    else: trap_key = self.trap + " Flipped"
+    list_of_electrodes = traps[trap_key]["electrodes_order"]
+    for elec in list_of_electrodes:
+        param_name = f"offset_{elec}"
+        setattr(self, param_name, 0.0)
+

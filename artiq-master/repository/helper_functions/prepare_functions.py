@@ -67,7 +67,7 @@ def prepare_instruments(self):
     self.electrodes = Electrodes(trap = self.trap, flipped = self.flip_electrodes)
     for elec in self.electrodes.elec_dict.keys():
         param_name = f"offset_{elec}"
-        offset_voltage = getattr(param_name, elec)
+        offset_voltage = getattr(self, param_name)
         self.electrodes.set_offset(elec, offset_voltage)
 
 def prepare_initialization(self):
