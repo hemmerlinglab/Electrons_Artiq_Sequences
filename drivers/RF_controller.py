@@ -4,6 +4,32 @@ from keysight_spectrum import Keysight
 import numpy as np
 import time
 
+RF_SYSTEM_PARAMS = {
+
+    # change this when the RF system changes
+    "update_date": 20251217,
+
+    # generator range (amplitude, in dBm)
+    "amplitude_min": -30.0,
+    "amplitude_max": +11.0,
+
+    # generator range (frequency, in Hz)
+    "frequency_min": 1e+6,
+    "frequency_max": 31.8e+9,
+
+    # spectrum analyzer measurement settings
+    "span_hz": 50e+6,
+    "div_dB": 1.0,
+
+    # rf system dependent functions
+    "careful_functions": [
+        "_update_setpoint_fast",
+        "_convert_frequency_value",
+        "_set_vertical_window",
+        "_convert_frequency_value",
+    ]
+}
+
 class RFController:
 
     # 1) Initialization
@@ -34,19 +60,19 @@ class RFController:
 
         # 3. Hidden Attributes (Constants)
         # ---------------------------------------
-        self._divA = 1.0
-        self._span = 50e+06
+        self._divA = RF_SYSTEM_PARAMS["div_dB"]
+        self._span = RF_SYSTEM_PARAMS["span_hz"]
 
         # 4. Generator setpoint bounds
         # ---------------------------------------
-        self._setpoint_min = -30.0
-        self._setpoint_max = +11.0
+        self._setpoint_min = RF_SYSTEM_PARAMS["amplitude_min"]
+        self._setpoint_max = RF_SYSTEM_PARAMS["amplitude_max"]
 
         # 5. Last Setpoint for Actual and Locked Mode
         # ---------------------------------------
         self._last_setpoint = None
 
-    # Turn RF on and off
+    # 2) Turn RF on and off
     # ===============================================================
     def on(self):
 
@@ -85,26 +111,15 @@ class RFController:
 
     def _convert_frequency_value(self, frequency):
 
-        # Spec range is hard coded here, too lazy to make this flexible
-        if frequency >= 1e+6 and frequency <= 31.8e+9:
+        min_hz = RF_SYSTEM_PARAMS["frequency_min"]
+        max_hz = RF_SYSTEM_PARAMS["frequency_max"]
+
+        if frequency >= min_hz and frequency <= max_hz:
             return frequency
-        elif frequency >= 1e-3 and frequency <= 31.8:
+        elif frequency >= min_hz/1e9 and frequency <= max_hz/1e9:
             return frequency * 1e+9
         else:
             raise ValueError("Frequency is not supported! Supported range: [1e+6, 31.8e+9]")
-
-    def _get_initial_setpoint(self, target: float) -> float:
-
-        # This has to change when the RF connection system or trap was changed.
-        # Not deadly if not changed, though
-        if target <= 10.2:
-            return target - 10.2
-        elif target <= 12.2:
-            return 2.0 * (target - 10.2)
-        elif target <= 12.8:
-            return 3.33 * (target - 12.2) + 4.0
-        else:
-            return 8.0
 
     def _auto_setpoint(self, target: float) -> float:
 
@@ -131,16 +146,44 @@ class RFController:
                 print(f"[RFController] RF setpoint: {self._last_setpoint:.2f} dBm")
                 return
 
-            # Semi-Newton's Method
-            if self._last_setpoint <= 0.0: _K = 1.0
-            elif self._last_setpoint <= 4.0: _K = 2.0
-            elif self._last_setpoint <= 6.0: _K = 3.33
-            else: _K = 5.0
-
-            self._last_setpoint += _K * err
-            self._last_setpoint = max(self._setpoint_min, min(self._setpoint_max, self._last_setpoint))
+            self._update_setpoint_fast(err)
 
         print(f"[RFController] Warning: Did not find proper setpoint for this RF_amplitude within setpoint bound [{self._setpoint_min:.1f}, {self._setpoint_max:.1f}] dBm!")
+
+    def _update_setpoint(self, err: float):
+        """
+        Robust setpoint update
+        If RF system changed, either use this or write a new fast algorithm.
+        """
+
+        self._last_setpoint += 0.9 * err
+        self._last_setpoint = max(self._setpoint_min, min(self._setpoint_max, self._last_setpoint))
+
+    # 3.1) RF System dependent Functions, Modify when Changed
+    # ===============================================================
+    def _get_initial_setpoint(self, target: float) -> float:
+
+        # This has to change when the RF connection system or trap was changed.
+        # Not deadly if not changed, though
+        if target <= 10.2:
+            return target - 10.2
+        elif target <= 12.2:
+            return 2.0 * (target - 10.2)
+        elif target <= 12.8:
+            return 3.33 * (target - 12.2) + 4.0
+        else:
+            return 8.0
+
+    def _update_setpoint_fast(self, err: float):
+
+        # Semi-Newton's Method
+        if self._last_setpoint <= 0.0: K = 1.0
+        elif self._last_setpoint <= 4.0: K = 2.0
+        elif self._last_setpoint <= 6.0: K = 3.33
+        else: K = 5.0
+
+        self._last_setpoint += K * err
+        self._last_setpoint = max(self._setpoint_min, min(self._setpoint_max, self._last_setpoint))
 
     # 4) Utilities
     # ===============================================================
