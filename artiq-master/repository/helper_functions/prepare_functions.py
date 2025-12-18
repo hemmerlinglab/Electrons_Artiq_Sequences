@@ -8,9 +8,8 @@ import os
 sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/drivers")
 from bk_4053 import BK4053
 from rigol   import DSG821
-from rs      import RS
 from laser_controller import LaserClient
-from keysight_spectrum import Keysight
+from RF_controller    import RFController
 
 # something within the same directory
 from dc_electrodes import Electrodes
@@ -59,9 +58,14 @@ def prepare_instruments(self):
 
     self.ext_pulser        = BK4053()      # extraction pulse generator and AOM controller
     self.tickler           = DSG821()      # tickle pulse generator
-    self.RF_driver         = RS()          # trap drive
     self.laser             = LaserClient() # Laser Lock GUI client
-    self.spectrum_analyzer = Keysight()    # Keysight N9000B spectrum analyzer
+
+    # trap drive and measurement
+    self.rf = RFController(
+        mode = self.RF_amp_mode,
+        amplitude = self.RF_amplitude,
+        frequency = self.RF_frequency
+    )
 
     # Zotino DC controller
     self.electrodes = Electrodes(trap = self.trap, flipped = self.flip_electrodes)
@@ -79,14 +83,12 @@ def prepare_initialization(self):
     self.laser.set_frequency(390, self.frequency_390)
     self.laser.set_frequency(422, self.frequency_422)
 
-    # 1. Trap drive
+    # 1. RF
     #------------------------------------------------------
-    self.RF_driver.set_ampl(self.RF_amplitude)
-    self.RF_driver.set_freq(self.RF_frequency * 1e9)
     if self.RF_on:
-        self.RF_driver.on()
+        self.rf.on()
     else:
-        self.RF_driver.off()
+        self.rf.off()
 
     # 2. DC voltages
     #------------------------------------------------------
@@ -95,6 +97,7 @@ def prepare_initialization(self):
 
     # 3. Mesh, MCP, and Threshold voltage
     #------------------------------------------------------
+    #self.mesh = Mesh(initial_voltage = self.mesh_voltage)
     set_mesh_voltage(self, self.mesh_voltage)
     self.current_MCP_front = self.MCP_front
     set_MCP_voltages(self, self.MCP_front)
@@ -113,16 +116,6 @@ def prepare_initialization(self):
         self.tickler.set_freq(self.tickle_frequency)
     else:
         self.tickler.off()
-
-    # 7. Keysight Windows and Amplitude Division
-    #------------------------------------------------------
-    self.divA = 1
-    self.span = 50e+06
-    self.spectrum_analyzer.set_ref_ampl(min(self.RF_amplitude+16,18))
-    self.spectrum_analyzer.set_div_ampl(self.divA)
-    self.spectrum_analyzer.set_span(self.span)
-    self.spectrum_analyzer.set_center_freq(self.RF_frequency * 1e9)
-    self.spectrum_analyzer.marker_on(1)
 
 def prepare_saving_configuration(self):
     

@@ -205,7 +205,7 @@ class Electrodes(object):
         inds, vols = self._get_voltage_matrix(multipole_vector)
 
         for i in range(len(inds)):
-            print(f"ch{inds[i]}:\t{vols[i]:6.2f}V")
+            print(f"  ch{inds[i]}:\t{vols[i]:6.2f}V")
         print()
 
     def print_offset_scan_ranges(self, multipole_vector):

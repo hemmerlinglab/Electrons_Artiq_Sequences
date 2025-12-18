@@ -118,6 +118,7 @@ def _scan_mesh_voltage(self, val, scan_values, scan_check = False):
         return _limit_check(self.scanning_parameter, scan_values, [0.0, 600.0])
     
     else:
+        #self.mesh.set_voltage(val)
         set_mesh_voltage(self, val)
         #time.sleep(3)
 
@@ -171,6 +172,15 @@ def _scan_wait_time(self, val, scan_values, scan_check = False):
 
         return 1
 
+def _scan_no_of_repeats(self, val, scan_values, scan_check = False):
+
+    if scan_check:
+        return _limit_check(self.scanning_parameter, scan_values, [0, 10000000])
+    
+    else:
+        self.no_of_repeats = val
+
+        return 1
 
 # 3. Laser Parameters  -------------------------------------------------------#
 #-----------------------------------------------------------------------------#
@@ -238,8 +248,7 @@ def _scan_RF_frequency(self, val, scan_values, scan_check = False):
         return _limit_check(self.scanning_parameter, scan_values, [1.0, 2.4])
     
     else:
-        self.RF_driver.set_freq(val * 1e9)
-        self.spectrum_analyzer.set_center_freq(val * 1e9)
+        self.rf.set_frequency(val * 1e9)
 
         return 1
 
@@ -249,8 +258,7 @@ def _scan_RF_amplitude(self, val, scan_values, scan_check = False):
         return _limit_check(self.scanning_parameter, scan_values, [-30, 11])
     
     else:
-        self.RF_driver.set_ampl(val)
-        self.spectrum_analyzer.set_ref_ampl(min(val+16,18))
+        self.rf.set_amplitude(val)
 
         return 1
 

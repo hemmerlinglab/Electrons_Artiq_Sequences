@@ -63,7 +63,7 @@ DATA_DIRECTORY = "/home/electrons/software/data"
 
 # Example filename pattern:
 #   /home/electrons/software/data/20241205/20241205_153000_offset_tl1.csv
-FILE_TEMPLATE = "{timestamp}_{param}.csv"
+FILE_TEMPLATE = "{timestamp}_{param}"
 
 # Signals to plot
 Y_SIGNALS = [
@@ -75,7 +75,7 @@ Y_SIGNALS = [
 
 X_SIGNAL = "arr_of_setpoints"
 
-MULTI_FILE_TEMPLATE = "{timestamp}_{dataset}.csv"
+MULTI_FILE_TEMPLATE = "{timestamp}_{dataset}"
 
 # =============================================================================
 # 2) Data loading for a single scan
@@ -271,12 +271,47 @@ def plot_results_4x5(results, fig_name="offset_scan_4x5.png"):
 # =============================================================================
 # 5) Main
 # =============================================================================
-
+'''
 if __name__ == "__main__":
     # 1) Run the scans once and record timestamps for each electrode
     timestamps = run_all_scans_get_timestamps()
 
     # 2) For each Y dataset, load data from disk and make one 4x5 figure
+    for y_dataset in Y_SIGNALS:
+        print(f"\n\n######## Plotting for Y dataset: {y_dataset} ########\n")
+        results = load_results_for_dataset(timestamps, y_dataset=y_dataset)
+        fig_name = f"offset_scan_4x5_{y_dataset}.png"
+        plot_results_4x5(results, fig_name=fig_name)
+'''
+
+TIMESTAMPS_20251205 = {
+    "tl1": "20251205_140039",
+    "tl2": "20251205_140750",
+    "tl3": "20251205_141459",
+    "tl4": "20251205_142207",
+    "tl5": "20251205_142916",
+    "tr1": "20251205_143625",
+    "tr2": "20251205_144334",
+    "tr3": "20251205_145042",
+    "tr4": "20251205_145750",
+    "tr5": "20251205_150459",
+    "bl1": "20251205_151209",
+    "bl2": "20251205_151920",
+    "bl3": "20251205_152627",
+    "bl4": "20251205_153334",
+    "bl5": "20251205_154042",
+    "br1": "20251205_154753",
+    "br2": "20251205_155501",
+    "br3": "20251205_160208",
+    "br4": "20251205_160915",
+    "br5": "20251205_161623",
+}
+
+if __name__ == "__main__":
+    # Use the timestamps from the already-finished scans
+    timestamps = TIMESTAMPS_20251205
+
+    # For each Y dataset, load data from disk and make one 4x5 figure
     for y_dataset in Y_SIGNALS:
         print(f"\n\n######## Plotting for Y dataset: {y_dataset} ########\n")
         results = load_results_for_dataset(timestamps, y_dataset=y_dataset)

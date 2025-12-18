@@ -12,6 +12,9 @@ def measure(self, ind, print_result = False, validate_390 = False, validate_422 
     if self.scheduler.check_pause():
         raise TerminationRequested("Termination requested during scan")
 
+    if self.RF_amp_mode == "locked":
+        self.rf.set_amplitude()
+
     status_390, status_422 = record_laser_frequencies(self, ind)
     record_RF_amplitude(self, ind)
 

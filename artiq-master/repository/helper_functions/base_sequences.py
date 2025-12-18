@@ -28,7 +28,7 @@ def record_laser_frequencies(self, idx, tol = 1e-5):
 
 def record_RF_amplitude(self, idx):
 
-    _, ampl, _ = self.spectrum_analyzer.marker_measure(1, wait_time = None)
+    ampl = self.rf.get_amplitude()
     self.mutate_dataset('act_RF_amplitude', idx, ampl)
     
     return
@@ -374,15 +374,14 @@ def count_histogram(self):
 @kernel
 def read_histogram_timestamps(self, t_start, t_end, i):
 
-    if (i+1) % self.histogram_refresh != 0:
-        tstamp = self.ttl3.timestamp_mu(t_end)
-        while tstamp != -1:
-            timestamp = self.core.mu_to_seconds(tstamp) - self.core.mu_to_seconds(t_start)
-            timestamp_us = timestamp * 1e6
-            self.append_to_dataset('timestamps', timestamp_us) # store the timestamps in microsecond
-            tstamp = self.ttl3.timestamp_mu(t_end) # read the timestamp of another event
+    tstamp = self.ttl3.timestamp_mu(t_end)
+    while tstamp != -1:
+        timestamp = self.core.mu_to_seconds(tstamp) - self.core.mu_to_seconds(t_start)
+        timestamp_us = timestamp * 1e6
+        self.append_to_dataset('timestamps', timestamp_us) # store the timestamps in microsecond
+        tstamp = self.ttl3.timestamp_mu(t_end) # read the timestamp of another event
 
-    else:
+    if ((i+1) % self.histogram_refresh == 0) or ((i+1) == self.no_of_repeats):
         make_histogram(self)
 
     return

@@ -77,9 +77,8 @@ def close_instruments(self):
     self.tickler.off()
     self.tickler.close()
 
-    # 3) Close RF (RS)
-    self.RF_driver.off()
-    self.RF_driver.close()
+    # 3) Close RF (RS and Keysight)
+    self.rf.off()
     
     # 4) Close Extraction Pulser (BK4053)
     # Should not turn off ext_pulser because it could kill the AOM
