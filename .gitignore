@@ -6,3 +6,5 @@ artiq-master/last_rid.pyon
 drivers/data
 *.h5
 *.swp
+*.png
+*.jpg
