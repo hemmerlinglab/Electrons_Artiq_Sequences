@@ -24,7 +24,7 @@ RF_SYSTEM_PARAMS = {
     # rf system dependent functions
     "careful_functions": [
         "_update_setpoint_fast",
-        "_convert_frequency_value",
+        "_get_initial_setpoint",
         "_set_vertical_window",
         "_convert_frequency_value",
     ]
@@ -96,11 +96,6 @@ class RFController:
 
     # 3) Internal Utilities
     # ===============================================================
-    def _set_spec_window(self):
-
-        self._set_vertical_window()
-        self.spec.set_center_freq(self.frequency)
-
     def _set_vertical_window(self):
 
         if self.mode == "setpoint":
@@ -121,10 +116,10 @@ class RFController:
         else:
             raise ValueError("Frequency is not supported! Supported range: [1e+6, 31.8e+9]")
 
-    def _auto_setpoint(self, target: float) -> float:
+    def _auto_setpoint(self, target: float):
 
         _max_iter = 15
-        _tol = 0.02
+        _tol = 0.002
         _n_meas = 3
         _settle_time = 0.05
 
@@ -143,12 +138,14 @@ class RFController:
             err = target - act_ampl
 
             if abs(err) <= _tol:
-                print(f"[RFController] RF setpoint: {self._last_setpoint:.2f} dBm")
+                print(f"[RFController] RF setpoint: {self._last_setpoint:.3f} dBm")
                 return
 
             self._update_setpoint_fast(err)
 
-        print(f"[RFController] Warning: Did not find proper setpoint for this RF_amplitude within setpoint bound [{self._setpoint_min:.1f}, {self._setpoint_max:.1f}] dBm!")
+        print("[RFController] Warning: Did not find proper setpoint for this RF_amplitude within "
+             f"setpoint bound [{self._setpoint_min:.3f}, {self._setpoint_max:.3f}] dBm!\n"
+             f"[RFController] Using setpoint: {self._last_setpoint:.3f} dBm! Actual amplitude: {act_ampl:.3f} dBm.")
 
     def _update_setpoint(self, err: float):
         """

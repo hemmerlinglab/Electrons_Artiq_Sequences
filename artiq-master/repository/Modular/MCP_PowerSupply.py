@@ -91,15 +91,16 @@ class MCP_PowerSupply(EnvExperiment):
             for i in range(len(self.Vt)):
                 if abs(self.Vtarget[i]-self.Vt[i]) < 100:
                     self.Vt[i] = self.Vtarget[i]
-                    print(self.Vt)
+                    #print(self.Vt)
                 elif self.Vtarget[i] - self.Vt[i] >= 100:
                     self.Vt[i] += 100
-                    print(self.Vt)
+                    #print(self.Vt)
                     sleep_time = 20
                 elif self.Vtarget[i] - self.Vt[i] <= -100:
                     self.Vt[i] -= 100
-                    print(self.Vt)
-            # print("zotino_written")
+                    #print(self.Vt)
+
+            print(f"Ramp step: Vt = [{self.Vt[0]:.3f}, {self.Vt[1]:.3f}, {self.Vt[2]:.3f}]")
             self.Vin = [0.0]*3
             for i in range(len(self.V0)):
                 self.Vin[i] = calculate_Vin(i, self.Vt[i])

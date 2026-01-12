@@ -255,8 +255,11 @@ def _scan_RF_frequency(self, val, scan_values, scan_check = False):
 def _scan_RF_amplitude(self, val, scan_values, scan_check = False):
 
     if scan_check:
-        return _limit_check(self.scanning_parameter, scan_values, [-30, 11])
-    
+        if self.mode == "setpoint":
+            return _limit_check(self.scanning_parameter, scan_values, [-30, 11])
+        else:
+            return _limit_check(self.scanning_parameter, scan_values, [-20, 13])
+
     else:
         self.rf.set_amplitude(val)
 

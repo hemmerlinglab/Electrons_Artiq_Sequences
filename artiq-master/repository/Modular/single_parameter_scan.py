@@ -30,6 +30,10 @@ class SingleParamScan(EnvExperiment):
         if not self.scan_ok:
             return
 
+        validate_422 = True
+        if self.scanning_parameter == "frequency_422":
+            validate_422 = False
+
         for ind in range(len(self.scan_values)):
 
             t0 = time.time()
@@ -41,7 +45,7 @@ class SingleParamScan(EnvExperiment):
             while True:
 
                 # Do experiment
-                try: measure(self, ind)
+                try: measure(self, ind, validate_422=validate_422)
 
                 # Handle RTIO errors from ARTIQ (e.g. overflow due to unstable MCP amplifier)
                 except (RTIOOverflow, RTIOUnderflow) as e:

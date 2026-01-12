@@ -202,13 +202,13 @@ def set_MCP_voltages(self, val):
         if not first_cycle: time.sleep(sleep_time)
         first_cycle = False
 
-        print(current_MCP_voltage)
+        print(f"[MCP] Applying MCP Voltage: {current_MCP_voltage:.3f}, {current_MCP_voltage:.3f}, {current_MCP_voltage:.3f}")
 
         for i, v in enumerate(current_MCP_voltage):
-            print(v)
+            #print(v)
             vols[i] = calculate_Vin(i, v)
 
-        print(chan, vols)
+        #print(chan, vols)
         set_electrode_voltages(self, chan, vols)
     
     return
