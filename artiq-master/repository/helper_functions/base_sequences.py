@@ -202,7 +202,7 @@ def set_MCP_voltages(self, val):
         if not first_cycle: time.sleep(sleep_time)
         first_cycle = False
 
-        print(f"[MCP] Applying MCP Voltage: {current_MCP_voltage:.3f}, {current_MCP_voltage:.3f}, {current_MCP_voltage:.3f}")
+        print(f"[MCP] Applying MCP Voltage: {current_MCP_voltage[0]:.3f}, {current_MCP_voltage[1]:.3f}, {current_MCP_voltage[2]:.3f}")
 
         for i, v in enumerate(current_MCP_voltage):
             #print(v)
