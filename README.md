@@ -42,3 +42,30 @@ Our ARTIQ relies on Python in `nix` environment, not conda or system bare Python
    ```
    nix-env -iA nixpkgs.python38Packages.pandas
    ```
+
+## How to commit code changes to GitHub?
+Backing up our code on GitHub is very important, remember to do this after changing the code.
+1. Go to the base path of the project directory:
+   ```
+   cd ~/software/Electrons_Artiq_Sequences/
+   ```
+2. (Optional) List add modifications since last git update:
+   ```
+   git status
+   ```
+3. Add all changes in the repository:
+   ```
+   git add .
+   ```
+4. (Optional) List add modifications to see if they are added:
+   ```
+   git status
+   ```
+5. Apply the changes to the git repository:
+   ```
+   git commit -m "<your update note>"
+   ```
+6. Upload changes to GitHub:
+   ```
+   git push
+   ```
