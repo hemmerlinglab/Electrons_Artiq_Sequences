@@ -178,7 +178,7 @@ def _scan_no_of_repeats(self, val, scan_values, scan_check = False):
         return _limit_check(self.scanning_parameter, scan_values, [0, 10000000])
     
     else:
-        self.no_of_repeats = val
+        self.no_of_repeats = int(val)
 
         return 1
 

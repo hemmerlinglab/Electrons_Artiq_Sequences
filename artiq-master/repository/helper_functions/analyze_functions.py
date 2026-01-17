@@ -1,6 +1,7 @@
 import numpy as np
 import shutil
 from configparser import ConfigParser
+import traceback
 
 import scan_functions as sf
 from base_sequences import set_multipoles
@@ -10,23 +11,43 @@ from helper_functions import latin_hypercube, normalize_coordinates, normalize_v
 # 1) Master function for analyze
 def ofat_analyze(self):
 
-    reset_scan_parameter(self)
+    try:
+        reset_scan_parameter(self)
+    except Exception:
+        print("[Error] Failed to reset scan parameter")
+        traceback.print_exc()
+
     close_instruments(self)
+
     save_data_or_exit(self)
 
 def doe_analyze(self):
 
-    reset_scanned_parameters(self)
+    try:
+        reset_scanned_parameters(self)
+    except Exception:
+        print("[Error] Failed to reset scanned parameters")
+        traceback.print_exc()
+
     close_instruments(self)
+
     save_data_or_exit(self)
+
     if self.scan_ok and self.utility_mode == "DOE Scan":
         save_to_doe_table(self)
 
 def optimizer_analyze(self):
 
-    reset_optimizer_parameters(self)
+    try:
+        reset_optimizer_parameters(self)
+    except Exception:
+        print("[Error] Failed to reset optimizer parameters")
+        traceback.print_exc()
+
     close_instruments(self)
+
     save_data_or_exit(self)
+
     printout_final_result(self)
 
 # ===================================================================
@@ -71,19 +92,34 @@ def close_instruments(self):
 
     # Close instrument connections created by prepare
     # 1) Close Laser Client
-    self.laser.close()
-    
+    try:
+        self.laser.close()
+    except Exception:
+        print("[Error] Failed to close the laser")
+        traceback.print_exc()
+
     # 2) Close Tickler (DSG821)
-    self.tickler.off()
-    self.tickler.close()
+    try:
+        self.tickler.off()
+        self.tickler.close()
+    except Exception:
+        print("[Error] Failed to close the tickler")
+        traceback.print_exc()
 
     # 3) Close RF (RS and Keysight)
-    self.rf.off()
-    
+    try:
+        self.rf.off()
+    except Exception:
+        print("[Error] Failed to close the RF")
+        traceback.print_exc()
+        
     # 4) Close Extraction Pulser (BK4053)
     # Should not turn off ext_pulser because it could kill the AOM
-    #self.ext_pulser.off()
-    self.ext_pulser.close()
+    try:
+        self.ext_pulser.close()
+    except Exception:
+        print("[Error] Failed to close the extraction pulse and AOM controller")
+        traceback.print_exc()
 
 def printout_final_result(self):
 

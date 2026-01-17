@@ -88,11 +88,12 @@ class RFController:
         self.spec.set_span(self._span)
         self.spec.marker_on(self.marker_no)
 
-    def off(self):
+    def off(self, kill_sockets = True):
 
         self.generator.off()
-        self.generator.close()
-        self.spec.close()
+        if kill_sockets:
+            self.generator.close()
+            self.spec.close()
 
     # 3) Internal Utilities
     # ===============================================================

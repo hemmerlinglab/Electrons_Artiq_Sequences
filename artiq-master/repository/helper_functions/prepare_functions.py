@@ -88,7 +88,7 @@ def prepare_initialization(self):
     if self.RF_on:
         self.rf.on()
     else:
-        self.rf.off()
+        self.rf.off(kill_sockets=False)
 
     # 2. DC voltages
     #------------------------------------------------------
