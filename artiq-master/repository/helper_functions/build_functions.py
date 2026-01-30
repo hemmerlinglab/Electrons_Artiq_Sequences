@@ -1,6 +1,8 @@
 from artiq.experiment import NumberValue, EnumerationValue, BooleanValue, StringValue
 from traps import traps
 
+MODES_LIST = ["Lifetime", "Lifetime_fast", "Trapping", "Counting"]
+
 # ===================================================================
 # - Set Attribute with Config Saving
 
@@ -29,7 +31,7 @@ def ofat_build(self):
     load_attributes(self)
     
     # Load Parameters
-    my_setattr(self, 'mode', EnumerationValue(['Trapping', 'Counting'],default='Trapping'), scanable = False)
+    my_setattr(self, 'mode', EnumerationValue(MODES_LIST, default='Trapping'), scanable = False)
     load_common_parameters(self)       # Parameters used in all sequences
     load_experiment_parameters(self)   # Not used in find_optimal_E
     load_ofat_parameters(self)         # Scanning setups at the bottom (have to be so due to the logic of `list of parameters`)
@@ -40,7 +42,7 @@ def doe_build(self):
     load_attributes(self)
 
     # Load Parameters
-    my_setattr(self, 'mode', EnumerationValue(['Trapping', 'Counting'],default='Trapping'), scanable = False)
+    my_setattr(self, 'mode', EnumerationValue(MODES_LIST, default='Trapping'), scanable = False)
     load_doe_parameters(self)          # Keep doe setups at the top
     load_common_parameters(self)       # Parameters used in all sequences
     load_experiment_parameters(self)   # Not used in find_optimal_E
@@ -95,11 +97,25 @@ def load_common_parameters(self):
 
     # 3. Sequence Settings
     #------------------------------------------------------
-    group_sequence = "Sequence Settings"
-    my_setattr(self, 'wait_time',         NumberValue(default=90,unit='us',scale=1,ndecimals=0,step=1), group=group_sequence)
-    my_setattr(self, 'load_time',         NumberValue(default=210,unit='us',scale=1,ndecimals=0,step=1), group=group_sequence)
-    my_setattr(self, 'no_of_repeats',     NumberValue(default=10000,unit='',scale=1,ndecimals=0,step=1), group=group_sequence)
-    my_setattr(self, 'detection_time',    NumberValue(default=1000,unit='ms for counting mode only',scale=1,ndecimals=0,step=1), group=group_sequence)
+    # 3-1) General
+    group_general = "Sequence Settings (Trapping & Lifetime Mode)"
+    my_setattr(self, 'load_time',         NumberValue(default=210,unit='us',scale=1,ndecimals=0,step=1), group=group_general)
+
+    # 3-1) Trapping Mode
+    group_trapping = "Sequence Settings (Trapping Mode)"
+    my_setattr(self, 'wait_time',         NumberValue(default=90,unit='us',scale=1,ndecimals=0,step=1), group=group_trapping)
+    my_setattr(self, 'no_of_repeats',     NumberValue(default=10000,unit='',scale=1,ndecimals=0,step=1), group=group_trapping)
+
+    # 3-2) Counting Mode
+    group_counting = "Sequence Settings (Counting Mode)"
+    my_setattr(self, 'detection_time',    NumberValue(default=1000,unit='ms for counting mode only',scale=1,ndecimals=0,step=1), group=group_counting)
+
+    # 3-3) Lifetime Mode
+    group_lifetime = "Sequence_Settings (Lifetime Mode)"
+    my_setattr(self, 'wait_times_path',   StringValue(default='/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/Table/'), group=group_lifetime, scanable=False)
+    my_setattr(self, 'wait_times_file',   StringValue(default='lifetime_wait_times_short.csv'), group=group_lifetime, scanable=False)
+    my_setattr(self, 'repeats_ratio',     NumberValue(default=1.0,unit='',scale=1,ndecimals=2,step=0.01), group=group_lifetime)
+    my_setattr(self, 'wait_time_fast',    NumberValue(default=700,unit='us',scale=1,ndecimals=0,step=1), group=group_lifetime)
 
     # 4. Trap Settings
     #------------------------------------------------------
@@ -109,7 +125,7 @@ def load_common_parameters(self):
     # 5. Laser Settings
     #------------------------------------------------------
     group_laser = "Laser Settings"
-    my_setattr(self, 'frequency_422',     NumberValue(default=709.078300,unit='THz',scale=1,ndecimals=6,step=1e-6), group=group_laser)
+    my_setattr(self, 'frequency_422',     NumberValue(default=709.076990,unit='THz',scale=1,ndecimals=6,step=1e-6), group=group_laser)
     my_setattr(self, 'frequency_390',     NumberValue(default=768.708843,unit='THz',scale=1,ndecimals=6,step=1e-6), group=group_laser)
 
     # 6. RF Settings
@@ -130,7 +146,7 @@ def load_common_parameters(self):
     #------------------------------------------------------
     group_DC = "DC Multipoles Settings"
     my_setattr(self, 'U1',                NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.001), group=group_DC)
-    my_setattr(self, 'U2',                NumberValue(default=-0.13,unit='V',scale=1,ndecimals=3,step=.001), group=group_DC)
+    my_setattr(self, 'U2',                NumberValue(default=-0.22,unit='V',scale=1,ndecimals=3,step=.001), group=group_DC)
     my_setattr(self, 'U3',                NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.001), group=group_DC)
     my_setattr(self, 'U4',                NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.001), group=group_DC)
     my_setattr(self, 'U5',                NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.001), group=group_DC)
@@ -140,9 +156,9 @@ def load_experiment_parameters(self):
     # 1. 1st Order Multipoles
     #------------------------------------------------------
     group_DC = "DC Multipoles Settings"
-    my_setattr(self, 'Ex',                  NumberValue(default=-0.15,unit='V',scale=1,ndecimals=3,step=.001), group=group_DC)
-    my_setattr(self, 'Ey',                  NumberValue(default=0.14,unit='V',scale=1,ndecimals=3,step=.001), group=group_DC)
-    my_setattr(self, 'Ez',                  NumberValue(default=0,unit='V',scale=1,ndecimals=3,step=.001), group=group_DC)
+    my_setattr(self, 'Ex',                  NumberValue(default=-0.199,unit='V',scale=1,ndecimals=3,step=.001), group=group_DC)
+    my_setattr(self, 'Ey',                  NumberValue(default=0.051,unit='V',scale=1,ndecimals=3,step=.001), group=group_DC)
+    my_setattr(self, 'Ez',                  NumberValue(default=-0.047,unit='V',scale=1,ndecimals=3,step=.001), group=group_DC)
 
     # 2. Tickle Settings
     #------------------------------------------------------

@@ -35,6 +35,12 @@ def measure(self, ind, print_result = False, validate_390 = False, validate_422 
         if print_result:
             print(f"Trapped: {cts_trapped}, Lost: {cts_lost}, Loading: {cts_loading}")
 
+    elif self.mode == 'Lifetime_fast':
+        pass
+
+    elif self.mode == 'Lifetime':
+        pass
+
     elif self.mode == 'Counting':
         # Counting mode information sheet:
         # laser: Controlled

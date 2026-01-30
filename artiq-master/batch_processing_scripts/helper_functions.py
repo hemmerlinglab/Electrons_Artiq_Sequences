@@ -32,3 +32,5 @@ def dummy_fine_scan_range():
 
 def dummy_optima():
     return -0.13
+
+def analyze_rough_scan(timestamp):

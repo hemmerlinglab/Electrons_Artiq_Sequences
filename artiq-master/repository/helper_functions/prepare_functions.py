@@ -20,34 +20,51 @@ from scan_functions import scan_parameter
 # 1) Master function for prepare
 def ofat_prepare(self):
 
+    # 1) prepare instruments
     prepare_instruments(self)
+
+    # 2) prepare datasets
+    self.set_dataset('lifetime', [0] * self.steps, broadcast=True)
     prepare_ofat_datasets(self)
-    prepare_common_datasets(self)
+    
+    _prepare_with_effective_steps(self, prepare_common_datasets)
+
+    # 3) prepare others
     prepare_initialization(self)
     prepare_ofat_saving_configuration(self)
     prepare_saving_configuration(self)
 
 def doe_prepare(self):
 
+    # 1) prepare instruments
     prepare_instruments(self)
 
-    # Prepare Datasets
-    if self.utility_mode == "DOE Scan":
-        prepare_doe_datasets(self)
-    elif self.utility_mode == "Single Experiment":
+    # 2) prepare datasets
+    if self.utility_mode == "Single Experiment":
         self.steps = 1
         self.scan_ok = True
 
-    prepare_common_datasets(self)
+    self.set_dataset('lifetime', [0] * self.steps, broadcast=True)
+    prepare_doe_datasets(self)
+
+    if self.utility_mode == "DOE Scan":
+        _prepare_with_effective_steps(self, prepare_common_datasets)
+
+    # 3) prepare others
     prepare_initialization(self)
     prepare_saving_configuration(self)
 
 def optimizer_prepare(self):
 
-    # General Preparations
+    # 1) prepare instruments
     prepare_instruments(self)
+
+    # 2) prepare datasets
     prepare_optimizer_datesets(self)
-    prepare_common_datasets(self)
+    self.set_dataset('lifetime', [0] * self.steps, broadcast=True)
+
+    _prepare_with_effective_steps(self, prepare_common_datasets)
+
     prepare_initialization(self)
     prepare_saving_configuration(self)
     prepare_optimizer_saving_configuration(self)
@@ -138,6 +155,8 @@ def prepare_saving_configuration(self):
     self.data_to_save.extend(common_data_to_save)
     self.config_dict.append({'par' : 'sequence_file', 'val' : self.sequence_filename, 'cmt' : 'Filename of the main sequence file'})
 
+    if self.mode in ("Lifetime", "Lifetime_fast"):
+
     get_basefilename(self)
 
     self.core.reset() # Reset the core
@@ -198,8 +217,8 @@ def prepare_common_datasets(self):
     # experiment metadataset
     self.set_dataset('time_cost',          [0] * self.steps, broadcast=True)
 
-    # keysight amplitude
-    self.set_dataset('act_RF_amplitude', [0] * self.steps, broadcast=True)
+    # actual RF amplitude from keysight spec
+    self.set_dataset('act_RF_amplitude',   [0] * self.steps, broadcast=True)
 
 def prepare_ofat_datasets(self):
 
@@ -220,7 +239,7 @@ def prepare_doe_datasets(self):
     allowed_params = [x['par'] for x in self.config_dict if x['scanable']]
     self.doe_file = self.doe_file_path + self.doe_file_name
     self.setpoints, self.fields_to_fill, self.steps = \
-        load_doe_setpoints(self.doe_file, allowed_params)
+        load_doe_setpoints(self.doe_file, allowed_params) # self.steps is first created here
 
     # Safety: perform scan check for all parameters
     self.scan_ok = True
@@ -237,6 +256,7 @@ def prepare_doe_datasets(self):
 def prepare_optimizer_datesets(self):
 
     # For compatibility with preparing other datasets
+    # self.steps is first created here
     self.steps = self.max_iteration + self.init_sample_size
     self.E_sampled = []
     self.y_sampled = []
@@ -288,6 +308,37 @@ def load_doe_setpoints(file_path, allowed_params):
     setpoints = full_table[setpoint_columns]
     
     return setpoints, response_columns, len(setpoints)
+
+def load_lifetime_wait_times(filepath):
+    hlp = np.genfromtxt(filepath, delimiter=",")
+    wait_times = hlp[:,0]
+    no_of_repeats = hlp[:,1]
+    return wait_times, no_of_repeats
+
+def _lifetime_points_for_prepare(self):
+
+    if self.mode == "Lifetime":
+        self.wait_time_arr, self.repeats_arr = load_lifetime_wait_times(self.wait_times_file)
+        return len(self.wait_time_arr)
+    elif self.mode == "Lifetime_fast":
+        return 2
+    else:
+        return 1
+
+def _prepare_with_effective_steps(self, datasets_function):
+
+    lp = _lifetime_points_for_prepare(self)
+    effective_steps = self.steps * lp
+    old_steps = self.steps
+
+    self.steps = effective_steps
+    try:
+        datasets_function(self)
+    except Exception:
+        datasets_function()
+    finally:
+        self.steps = old_steps
+
 
 def get_basefilename(self, extension = ''):
     my_timestamp = datetime.datetime.today()
