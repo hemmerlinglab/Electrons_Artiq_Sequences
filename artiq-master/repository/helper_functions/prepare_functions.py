@@ -26,7 +26,7 @@ def ofat_prepare(self):
     # 2) prepare datasets
     self.set_dataset('lifetime', [0] * self.steps, broadcast=True)
     prepare_ofat_datasets(self)
-    
+
     _prepare_with_effective_steps(self, prepare_common_datasets)
 
     # 3) prepare others
@@ -156,6 +156,7 @@ def prepare_saving_configuration(self):
     self.config_dict.append({'par' : 'sequence_file', 'val' : self.sequence_filename, 'cmt' : 'Filename of the main sequence file'})
 
     if self.mode in ("Lifetime", "Lifetime_fast"):
+        pass
 
     get_basefilename(self)
 
