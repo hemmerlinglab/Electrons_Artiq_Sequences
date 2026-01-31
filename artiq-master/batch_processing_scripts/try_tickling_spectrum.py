@@ -22,7 +22,7 @@ config = {
     "load_time": 210,
     "trap": "Single PCB",
     "flip_electrodes": False,
-    "frequency_422": 709.079965,
+    "frequency_422": 709.079980,
     "frequency_390": 768.708843,
     "RF_on": True,
     "RF_amp_mode": "setpoint",
@@ -38,16 +38,19 @@ config = {
 
 # 3) Scan Settings
 # =================================================================
-RF_amplitude = 2.50
-U2 = -0.38
+RF_amplitude = 4.50
+U2 = -0.225
 
-scan_range = [1, 200]
-steps = 200
+scan_range = [1, 100]
+steps = 100
 
 trial_E = [
-
-    [-0.166, 0.024, 0.04]
-
+    [-0.366, 0.052, -0.009],
+    [-0.316, 0.052, -0.009],
+    [-0.266, 0.052, -0.009],
+    [-0.216, 0.052, -0.009],
+    [-0.166, 0.052, -0.009],
+    [-0.116, 0.052, -0.009],
 ]
 
 # 4) Plot Functions
