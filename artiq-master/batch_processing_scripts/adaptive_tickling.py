@@ -1,15 +1,83 @@
 from artiq_controller import SingleParameterScan
-
+from helper_functions import analyze_rough_scan, analyze_fine_scan, plot_fine_scan
 import numpy as np
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
+import pandas as pd
+import json
+from datetime import datetime
+import os
+from pathlib import Path
 
-from helper_functions import analyze_rough_scan
-
-# 1) Meta Settings
+# 1) Save Settings
 # ===================================================================
-save_path = "/home/electrons/software/data/"
+SAVE_DIR = Path("result")
+SAVE_DIR.mkdir(parents=True, exist_ok=True)
+
+RUN_TAG = datetime.now().strftime("%Y%m%d_%H%M%S")
+SUMMARY_JSON = SAVE_DIR / f"run_summary_{RUN_TAG}.json"
+SUMMARY_CSV = SAVE_DIR / f"run_best_models_{RUN_TAG}.csv"
+
+def get_figure_dir(ts):
+    date = ts.split("_")[0]
+    fig_dir = SAVE_DIR / date
+    fig_dir.mkdir(parents=True, exist_ok=True)
+    return fig_dir
+
+def get_fine_scan_prefix(ts, U2, RF_amplitude, line_id, rep):
+    fig_dir = get_figure_dir(ts)
+    prefix = fig_dir / f"fine_U2{U2:+.3f}_RF{RF_amplitude:.2f}_line{line_id:02d}_rep{rep:02d}_{ts}"
+    return prefix
+
+def to_builtin(obj):
+    import numpy as np
+    if isinstance(obj, dict):
+        return {str(k): to_builtin(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [to_builtin(v) for v in obj]
+    if isinstance(obj, tuple):
+        return [to_builtin(v) for v in obj]
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    if isinstance(obj, (np.floating,)):
+        return float(obj)
+    if isinstance(obj, (np.integer,)):
+        return int(obj)
+    return obj
+
+def best_fit_to_row(best_fit, max_n_peaks=4):
+    """
+    Flatten best_fit into csv columns.
+    best_fit format: {"n_peaks", "r2", "aicc", "popt", ...}
+    popt: [c0, amp1, mu1, sigma1, amp2, mu2, sigma2, ...]
+    """
+    row = {}
+    if (best_fit is None) or (best_fit.get("popt", None) is None):
+        row["n_peaks"] = 0
+        row["r2"] = None
+        row["aicc"] = None
+        row["c0"] = None
+        for i in range(1, max_n_peaks + 1):
+            row[f"amp{i}"] = None
+            row[f"mu{i}"] = None
+            row[f"sigma{i}"] = None
+        return row
+
+    popt = best_fit["popt"]
+    n = int(best_fit["n_peaks"])
+    row["n_peaks"] = n
+    row["r2"] = float(best_fit["r2"])
+    row["aicc"] = float(best_fit["aicc"])
+    row["c0"] = float(popt[0])
+
+    for i in range(1, max_n_peaks + 1):
+        if i <= n:
+            row[f"amp{i}"] = float(popt[1 + 3*(i-1)])
+            row[f"mu{i}"] = float(popt[1 + 3*(i-1) + 1])
+            row[f"sigma{i}"] = float(popt[1 + 3*(i-1) + 2])
+        else:
+            row[f"amp{i}"] = None
+            row[f"mu{i}"] = None
+            row[f"sigma{i}"] = None
+    return row
 
 # 2) Global Settings
 # ===================================================================
@@ -50,11 +118,13 @@ E = [-0.166, 0.024, 0.04]
 
 U2_to_scan = np.linspace(-0.20, -0.25, 11)
 OUTSIDE_LOOP_REPEATS = 5
+MAX_N_PEAKS = 4
 
 # 4) Perform Experiments
 # ===================================================================
 results = {
     "meta": {
+        "run_tag": RUN_TAG,
         "config": config,
         "RF_amplitude": float(RF_amplitude),
         "E": [float(x) for x in E],
@@ -63,6 +133,7 @@ results = {
     "runs": []
 }
 
+best_rows = []
 Ex, Ey, Ez = E
 
 for i, U2 in enumerate(U2_to_scan):
@@ -124,9 +195,10 @@ for i, U2 in enumerate(U2_to_scan):
         })
 
     # Prepare for fine scans
-    centers = [fine_scan["center"] for fs in fine_scans_to_run]
-    print(f"[Manager] Identified {len(fine_scans_to_run)} lines: {", ".join(f'{c:.1f}' for c in centers)} MHz")
-    scanner.set_param("no_of_repeats": NO_OF_REPEATS_FINE)
+    centers = [fine_scan["center"] for fine_scan in fine_scans_to_run]
+    centers_str = ", ".join(f"{c:.1f}" for c in centers)
+    print(f"[Manager] Identified {len(fine_scans_to_run)} lines: {centers_str} MHz")
+    scanner.set_param("no_of_repeats", NO_OF_REPEATS_FINE)
     scanner.set_param("histogram_refresh", NO_OF_REPEATS_FINE)
 
     for rep in range(OUTSIDE_LOOP_REPEATS):
@@ -134,7 +206,7 @@ for i, U2 in enumerate(U2_to_scan):
         for line_id, fine_scan in enumerate(fine_scans_to_run):
 
             time_est = (config["wait_time"] + config["load_time"] + LAG) * NO_OF_REPEATS_FINE * fine_scan["steps"] * 1e-6
-            print(f"[Manager] Running repetition {rep} for line {line_id} ({fine_scans_to_run['centers'][line_id]:.1f} MHz), estimated time cost {time_est} s ...")
+            print(f"[Manager] Running repetition {rep} for line {line_id} ({fine_scan['center']:.1f} MHz), estimated time cost {time_est} s ...")
             ts = scanner.run(
                 scanning_parameter = "tickle_frequency",
                 min_scan = fine_scan["min_scan"],
@@ -143,11 +215,40 @@ for i, U2 in enumerate(U2_to_scan):
             )
 
             # Analyze the fine scan data
+            scan_result = analyze_fine_scan(
+                ts,
+                stepsize=0.2,
+                scan_count=50,
+                max_n_peaks=MAX_N_PEAKS
+            )
+            out_prefix = get_fine_scan_prefix(ts, U2, RF_amplitude, line_id, rep)
+            plot_fine_scan(ts, scan_result, out_prefix)
 
             # Store the fine scan data
             u2_block["fine_scans"][line_id]["timestamps"].append(ts)
 
+            # Organize in-loop analyze result into csv
+            for mode in ["lost", "trapped"]:
+                best_fit = scan_result[mode]["best"]
+                row = {
+                    "timestamp": ts,
+                    "mode": mode,
+                    "U2": U2,
+                    "RF_amplitude": RF_amplitude,
+                    "line_id": line_id,
+                    "rep": rep,
+                    "min_scan": fine_scan["min_scan"],
+                    "max_scan": fine_scan["max_scan"],
+                }
+                row.update(best_fit_to_row(best_fit, max_n_peaks=MAX_N_PEAKS))
+                best_rows.append(row)
+
     results["runs"].append(u2_block)
 
+with open(SUMMARY_JSON, "w", encoding="utf-8") as f:
+    json.dump(to_builtin(results), f, indent=2)
 
+pd.DataFrame(best_rows).to_csv(SUMMARY_CSV, index=False)
 
+print(f"[Manager] Saved summary: {SUMMARY_JSON}")
+print(f"[Manager] Saved best-model CSV: {SUMMARY_CSV}")
