@@ -1,13 +1,14 @@
 from artiq_controller import SingleParameterScan
-from helper_functions import analyze_rough_scan, analyze_fine_scan, plot_fine_scan
+from helper_functions import analyze_rough_scan, analyze_fine_scan, plot_fine_scan, find_best_laser_frequency
 import numpy as np
 import pandas as pd
 import json
+import time
 from datetime import datetime
 import os
 from pathlib import Path
 
-# 1) Save Settings
+# 0) Save Settings
 # ===================================================================
 SAVE_DIR = Path("result")
 SAVE_DIR.mkdir(parents=True, exist_ok=True)
@@ -79,7 +80,7 @@ def best_fit_to_row(best_fit, max_n_peaks=4):
             row[f"sigma{i}"] = None
     return row
 
-# 2) Global Settings
+# 1) Global Settings
 # ===================================================================
 config = {
     "mode": "Trapping",
@@ -93,8 +94,9 @@ config = {
     "load_time": 210,                       # unit: us
     "trap": "Single PCB",
     "flip_electrodes": False,
-    "frequency_422": 709.076990,            # unit: THz
+    "frequency_422": 709.076740,            # unit: THz
     "frequency_390": 768.708843,            # unit: THz
+    "laser_failure": "raise error",
     "RF_on": True,
     "RF_amp_mode": "setpoint",
     "RF_frequency": 1.732,                  # unit: GHz
@@ -108,17 +110,82 @@ config = {
 }
 
 LAG = 250                                   # unit: us
-NO_OF_REPEATS_ROUGH = 6000
-NO_OF_REPEATS_FINE = 20000
+NO_OF_REPEATS_ROUGH = 3000                  # 5000 for scan, 3000 for debug
+NO_OF_REPEATS_FINE = 5000                   # 20000 for scan, 5000 for debug
+STEPSIZE_FINE = 0.5                         # 0.2 for scan, 0.5 for debug
 
 # 3) Scan Settings
 # ===================================================================
-RF_amplitude = 4.50
-E = [-0.166, 0.024, 0.04]
+RF_amplitude = 2.50
+E = [-0.200, 0.050, 0.030]
 
 U2_to_scan = np.linspace(-0.20, -0.25, 11)
 OUTSIDE_LOOP_REPEATS = 5
 MAX_N_PEAKS = 4
+
+# 3) Helper Functions
+# ===================================================================
+def relock_laser_422(
+    scanner, config,
+    rough_center=709.078000, rough_width=0.003000, rough_steps=61,
+    fine_width=0.000200, fine_steps=41
+):
+
+    f0 = config["frequency_422"]
+
+    scanner.set_param("no_of_repeats", NO_OF_REPEATS_ROUGH)
+    scanner.set_param("histogram_refresh", NO_OF_REPEATS_ROUGH)
+
+    print(f"[Manager] Scanning frequency_422 [rough] ...")
+    ts_rough = scanner.run(
+        scanning_parameter = "frequency_422",
+        min_scan = rough_center - rough_width,
+        max_scan = rough_center + rough_width,
+        steps = rough_steps,
+    )
+    freq_rough = find_best_laser_frequency(ts_rough)
+    print(f"[Manager] Scan Result: {freq_rough:6f} THz")
+
+    scanner.set_param("no_of_repeats", NO_OF_REPEATS_FINE)
+    scanner.set_param("histogram_refresh", NO_OF_REPEATS_FINE)
+
+    print(f"[Manager] Scanning frequency_422 [fine] ...")
+    ts_fine = scanner.run(
+        scanning_parameter = "frequency_422",
+        min_scan = freq_rough - fine_width,
+        max_scan = freq_rough + fine_width,
+        steps = fine_steps
+    )
+    freq_fine = find_best_laser_frequency(ts_fine)
+    print(f"[Manager] Scan Result: {freq_fine:6f} THz")
+
+    config["frequency_422"] = freq_fine
+    scanner.set_param("frequency_422", freq_fine)
+    print(f"[Manager] Laser frequency 422 updated: {f0:.6f} THz -> {freq_fine:.6f} THz.")
+
+    return freq_fine, ts_rough, ts_fine
+
+def run_with_422_relock(scanner, config, restore_params=None, **run_kwargs):
+
+    while True:
+
+        t0 = time.time()
+
+        ts, out = scanner.run(get_output=True, **run_kwargs)
+        stdout, stderr = out
+
+        if "LASER_OFF_422" in stderr:
+            print("[Manager] Detected LASER_OFF_422 -> relock laser and retry scan.")
+            relock_laser_422(scanner, config)
+
+            if restore_params is not None:
+                scanner.load_params(restore_params)
+
+            print("[Manager] Resuming the interrupted scan ...")
+            continue
+
+        print(f"[Manager] Scan done in {time.time()-t0:.1f}s")
+        return ts
 
 # 4) Perform Experiments
 # ===================================================================
@@ -165,7 +232,9 @@ for i, U2 in enumerate(U2_to_scan):
         .set_param("histogram_refresh", NO_OF_REPEATS_ROUGH)
     )
 
-    ts = scanner.run(
+    ts = run_with_422_relock(
+        scanner, config,
+        restore_params={"no_of_repeats": NO_OF_REPEATS_ROUGH, "histogram_refresh": NO_OF_REPEATS_ROUGH},
         scanning_parameter = "tickle_frequency",
         min_scan = 1,
         max_scan = 200,
@@ -173,7 +242,7 @@ for i, U2 in enumerate(U2_to_scan):
     )
 
     # Analyze the rough scan data
-    fine_scans_to_run = analyze_rough_scan(ts)
+    fine_scans_to_run = analyze_rough_scan(ts, stepsize=STEPSIZE_FINE)
 
     # Store the rough scan data
     u2_block["rough_scan"] = {
@@ -206,8 +275,11 @@ for i, U2 in enumerate(U2_to_scan):
         for line_id, fine_scan in enumerate(fine_scans_to_run):
 
             time_est = (config["wait_time"] + config["load_time"] + LAG) * NO_OF_REPEATS_FINE * fine_scan["steps"] * 1e-6
-            print(f"[Manager] Running repetition {rep} for line {line_id} ({fine_scan['center']:.1f} MHz), estimated time cost {time_est} s ...")
-            ts = scanner.run(
+            print(f"[Manager] Running repetition {rep} for line {line_id} at {fine_scan['center']:.1f} MHz "
+                  f"({fine_scan['min_scan']:.1f} MHz, {fine_scan['max_scan']:.1f} MHz), estimated time cost {time_est} s ...")
+            ts = run_with_422_relock(
+                scanner, config,
+                restore_params = {"no_of_repeats": NO_OF_REPEATS_FINE, "histogram_refresh": NO_OF_REPEATS_FINE},
                 scanning_parameter = "tickle_frequency",
                 min_scan = fine_scan["min_scan"],
                 max_scan = fine_scan["max_scan"],
@@ -217,10 +289,12 @@ for i, U2 in enumerate(U2_to_scan):
             # Analyze the fine scan data
             scan_result = analyze_fine_scan(
                 ts,
-                stepsize=0.2,
+                stepsize=STEPSIZE_FINE,
                 scan_count=50,
-                max_n_peaks=MAX_N_PEAKS
+                max_n_peaks=MAX_N_PEAKS,
+                n_jobs=6,
             )
+
             out_prefix = get_fine_scan_prefix(ts, U2, RF_amplitude, line_id, rep)
             plot_fine_scan(ts, scan_result, out_prefix)
 

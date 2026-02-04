@@ -104,8 +104,9 @@ class ArtiqController:
             args.append(f"{key}={repr(value)}")
         return args
 
-    def _extract_timestamps(self, stdout: str) -> str:
-        m = re.search(r"(\d{8}_\d{6})", stdout)
+    def _extract_timestamps(self, stdout: str, stderr: str = None) -> str:
+        combined = (stdout or "") + "\n" + (stderr or "")
+        m = re.search(r"(\d{8}_\d{6})", combined)
         return m.group(1) if m else ""
 
     def print_args(self):
@@ -114,14 +115,18 @@ class ArtiqController:
     # -----------------------------
     # Execution
     # -----------------------------
-    def run(self) -> str:
+    def run(self, get_output=False) -> str:
         cp = subprocess.run(
             self._construct_args(),
             capture_output=True,
             text=True,
             cwd = self.workdir
         )
-        return self._extract_timestamps(cp.stdout)
+
+        if get_output:
+            return self._extract_timestamps(cp.stdout, cp.stderr), (cp.stdout, cp.stderr)
+        else:
+            return self._extract_timestamps(cp.stdout, cp.stderr)
 
 
 # 2) Subclass for single_parameter_scan
@@ -149,6 +154,7 @@ class SingleParameterScan(ArtiqController):
         min_scan: float = 1.0,
         max_scan: float = 150.0,
         steps: int = 150,
+        get_output = False,
         # Allow any additional ARTIQ parameters to be passed through
         **extra_params,
     ) -> str:
@@ -172,7 +178,7 @@ class SingleParameterScan(ArtiqController):
         # Pass everything else through (e.g. U1, Ex, Ey, tickle_level, etc.)
         self.load_params(extra_params)
 
-        return super().run()
+        return super().run(get_output=get_output)
 
 # 3) Subclass for doe_scan
 # =============================================================================
@@ -199,6 +205,7 @@ class DoeScan(ArtiqController):
         doe_file_path: str = "/home/electrons/software/"
                              "Electrons_Artiq_Sequences/artiq-master/doe_configs/",
         doe_file_name: str = "doe_table.csv",
+        get_output = False,
         **extra_params,
     ) -> str:
         """
@@ -217,7 +224,7 @@ class DoeScan(ArtiqController):
             "doe_file_name": doe_file_name,
         })
         self.load_params(extra_params)
-        return super().run()
+        return super().run(get_output=get_output)
 
 # 4) Subclass for find_optimal_E
 # =============================================================================
@@ -235,7 +242,7 @@ class FindOptimalE(ArtiqController):
         super().__init__(script_path=script_path, command=command)
 
     @staticmethod
-    def _parse_optimal_Es(stdout: str):
+    def _parse_optimal_Es(stdout: str, stderr: str = None):
         """
         Parse the two 'E = [...]' lines printed by printout_final_result(self).
 
@@ -243,7 +250,8 @@ class FindOptimalE(ArtiqController):
             (E_best_obs, E_best_model), each a 3-tuple of floats,
             or (None, None) if parsing fails.
         """
-        matches = re.findall(r"E\s*=\s*\[([^\]]+)\]", stdout)
+        combined = (stdout or "") + "\n" + (stderr or "")
+        matches = re.findall(r"E\s*=\s*\[([^\]]+)\]", combined)
         if len(matches) < 2:
             return None, None
 
@@ -269,6 +277,7 @@ class FindOptimalE(ArtiqController):
         min_Ez: float = -0.10,
         max_Ez: float = 0.10,
         no_of_repeats: int = 3000,
+        get_output = False,
         **extra_params,
     ):
         # Set parameters
@@ -296,10 +305,13 @@ class FindOptimalE(ArtiqController):
         )
 
         # Parse both E's and timestamp from the printed analyze output
-        E_best_obs, E_best_model = self._parse_optimal_Es(cp.stdout)
-        timestamp = self._extract_timestamps(cp.stdout)
+        E_best_obs, E_best_model = self._parse_optimal_Es(cp.stdout, cp.stderr)
+        timestamp = self._extract_timestamps(cp.stdout, cp.stderr)
 
-        return E_best_obs, E_best_model, timestamp
+        if get_output:
+            return E_best_obs, E_best_model, timestamp, (cp.stdout, cp.stderr)
+        else:
+            return E_best_obs, E_best_model, timestamp
 
 if __name__ == "__main__":
     ac = ArtiqController("general_scan.py")

@@ -127,6 +127,7 @@ def load_common_parameters(self):
     group_laser = "Laser Settings"
     my_setattr(self, 'frequency_422',     NumberValue(default=709.076990,unit='THz',scale=1,ndecimals=6,step=1e-6), group=group_laser)
     my_setattr(self, 'frequency_390',     NumberValue(default=768.708843,unit='THz',scale=1,ndecimals=6,step=1e-6), group=group_laser)
+    my_setattr(self, 'laser_failure',     EnumerationValue(['wait for fix', 'raise error'], default='wait for fix'), group=group_laser, scanable=False)
 
     # 6. RF Settings
     #------------------------------------------------------

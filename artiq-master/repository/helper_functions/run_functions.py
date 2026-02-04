@@ -6,6 +6,17 @@ from base_sequences import count_histogram, count_events, record_laser_frequenci
 from helper_functions import latin_hypercube, bo_suggest_next
 
 # ===================================================================
+# 0) Customized Error for Laser Jump
+class LaserError(RuntimeError):
+    def __init__(self, laser_id: int, message: str = None, actual=None, setpoint=None):
+        self.laser_id = int(laser_id)
+        self.actual = actual
+        self.setpoint = setpoint
+        if message is None:
+            message = f"Laser frequency of {self.laser_id} is off, please fix it manually!"
+        super().__init__(message)
+
+# ===================================================================
 # 1) Master Functions for Run (For Experiment)
 def measure(self, ind, print_result = False, validate_390 = False, validate_422 = True):
 
@@ -20,9 +31,9 @@ def measure(self, ind, print_result = False, validate_390 = False, validate_422 
 
     # Validate laser frequencies
     if validate_390 and not status_390:
-        raise RuntimeError("Laser frequency of 390 is off, please fix it manually!")
+        raise LaserError(390)
     if validate_422 and not status_422:
-        raise RuntimeError("Laser frequency of 422 is off, please fix it manually!")
+        raise LaserError(422)
 
     if self.mode == "Trapping":
         if self.histogram_on:
