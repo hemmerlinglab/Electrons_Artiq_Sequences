@@ -1,6 +1,10 @@
 import subprocess
 import copy
 import re
+from datetime import datetime
+import os
+
+from config import drop_keys
 
 # 1) Master Class
 # =============================================================================
@@ -10,12 +14,14 @@ class ArtiqController:
             self,
             script_path: str = None,
             command: str = "artiq_run",
-            workdir: str = "/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/"
+            workdir: str = "/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/",
+            log_path: str = "/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/batch_processing_scripts/result"
         ):
         self.exp_params = {}
         self.command = command
         self.script = script_path
         self.workdir = workdir    # Must set appropriately otherwise artiq would crash
+        self.log_path = log_path
 
         # In-memory profiles: name -> {"script": ..., "command": ..., "params": {...}}
         self._profiles = {}
@@ -29,31 +35,38 @@ class ArtiqController:
 
     def set_script(self, script_path: str):
         self.script = script_path
-        return self  # allow chaining
+        return self
 
     def set_workdir(self, workdir: str):
         self.workdir = workdir
         return self
 
+    def set_log_path(self, log_path: str):
+        self.log_path = log_path
+        return self
+
     def set_param(self, key: str, val):
         self.exp_params[key] = val
-        return self  # allow chaining
+        return self
 
     def load_params(self, conf: dict):
         self.exp_params.update(conf)
-        return self  # allow chaining
+        return self
 
     def delete_param(self, key: str):
         self.exp_params.pop(key, None)
-        return self  # allow chaining
+        return self
 
     def clear_params(self):
         self.exp_params.clear()
-        return self  # allow chaining
+        return self
 
     def get_params(self):
         # non-fluent: you want the dict, not self
         return copy.deepcopy(self.exp_params)
+
+    def get_param(self, param_key, default=None):
+        return self.exp_params.get(param_key, default)
 
     # -----------------------------
     # Profiles / presets
@@ -68,7 +81,7 @@ class ArtiqController:
             "workdir": self.workdir,
             "params": copy.deepcopy(self.exp_params),
         }
-        return self  # allow chaining
+        return self
 
     def load_profile(self, name: str):
         """
@@ -109,13 +122,65 @@ class ArtiqController:
         m = re.search(r"(\d{8}_\d{6})", combined)
         return m.group(1) if m else ""
 
+    def _clean_output(self, cp):
+        """
+        Remove big chunk of datasets from stdout
+        Blacklist based, if not on list it would be kept
+        depends on drop_keys in config.py
+        """
+
+        stdout = cp.stdout
+        key_re = re.compile(r'^\s*([A-Za-z_][A-Za-z0-9_]*)\s*:\s*')
+
+        out_lines = []
+        dropping_big_block = False
+
+        for line in stdout.splitlines(True):  # keep newline
+            m = key_re.match(line)
+            if m:
+                key = m.group(1)
+                rest = line[m.end():].lstrip()
+                if key in drop_keys and rest.startswith("["):
+                    if key == "arr_of_timestamps":
+                        dropping_big_block = True
+                    continue
+
+            if dropping_big_block:
+                if (line.strip() == "") or key_re.match(line):
+                    dropping_big_block = False
+                else:
+                    continue
+
+            out_lines.append(line)
+
+        return "".join(out_lines), cp.stderr
+
+    def _write_log(self, timestamp: str, stdout: str, stderr: str):
+
+        try:
+            date, time = timestamp.split("_")
+        except Exception:
+            date, time = self._last_run_time.split("_")
+
+        os.makedirs(f"{self.log_path}/{date}", exist_ok=True)
+
+        log_file = f"{self.log_path}/{date}/output_log.txt"
+        with open(log_file, "a", encoding="utf-8") as f:
+            f.write("\n" + "=" * 60 + "\n")
+            f.write(f"timestamp: {timestamp}\n")
+            f.write("stdout:\n" + stdout + "\n\n")
+            f.write("stderr:\n" + stderr + "\n")
+            f.write("=" * 60 + "\n")
+
+    # -----------------------------
+    # Main Utilities
+    # -----------------------------
     def print_args(self):
         print(self._construct_args())
 
-    # -----------------------------
-    # Execution
-    # -----------------------------
-    def run(self, get_output=False) -> str:
+    def run(self) -> str:
+
+        self._last_run_time = datetime.now().strftime("%Y%m%d_%H%M%S")
         cp = subprocess.run(
             self._construct_args(),
             capture_output=True,
@@ -123,11 +188,12 @@ class ArtiqController:
             cwd = self.workdir
         )
 
-        if get_output:
-            return self._extract_timestamps(cp.stdout, cp.stderr), (cp.stdout, cp.stderr)
-        else:
-            return self._extract_timestamps(cp.stdout, cp.stderr)
+        stdout, stderr = self._clean_output(cp)
+        self.last_output = (stdout, stderr)
+        timestamp = self._extract_timestamps(stdout, stderr)
+        self._write_log(timestamp, stdout, stderr)
 
+        return timestamp
 
 # 2) Subclass for single_parameter_scan
 # =============================================================================
@@ -154,7 +220,6 @@ class SingleParameterScan(ArtiqController):
         min_scan: float = 1.0,
         max_scan: float = 150.0,
         steps: int = 150,
-        get_output = False,
         # Allow any additional ARTIQ parameters to be passed through
         **extra_params,
     ) -> str:
@@ -178,7 +243,7 @@ class SingleParameterScan(ArtiqController):
         # Pass everything else through (e.g. U1, Ex, Ey, tickle_level, etc.)
         self.load_params(extra_params)
 
-        return super().run(get_output=get_output)
+        return super().run()
 
 # 3) Subclass for doe_scan
 # =============================================================================
@@ -205,7 +270,6 @@ class DoeScan(ArtiqController):
         doe_file_path: str = "/home/electrons/software/"
                              "Electrons_Artiq_Sequences/artiq-master/doe_configs/",
         doe_file_name: str = "doe_table.csv",
-        get_output = False,
         **extra_params,
     ) -> str:
         """
@@ -224,7 +288,7 @@ class DoeScan(ArtiqController):
             "doe_file_name": doe_file_name,
         })
         self.load_params(extra_params)
-        return super().run(get_output=get_output)
+        return super().run()
 
 # 4) Subclass for find_optimal_E
 # =============================================================================

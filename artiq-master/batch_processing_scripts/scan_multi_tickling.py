@@ -1,9 +1,11 @@
-from artiq_controller import SingleParameterScan
-
 import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+
+import sys
+sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/batch_processing_scripts/artiq_controller")
+from artiq_controller import SingleParameterScan
 
 # 1) Meta Settings
 # ===================================================================

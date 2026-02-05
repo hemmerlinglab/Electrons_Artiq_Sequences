@@ -2,8 +2,10 @@ import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from artiq_controller import FindOptimalE
 
+import sys
+sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/batch_processing_scripts/artiq_controller")
+from artiq_controller import FindOptimalE
 
 # =============================================================================
 # 1) Configuration Settings

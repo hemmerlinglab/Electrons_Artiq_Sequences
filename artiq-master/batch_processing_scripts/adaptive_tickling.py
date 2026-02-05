@@ -1,12 +1,16 @@
-from artiq_controller import SingleParameterScan
-from helper_functions import analyze_rough_scan, analyze_fine_scan, plot_fine_scan, find_best_laser_frequency
 import numpy as np
 import pandas as pd
 import json
+from pathlib import Path
 import time
 from datetime import datetime
 import os
-from pathlib import Path
+
+import sys
+sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/batch_processing_scripts/artiq_controller")
+from artiq_controller import SingleParameterScan
+from helper_functions import analyze_rough_scan, analyze_fine_scan, plot_fine_scan
+from experiment_functions import relock_laser
 
 # 0) Save Settings
 # ===================================================================
@@ -94,7 +98,7 @@ config = {
     "load_time": 210,                       # unit: us
     "trap": "Single PCB",
     "flip_electrodes": False,
-    "frequency_422": 709.076740,            # unit: THz
+    #"frequency_422": 709.076730,            # unit: THz
     "frequency_390": 768.708843,            # unit: THz
     "laser_failure": "raise error",
     "RF_on": True,
@@ -110,9 +114,9 @@ config = {
 }
 
 LAG = 250                                   # unit: us
-NO_OF_REPEATS_ROUGH = 3000                  # 5000 for scan, 3000 for debug
-NO_OF_REPEATS_FINE = 5000                   # 20000 for scan, 5000 for debug
-STEPSIZE_FINE = 0.5                         # 0.2 for scan, 0.5 for debug
+NO_OF_REPEATS_ROUGH = 5000                  # 5000 for scan, 3000 for debug
+NO_OF_REPEATS_FINE = 20000                  # 20000 for scan, 5000 for debug
+STEPSIZE_FINE = 0.25                        # 0.25 for scan, 0.5 for debug
 
 # 3) Scan Settings
 # ===================================================================
@@ -125,61 +129,27 @@ MAX_N_PEAKS = 4
 
 # 3) Helper Functions
 # ===================================================================
-def relock_laser_422(
-    scanner, config,
-    rough_center=709.078000, rough_width=0.003000, rough_steps=61,
-    fine_width=0.000200, fine_steps=41
-):
-
-    f0 = config["frequency_422"]
-
-    scanner.set_param("no_of_repeats", NO_OF_REPEATS_ROUGH)
-    scanner.set_param("histogram_refresh", NO_OF_REPEATS_ROUGH)
-
-    print(f"[Manager] Scanning frequency_422 [rough] ...")
-    ts_rough = scanner.run(
-        scanning_parameter = "frequency_422",
-        min_scan = rough_center - rough_width,
-        max_scan = rough_center + rough_width,
-        steps = rough_steps,
-    )
-    freq_rough = find_best_laser_frequency(ts_rough)
-    print(f"[Manager] Scan Result: {freq_rough:6f} THz")
-
-    scanner.set_param("no_of_repeats", NO_OF_REPEATS_FINE)
-    scanner.set_param("histogram_refresh", NO_OF_REPEATS_FINE)
-
-    print(f"[Manager] Scanning frequency_422 [fine] ...")
-    ts_fine = scanner.run(
-        scanning_parameter = "frequency_422",
-        min_scan = freq_rough - fine_width,
-        max_scan = freq_rough + fine_width,
-        steps = fine_steps
-    )
-    freq_fine = find_best_laser_frequency(ts_fine)
-    print(f"[Manager] Scan Result: {freq_fine:6f} THz")
-
-    config["frequency_422"] = freq_fine
-    scanner.set_param("frequency_422", freq_fine)
-    print(f"[Manager] Laser frequency 422 updated: {f0:.6f} THz -> {freq_fine:.6f} THz.")
-
-    return freq_fine, ts_rough, ts_fine
-
-def run_with_422_relock(scanner, config, restore_params=None, **run_kwargs):
+def run_with_422_relock(scanner, config, initialize=False, **run_kwargs):
 
     while True:
 
+        if initialize:
+            print("[Manager] Searching for laser 422 frequency ...")
+            new_422_freq, _, _ = relock_laser(scanner, laser_to_relock=422)
+            config["frequency_422"] = new_422_freq
+            print("[Manager] Initialization Done, resuming to experiment scan ...")
+
+        initialize = False
         t0 = time.time()
 
-        ts, out = scanner.run(get_output=True, **run_kwargs)
-        stdout, stderr = out
+        ts = scanner.run(**run_kwargs)
+        stdout, stderr = scanner.last_output
 
         if "LASER_OFF_422" in stderr:
             print("[Manager] Detected LASER_OFF_422 -> relock laser and retry scan.")
-            relock_laser_422(scanner, config)
 
-            if restore_params is not None:
-                scanner.load_params(restore_params)
+            new_422_freq, _, _ = relock_laser(scanner, laser_to_relock=422)
+            config["frequency_422"] = new_422_freq
 
             print("[Manager] Resuming the interrupted scan ...")
             continue
@@ -202,6 +172,8 @@ results = {
 
 best_rows = []
 Ex, Ey, Ez = E
+
+initialize = True
 
 for i, U2 in enumerate(U2_to_scan):
 
@@ -234,12 +206,13 @@ for i, U2 in enumerate(U2_to_scan):
 
     ts = run_with_422_relock(
         scanner, config,
-        restore_params={"no_of_repeats": NO_OF_REPEATS_ROUGH, "histogram_refresh": NO_OF_REPEATS_ROUGH},
+        initialize=initialize,
         scanning_parameter = "tickle_frequency",
         min_scan = 1,
         max_scan = 200,
         steps = 200
     )
+    initialize = False
 
     # Analyze the rough scan data
     fine_scans_to_run = analyze_rough_scan(ts, stepsize=STEPSIZE_FINE)
@@ -279,7 +252,6 @@ for i, U2 in enumerate(U2_to_scan):
                   f"({fine_scan['min_scan']:.1f} MHz, {fine_scan['max_scan']:.1f} MHz), estimated time cost {time_est} s ...")
             ts = run_with_422_relock(
                 scanner, config,
-                restore_params = {"no_of_repeats": NO_OF_REPEATS_FINE, "histogram_refresh": NO_OF_REPEATS_FINE},
                 scanning_parameter = "tickle_frequency",
                 min_scan = fine_scan["min_scan"],
                 max_scan = fine_scan["max_scan"],

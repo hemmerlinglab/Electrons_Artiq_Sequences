@@ -1,4 +1,7 @@
 import numpy as np
+
+import sys
+sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/batch_processing_scripts/artiq_controller")
 from artiq_controller import FindOptimalE
 
 # 1) Settings -------------------------------------------------------
