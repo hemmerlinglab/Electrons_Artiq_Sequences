@@ -93,7 +93,7 @@ def load_common_parameters(self):
     group_detector = "Detector Settings"
     my_setattr(self, 'mesh_voltage',      NumberValue(default=120,unit='V',scale=1,ndecimals=0,step=1), group=group_detector)
     my_setattr(self, 'MCP_front',         NumberValue(default=400,unit='V',scale=1,ndecimals=0,step=1), group=group_detector)
-    my_setattr(self, 'threshold_voltage', NumberValue(default=100,unit='mV',scale=1,ndecimals=0,step=1), group=group_detector)
+    my_setattr(self, 'threshold_voltage', NumberValue(default=60,unit='mV',scale=1,ndecimals=0,step=1), group=group_detector)
 
     # 3. Sequence Settings
     #------------------------------------------------------
@@ -119,7 +119,7 @@ def load_common_parameters(self):
 
     # 4. Trap Settings
     #------------------------------------------------------
-    self.trap = "Single PCB"
+    self.trap = "Single PCB Shielded"
     self.flip_electrodes = False
 
     # 5. Laser Settings
@@ -143,7 +143,17 @@ def load_common_parameters(self):
     my_setattr(self, 'ext_pulse_length',  NumberValue(default=900,unit='ns',scale=1,ndecimals=0,step=1), group=group_ext)
     my_setattr(self, 'ext_pulse_level',   NumberValue(default=15,unit='V',scale=1,ndecimals=2,step=.01), group=group_ext)
 
-    # 8. DC Settings - 2nd Order Multipoles
+    # 8. DC Offset Settings
+    #------------------------------------------------------
+    group_offset = "DC Offset Settings"
+    if not self.flip_electrodes: trap_key = self.trap
+    else: trap_key = self.trap + " Flipped"
+    list_of_electrodes = traps[trap_key]["electrodes_order"]
+    for elec in list_of_electrodes:
+        param_name = f"offset_{elec}"
+        my_setattr(self, param_name,        NumberValue(default=0.0,unit='V',scale=1,ndecimals=2,step=0.01), group=group_offset)
+
+    # 9. DC Settings - 2nd Order Multipoles
     #------------------------------------------------------
     group_DC = "DC Multipoles Settings"
     my_setattr(self, 'U1',                NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.001), group=group_DC)
@@ -168,16 +178,6 @@ def load_experiment_parameters(self):
     my_setattr(self, 'tickle_level',        NumberValue(default=-10,unit='dBm',scale=1,ndecimals=1,step=1), group=group_tickling)
     my_setattr(self, 'tickle_frequency',    NumberValue(default=64,unit='MHz',scale=1,ndecimals=4,step=.0001), group=group_tickling)
     my_setattr(self, 'tickle_pulse_length', NumberValue(default=80,unit='us',scale=1,ndecimals=1,step=1), group=group_tickling)
-
-    # 3. DC Offset Settings
-    #------------------------------------------------------
-    group_offset = "DC Offset Settings"
-    if not self.flip_electrodes: trap_key = self.trap
-    else: trap_key = self.trap + " Flipped"
-    list_of_electrodes = traps[trap_key]["electrodes_order"]
-    for elec in list_of_electrodes:
-        param_name = f"offset_{elec}"
-        my_setattr(self, param_name,        NumberValue(default=0.0,unit='V',scale=1,ndecimals=2,step=0.01), group=group_offset)
 
 def load_ofat_parameters(self):
 
@@ -228,11 +228,4 @@ def load_optimizer_parameters(self):
     self.tickle_on = False
     self.tickle_pulse_length = 80
     self.tickle_level = -10
-
-    if not self.flip_electrodes: trap_key = self.trap
-    else: trap_key = self.trap + " Flipped"
-    list_of_electrodes = traps[trap_key]["electrodes_order"]
-    for elec in list_of_electrodes:
-        param_name = f"offset_{elec}"
-        setattr(self, param_name, 0.0)
 

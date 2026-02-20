@@ -10,7 +10,7 @@ import sys
 sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/batch_processing_scripts/artiq_controller")
 from artiq_controller import SingleParameterScan
 from helper_functions import analyze_rough_scan, analyze_fine_scan, plot_fine_scan
-from experiment_functions import relock_laser
+from experiment_functions import run_with_422_relock
 
 # 0) Save Settings
 # ===================================================================
@@ -96,8 +96,6 @@ config = {
     "threshold_voltage": 60,                # unit: mV
     "wait_time": 90,                        # unit: us
     "load_time": 210,                       # unit: us
-    "trap": "Single PCB",
-    "flip_electrodes": False,
     #"frequency_422": 709.076730,            # unit: THz
     "frequency_390": 768.708843,            # unit: THz
     "laser_failure": "raise error",
@@ -127,37 +125,7 @@ U2_to_scan = np.linspace(-0.20, -0.25, 11)
 OUTSIDE_LOOP_REPEATS = 5
 MAX_N_PEAKS = 4
 
-# 3) Helper Functions
-# ===================================================================
-def run_with_422_relock(scanner, config, initialize=False, **run_kwargs):
-
-    while True:
-
-        if initialize:
-            print("[Manager] Searching for laser 422 frequency ...")
-            new_422_freq, _, _ = relock_laser(scanner, laser_to_relock=422)
-            config["frequency_422"] = new_422_freq
-            print("[Manager] Initialization Done, resuming to experiment scan ...")
-
-        initialize = False
-        t0 = time.time()
-
-        ts = scanner.run(**run_kwargs)
-        stdout, stderr = scanner.last_output
-
-        if "LASER_OFF_422" in stderr:
-            print("[Manager] Detected LASER_OFF_422 -> relock laser and retry scan.")
-
-            new_422_freq, _, _ = relock_laser(scanner, laser_to_relock=422)
-            config["frequency_422"] = new_422_freq
-
-            print("[Manager] Resuming the interrupted scan ...")
-            continue
-
-        print(f"[Manager] Scan done in {time.time()-t0:.1f}s")
-        return ts
-
-# 4) Perform Experiments
+# 3) Perform Experiments
 # ===================================================================
 results = {
     "meta": {

@@ -341,7 +341,6 @@ class FindOptimalE(ArtiqController):
         min_Ez: float = -0.10,
         max_Ez: float = 0.10,
         no_of_repeats: int = 3000,
-        get_output = False,
         **extra_params,
     ):
         # Set parameters
@@ -361,6 +360,7 @@ class FindOptimalE(ArtiqController):
         self.load_params(extra_params)
 
         # Run ARTIQ and capture stdout
+        self._last_run_time = datetime.now().strftime("%Y%m%d_%H%M%S")
         cp = subprocess.run(
             self._construct_args(),
             capture_output=True,
@@ -369,13 +369,12 @@ class FindOptimalE(ArtiqController):
         )
 
         # Parse both E's and timestamp from the printed analyze output
-        E_best_obs, E_best_model = self._parse_optimal_Es(cp.stdout, cp.stderr)
-        timestamp = self._extract_timestamps(cp.stdout, cp.stderr)
+        stdout, stderr = self._clean_output(cp)
+        timestamp = self._extract_timestamps(stdout, stderr)
+        self._write_log(timestamp, stdout, stderr)
 
-        if get_output:
-            return E_best_obs, E_best_model, timestamp, (cp.stdout, cp.stderr)
-        else:
-            return E_best_obs, E_best_model, timestamp
+        E_best_obs, E_best_model = self._parse_optimal_Es(stdout, stderr)
+        return E_best_obs, E_best_model, timestamp
 
 if __name__ == "__main__":
     ac = ArtiqController("general_scan.py")

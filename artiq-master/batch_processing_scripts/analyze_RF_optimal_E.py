@@ -4,8 +4,20 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 import sys
+from pathlib import Path
+from datetime import datetime
 sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/batch_processing_scripts/artiq_controller")
 from artiq_controller import FindOptimalE
+from helper_functions import load_data
+
+SAVE_DIR = Path("/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/batch_processing_scripts/result")
+SAVE_DIR.mkdir(parents=True, exist_ok=True)
+
+RUN_TAG = datetime.now().strftime("%Y%m%d_%H%M%S")
+RUN_DATE = RUN_TAG[:8]  # "YYYYMMDD"
+
+OUT_DIR = SAVE_DIR / RUN_DATE
+OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # =============================================================================
 # 1) Configuration Settings
@@ -14,8 +26,15 @@ from artiq_controller import FindOptimalE
 # Define the list of RF amplitudes or U2 you want to scan
 # Modify this list based on your experimental needs (e.g., dBm or Voltage)
 PARAMETERS = ["RF_amplitude", "U2"]
-SCANNING = 1    # 0 = RF_amplitude, 1 = U2
-VALUES_TO_SCAN = [-0.40, -0.35, -0.30, -0.25, -0.21, -0.18, -0.15, -0.13, -0.11, -0.10]
+SCANNING = 0    # 0 = RF_amplitude, 1 = U2
+VALUES_TO_SCAN = [
+    -2.0, -1.8, -1.6, -1.4, -1.2,
+    -1.0, -0.8, -0.6, -0.4, -0.2,
+    +0.0, +0.25, +0.5, +0.75, +1.0,
+    +1.3, +1.6, +1.9, +2.2, +2.6,
+    +3.0, +3.6, +4.3, +5.0, +6.0,
+    +8.0
+]
 
 param_scan = PARAMETERS[SCANNING]
 
@@ -23,37 +42,38 @@ param_scan = PARAMETERS[SCANNING]
 general_config = {
     "histogram_on": True,
     "bin_width": 1.0,
-    "histogram_refresh": 1000,
+    "histogram_refresh": 4000,
     "mesh_voltage": 120,
     "MCP_front": 400,
     "threshold_voltage": 60,
     "wait_time": 90,
     "load_time": 210,
-    "frequency_422": 709.078300,
+    "frequency_422": 709.079620,
     "frequency_390": 768.708843,
     "RF_on": True,
+    "RF_amp_mode": "setpoint",
     "RF_frequency": 1.732,
     "ext_pulse_length": 900,
     "ext_pulse_level": 15.0,
     "U1": 0, "U3": 0, "U4": 0, "U5": 0,
-    "U2": -0.18,
+    "U2": -0.15,
     # param_scan will be updated dynamically in the loop
 }
 
 # Bayesian Optimizer Settings
 optimizer_config = {
     "optimize_target": "ratio_signal",
-    "max_iteration": 50,
-    "min_iteration": 5,
-    "init_sample_size": 10,
+    "max_iteration": 100,
+    "min_iteration": 10,
+    "init_sample_size": 20,
     "tolerance": 5e-3,
     "converge_count": 3,
     "n_candidate_run": 1024,
     "n_candidate_anal": 4096,
-    "min_Ex": -0.25, "max_Ex": 0.05,
-    "min_Ey": -0.05, "max_Ey": 0.2,
-    "min_Ez": -0.1, "max_Ez": 0.1,
-    "no_of_repeats": 3000,
+    "min_Ex": -0.35, "max_Ex": 0.15,
+    "min_Ey": -0.25, "max_Ey": 0.25,
+    "min_Ez": -0.10, "max_Ez": 0.40,
+    "no_of_repeats": 4000,
 }
 
 # =============================================================================
@@ -153,19 +173,24 @@ def run_scan_batch(n_repeats=5):
     - rf_actual_stds           -> list of stds of actual RF amplitudes per setpoint
     """
 
-    components = ("Ex", "Ey", "Ez")
+    COMPONENTS = ("Ex", "Ey", "Ez")
+    SIGNALS = ["loading_signal", "trapped_signal", "lost_signal", "ratio_signal", "ratio_lost"]
     results = {
-        "Observed": {comp: [] for comp in components},
-        "Model":    {comp: [] for comp in components},
+        "Observed": {comp: [] for comp in COMPONENTS},
+        "Model":    {comp: [] for comp in COMPONENTS},
     }
     errors = {
-        "Observed": {comp: [] for comp in components},
-        "Model":    {comp: [] for comp in components},
+        "Observed": {comp: [] for comp in COMPONENTS},
+        "Model":    {comp: [] for comp in COMPONENTS},
     }
 
     # For x-axis: actual RF amplitudes per setpoint
     rf_actual_means = []
     rf_actual_stds = []
+
+    # For y-axis: trap performances
+    y_means = {s: [] for s in SIGNALS}
+    y_stds  = {s: [] for s in SIGNALS}
 
     print(f"Starting Batch Scan for {param_scan}: {VALUES_TO_SCAN}")
     print(f"Repeats per point: {n_repeats} (Max/Min will be dropped)")
@@ -187,6 +212,9 @@ def run_scan_batch(n_repeats=5):
 
         # Temporary storage for actual RF amplitude of each run (measured)
         current_rf_actuals = []
+
+        # Temporary storage for y data of each run
+        current_y = {s: [] for s in SIGNALS}
 
         # --- Inner Loop: Repeat Optimization N times ---
         for i in range(n_repeats):
@@ -226,6 +254,12 @@ def run_scan_batch(n_repeats=5):
                     print(f"    Warning: could not get actual RF amplitude "
                           f"for timestamp {timestamp}: {e_rf}")
 
+                # Get signals for this run (from data file)
+                _, ys = load_data(timestamp, ynames=SIGNALS)
+                for s in SIGNALS:
+                    arr = ys.get(s, None)
+                    current_y[s].append(np.nanmax(arr) if arr is not None else np.nan)
+
             except Exception as e:
                 print(f"Error in run {i+1}: {e}")
 
@@ -238,6 +272,12 @@ def run_scan_batch(n_repeats=5):
         rf_actual_means.append(rf_mean)
         rf_actual_stds.append(rf_std)
 
+        # --- Calculate the correct y values ---
+        for s in SIGNALS:
+            mu, sd = calculate_trimmed_mean(np.array(current_y[s], dtype=float))
+            y_means[s].append(mu)
+            y_stds[s].append(sd)
+
         # --- Data Processing: Drop Max/Min and Average E-field components ---
         for kind in ("Observed", "Model"):
             runs = current_rf_runs[kind]
@@ -248,11 +288,11 @@ def run_scan_batch(n_repeats=5):
             # means = (mu_x, mu_y, mu_z)
             # stds  = (std_x, std_y, std_z)
 
-            for idx, comp in enumerate(components):
+            for idx, comp in enumerate(COMPONENTS):
                 results[kind][comp].append(means[idx])
                 errors[kind][comp].append(stds[idx])
 
-    return results, errors, rf_actual_means, rf_actual_stds
+    return results, errors, rf_actual_means, rf_actual_stds, y_means, y_stds
 
 
 # =========================================================================
@@ -313,12 +353,53 @@ def do_plot(
     return fig, axes
 
 
-if __name__ == "__main__":
-    # Run the RF scan batch and collect results
-    results, errors, rf_actual_means, rf_actual_stds = run_scan_batch(n_repeats=7)
-    #results, errors, rf_actual_means, rf_actual_stds = run_scan_batch(n_repeats=2)
+def plot_signals_2x3(
+    x_values,
+    y_means,   # dict: signal -> list
+    y_stds,    # dict: signal -> list
+    signals,
+    x_label,
+    out_png="scan_signals_2x3.png",
+    title="Trap performance signals vs scan parameter",
+):
+    fig, axes = plt.subplots(2, 3, figsize=(14, 8), sharex=True)
+    axes = axes.ravel()
 
-    # Use actual RF amplitudes on x-axis
+    for i, s in enumerate(signals):
+        ax = axes[i]
+        ax.errorbar(
+            x_values,
+            y_means[s],
+            yerr=y_stds[s],
+            fmt="-o",
+            capsize=4,
+        )
+        ax.set_title(s)
+        ax.grid(True, alpha=0.3)
+
+    # 6th subplot (empty)
+    ax_empty = axes[len(signals)]
+    ax_empty.axis("off")
+
+    # x label only on bottom row (optional)
+    for ax in axes[3:5]:  # bottom row, first two used (since last is off)
+        ax.set_xlabel(x_label)
+
+    fig.suptitle(title, fontsize=14)
+    plt.tight_layout(rect=[0, 0, 1, 0.95])
+    fig.savefig(out_png, dpi=300)
+    plt.close(fig)
+    print(f"[Save] signals grid -> {out_png}")
+
+
+# =========================================================================
+# 5) Main
+# =========================================================================
+
+if __name__ == "__main__":
+
+    results, errors, rf_actual_means, rf_actual_stds, y_means, y_stds = run_scan_batch(n_repeats=9)
+
     if param_scan == "RF_amplitude":
         x_vals = rf_actual_means
         xlabel = "Actual RF Amplitude"
@@ -326,24 +407,16 @@ if __name__ == "__main__":
         x_vals = VALUES_TO_SCAN
         xlabel = param_scan
 
-    # Plot Observed data
-    fig_obs, axes_obs = do_plot(
-        x_vals,
-        results["Observed"],
-        errors["Observed"],
-        title_suffix="Observed",
-        x_label=xlabel,
-    )
+    fig_obs, _ = do_plot(x_vals, results["Observed"], errors["Observed"], title_suffix="Observed", x_label=xlabel)
+    fig_mod, _ = do_plot(x_vals, results["Model"],    errors["Model"],    title_suffix="Model",    x_label=xlabel)
 
-    # Plot Model data
-    fig_mod, axes_mod = do_plot(
-        x_vals,
-        results["Model"],
-        errors["Model"],
-        title_suffix="Model",
-        x_label=xlabel,
-    )
+    fig_obs.savefig(OUT_DIR / "scan_observed.png", dpi=300)
+    fig_mod.savefig(OUT_DIR / "scan_model.png", dpi=300)
 
-    # Save figures instead of showing them (no Qt / xcb needed)
-    fig_obs.savefig("scan_observed.png", dpi=300)
-    fig_mod.savefig("scan_model.png", dpi=300)
+    SIGNALS = ["loading_signal", "trapped_signal", "lost_signal", "ratio_signal", "ratio_lost"]
+    plot_signals_2x3(
+        x_vals, y_means, y_stds, SIGNALS,
+        x_label=xlabel,
+        out_png=str(OUT_DIR / "scan_signals_2x3.png"),
+        title=f"Signals vs {param_scan}",
+    )

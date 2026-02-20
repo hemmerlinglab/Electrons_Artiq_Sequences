@@ -1,29 +1,50 @@
 import numpy as np
 from scipy.signal import find_peaks
-import time
 
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-from fitting_functions import find_peaks, gaussian_sum
+from fitting_functions import fit_n_peaks, gaussian_sum
 
 # Utility Functions - Load_data
 # ===============================================
 
-def load_data(timestamp, ynames = ["ratio_signal"]):
+def load_data(timestamp, ynames=["ratio_signal"]):
+    """
+    Load data from the artiq data saving folders.
+    1) INPUT ----------------------------------------
+    timestamp:  str, which experiment you want to load data from
+    ynames:     list, dataset name you want to load, use the same name as its dataset name in artiq
+    2) OUTPUT ---------------------------------------
+    xdata:      np.ndarray, setpoint data, loaded from _arr_of_setpoints
+    ydata:      dict {yname: np.ndarray}, datasets you want to load
+    """
 
     print(f"[Data Loader] loading timestamp: {timestamp} ...")
 
     date, _ = timestamp.split("_")
     basefilename = f"/home/electrons/software/data/{date}/{timestamp}"
-    xdata = np.genfromtxt(f"{basefilename}_arr_of_setpoints")
+    try:
+        xdata = np.genfromtxt(f"{basefilename}_arr_of_setpoints")
+    except Exception:
+        xdata = None
+
     ydata = {}
     for yname in ynames:
         ydata[yname] = np.genfromtxt(f"{basefilename}_{yname}")
     return xdata, ydata
 
 def load_configuration(timestamp, conf_names=["U2"]):
+    """
+    Get parameter configurations from artiq.
+    1) INPUT ----------------------------------------
+    timestamp:  str, which experiment you want to load configuration from
+    conf_names: list, configuration name you want to load, use the same name as its parameter name in artiq
+    2) OUTPUT  --------------------------------------
+    list of the parameters you requested, in the same order as your conf_names
+    """
+    
     date, _ = timestamp.split("_")
     filename = f"/home/electrons/software/data/{date}/{timestamp}_conf"
 
@@ -38,35 +59,21 @@ def load_configuration(timestamp, conf_names=["U2"]):
 
     return [config_map.get(name, "") for name in conf_names]
 
-def calculate_fine_scan_range(timestamp: str, yname: str = "ratio_signal", stepsize: float = 0.01):
-    # Read data
-    xs, ys_dict = load_data(timestamp, [yname])
-    ys = ys_dict[yname]
-
-    # Calculate range
-    maxval = np.max(ys)
-    mask = ys > (maxval / 2.0)
-    xs_in = xs[mask]
-    xmin, xmax = np.min(xs_in), np.max(xs_in)
-    steps = int(round((xmax - xmin) / stepsize)) + 1
-    return xmin, xmax, steps
-
-def moving_average(y, window=7):
-    y = np.asarray(y)
-    if window is None or window <= 1:
-        return y
-    kernel = np.ones(window, dtype=float) / window
-    return np.convolve(y, kernel, mode="same")
-
 def find_best_laser_frequency(timestamp):
+    """
+    Function built for searching for the correct laser frequencies
+    1) INPUT ----------------------------------------
+    timestamp:  str, the timestamp for your laser frequency scan
+    """
+
     x, y = load_data(timestamp, ynames=["loading_signal"])
     y_smooth = moving_average(y["loading_signal"])
     return float(x[np.argmax(y_smooth)])
 
-def analyze_rough_scan(timestamp, stepsize=0.2):
+def analyze_rough_scan(timestamp, ynames=["ratio_signal", "ratio_lost"], stepsize=0.2):
 
     # Extract Data
-    x, ys = load_data(timestamp, ynames = ["ratio_signal", "ratio_lost"])
+    x, ys = load_data(timestamp, ynames=ynames)
     y1 = -ys["ratio_signal"]
     y2 = ys["ratio_lost"]
     dx = x[1] - x[0]
@@ -106,10 +113,10 @@ def analyze_rough_scan(timestamp, stepsize=0.2):
 
     return fine_scans
 
-def analyze_fine_scan(timestamp, stepsize=0.2, r2_gate=0.90, scan_count=50, max_n_peaks=4, n_jobs=1):
+def analyze_fine_scan(timestamp, ynames=["ratio_signal", "ratio_lost"], stepsize=0.2, r2_gate=0.90, scan_count=50, max_n_peaks=4, n_jobs=1):
 
     modes = ["lost", "trapped"]
-    x, ys = load_data(timestamp, ynames = ["ratio_signal", "ratio_lost"])
+    x, ys = load_data(timestamp, ynames=ynames)
 
     y = {"lost": ys["ratio_lost"], "trapped": ys["ratio_signal"]}
     result = {}
@@ -195,9 +202,15 @@ def plot_fine_scan(timestamp, fit_result, out_name):
 
     print(f"[Plot] Saved: {out_name}.png")
 
-# Analyze Rough Scan Helpers
+
+
+
+# Mathematical Helper Functions
 # ===============================================
 def find_peaks_and_plot(x, y, noise):
+    """
+    For utility function `analyze_rough_scan`
+    """
 
     peaks = find_peaks(y, height=max(6*noise, 0.20), prominence=max(3*noise, 0.15), distance=5)
 
@@ -210,6 +223,9 @@ def find_peaks_and_plot(x, y, noise):
     return peaks
 
 def construct_scan_ranges(x, y, peaks, width=10.0, stepsize=0.2):
+    """
+    For utility function `analyze_rough_scan`
+    """
 
     # Create Ranges
     if isinstance(peaks, tuple): peaks = peaks[0]
@@ -249,6 +265,9 @@ def construct_scan_ranges(x, y, peaks, width=10.0, stepsize=0.2):
     return fine_scans
 
 def merge_scan_ranges(fine_scans_trapped, fine_scans_lost, x, y_trapped, y_lost, stepsize=0.2):
+    """
+    For utility function `analyze_rough_scan`
+    """
 
     # Collect all ranges with a lost-flag (internal only)
     intervals = []
@@ -303,3 +322,10 @@ def merge_scan_ranges(fine_scans_trapped, fine_scans_lost, x, y_trapped, y_lost,
         fine_scans.append(fine_scan)
 
     return fine_scans
+
+def moving_average(y, window=7):
+    y = np.asarray(y)
+    if window is None or window <= 1:
+        return y
+    kernel = np.ones(window, dtype=float) / window
+    return np.convolve(y, kernel, mode="same")

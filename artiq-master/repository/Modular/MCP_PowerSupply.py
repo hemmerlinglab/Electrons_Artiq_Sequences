@@ -8,6 +8,7 @@ from helper_functions import calculate_Vsampler, calculate_HighV, calculate_Vin,
 class MCP_PowerSupply(EnvExperiment):
     
     def build(self):
+
         self.setattr_device('core')
         self.setattr_device('zotino0')
         self.setattr_device('sampler0')
@@ -66,7 +67,7 @@ class MCP_PowerSupply(EnvExperiment):
             self.zotino0.write_dac(self.channels[i], self.Vin[i])
             self.zotino0.load()
             delay(200*us)
-    
+
     def run(self):
 
         self.Vt()

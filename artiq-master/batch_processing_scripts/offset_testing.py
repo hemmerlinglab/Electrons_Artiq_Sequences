@@ -2,6 +2,11 @@ import numpy as np
 import matplotlib
 matplotlib.use("Agg")   # Use non-interactive backend (no Qt / xcb)
 import matplotlib.pyplot as plt
+from pathlib import Path
+from datetime import datetime
+import json
+import csv
+import argparse
 
 import sys
 sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/batch_processing_scripts/artiq_controller")
@@ -10,6 +15,19 @@ from artiq_controller import SingleParameterScan
 # =============================================================================
 # 1) Configuration
 # =============================================================================
+
+try:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--offset", type=float, required=True, help="Top electrode offset (+OFFSET), bottom uses (-OFFSET)")
+    args = parser.parse_args()
+
+    OFFSET = float(args.offset)
+
+except Exception:
+    OFFSET = 0.0
+
+SAVE_DIR = Path("/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/batch_processing_scripts/result")
+SAVE_DIR.mkdir(parents=True, exist_ok=True)
 
 # Layout of electrodes in the final 4x5 subplot figure
 ROWS = [
@@ -33,7 +51,7 @@ def offset_param_name(electrode: str) -> str:
 SCAN_CONFIG = {
     "min_scan": -20.0,    # offset lower bound
     "max_scan": 20.0,     # offset upper bound
-    "steps":  81,       # number of points
+    "steps":  41,       # number of points
 }
 
 # General ARTIQ parameters for the sequence (passed through **extra_params)
@@ -41,30 +59,38 @@ GENERAL_SEQ_CONFIG = {
     "mode": "Trapping",
     "histogram_on": True,
     "bin_width": 1.0,
-    "histogram_refresh": 1000,
+    "histogram_refresh": 10000,
     "mesh_voltage": 120,
     "MCP_front": 400,
     "threshold_voltage": 60,
     "wait_time": 90,
     "load_time": 210,
     "no_of_repeats": 10000,
-    "frequency_422": 709.078300,
+    "frequency_422": 709.076660,
     "frequency_390": 768.708843,
     "RF_on": True,
     "RF_frequency": 1.732,
     "ext_pulse_length": 900,
     "ext_pulse_level": 15.0,
     "U1": 0.0, "U3": 0.0, "U4": 0.0, "U5": 0.0,
-    "Ex": -0.18, "Ey": 0.06, "Ez": 0.01,
-    "U2": -0.18,
-    "RF_amplitude": 4.0,
+    "Ex": -0.20, "Ey": 0.05, "Ez": 0.03,
+    "U2": -0.225,
+    "RF_amplitude": 2.5,
+    "tickle_on": False,
 }
+
+# Generate offsets
+OFFSET_CONFIG = {}
+for row in ROWS:
+    for e in row:
+        is_top = e.startswith(("tl", "tr"))
+        OFFSET_CONFIG[f"offset_{e}"] = float(OFFSET if is_top else -OFFSET)
 
 # Data directory and filename template for the single_parameter_scan output
 DATA_DIRECTORY = "/home/electrons/software/data"
 
 # Example filename pattern:
-#   /home/electrons/software/data/20241205/20241205_153000_offset_tl1.csv
+#   /home/electrons/software/data/20241205/20241205_153000_arr_of_setpoints (no .csv)
 FILE_TEMPLATE = "{timestamp}_{param}"
 
 # Signals to plot
@@ -162,14 +188,17 @@ def run_scan_for_electrode(electrode: str) -> str:
     param = offset_param_name(electrode)
     print(f"\n=== Scanning electrode {electrode} (parameter: {param}) ===")
 
-    sps = SingleParameterScan()
+    sps = (
+        SingleParameterScan()
+        .load_params(GENERAL_SEQ_CONFIG)
+        .load_params(OFFSET_CONFIG)
+    )
 
     timestamp = sps.run(
         scanning_parameter=param,
         min_scan=SCAN_CONFIG["min_scan"],
         max_scan=SCAN_CONFIG["max_scan"],
         steps=SCAN_CONFIG["steps"],
-        **GENERAL_SEQ_CONFIG,
     )
 
     print(f"  single_parameter_scan timestamp = {timestamp}")
@@ -219,7 +248,42 @@ def load_results_for_dataset(timestamps: dict, y_dataset: str):
     return results
 
 # =============================================================================
-# 4) Plotting: 4x5 subplots in one figure
+# 4) Saving: Saving helper functions
+# =============================================================================
+
+def fmt_offset_for_filename(x: float, ndp: int = 3) -> str:
+    # +0.050 -> p0p050, -0.200 -> m0p200 (safe in bash/globs)
+    s = f"{x:+.{ndp}f}"
+    return s.replace("+", "p").replace("-", "m").replace(".", "p")
+
+RUN_TAG = datetime.now().strftime("%Y%m%d_%H%M%S")
+BASE_NAME = f"offsetScan_OFF{fmt_offset_for_filename(OFFSET)}_{RUN_TAG}"
+
+def save_timestamps(timestamps: dict):
+    # JSON (full metadata)
+    json_path = SAVE_DIR / f"{BASE_NAME}_timestamps.json"
+    payload = {
+        "run_tag": RUN_TAG,
+        "OFFSET": float(OFFSET),
+        "SCAN_CONFIG": SCAN_CONFIG,
+        "GENERAL_SEQ_CONFIG": GENERAL_SEQ_CONFIG,
+        "timestamps": timestamps,
+    }
+    with open(json_path, "w") as f:
+        json.dump(payload, f, indent=2, sort_keys=True)
+    print(f"[Save] timestamps JSON -> {json_path}")
+
+    # CSV (quick view)
+    csv_path = SAVE_DIR / f"{BASE_NAME}_timestamps.csv"
+    with open(csv_path, "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["electrode", "timestamp"])
+        for elec in ALL_ELECTRODES:
+            w.writerow([elec, timestamps.get(elec, "")])
+    print(f"[Save] timestamps CSV  -> {csv_path}")
+
+# =============================================================================
+# 5) Plotting: 4x5 subplots in one figure
 # =============================================================================
 
 def plot_results_4x5(results, fig_name="offset_scan_4x5.png"):
@@ -273,17 +337,19 @@ def plot_results_4x5(results, fig_name="offset_scan_4x5.png"):
 # =============================================================================
 # 5) Main
 # =============================================================================
-'''
 if __name__ == "__main__":
-    # 1) Run the scans once and record timestamps for each electrode
     timestamps = run_all_scans_get_timestamps()
 
-    # 2) For each Y dataset, load data from disk and make one 4x5 figure
+    # save timestamps right away
+    save_timestamps(timestamps)
+
     for y_dataset in Y_SIGNALS:
         print(f"\n\n######## Plotting for Y dataset: {y_dataset} ########\n")
         results = load_results_for_dataset(timestamps, y_dataset=y_dataset)
-        fig_name = f"offset_scan_4x5_{y_dataset}.png"
-        plot_results_4x5(results, fig_name=fig_name)
+
+        fig_path = SAVE_DIR / f"{BASE_NAME}_{y_dataset}.png"
+        plot_results_4x5(results, fig_name=str(fig_path))
+
 '''
 
 TIMESTAMPS_20251205 = {
@@ -319,3 +385,4 @@ if __name__ == "__main__":
         results = load_results_for_dataset(timestamps, y_dataset=y_dataset)
         fig_name = f"offset_scan_4x5_{y_dataset}.png"
         plot_results_4x5(results, fig_name=fig_name)
+'''

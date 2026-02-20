@@ -17,4 +17,12 @@ drop_keys = {
     "scan_result",
     "time_cost",
     "sampler_voltages",
+    "timestamps",
+    "timestamps_loading",
+    "best_rel_noise",
+    "e_trace",
+    "ei",
+    "length_scale",
+    "optimizer_x",
+    "y_best",
 }

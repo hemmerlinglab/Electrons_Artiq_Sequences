@@ -2,6 +2,36 @@ from typing import Tuple
 from artiq_controller import SingleParameterScan
 from helper_functions import find_best_laser_frequency
 
+
+def run_with_422_relock(scanner, config, initialize=False, **run_kwargs):
+
+    while True:
+
+        if initialize:
+            print("[Manager] Searching for laser 422 frequency ...")
+            new_422_freq, _, _ = relock_laser(scanner, laser_to_relock=422)
+            config["frequency_422"] = new_422_freq
+            print("[Manager] Initialization Done, resuming to experiment scan ...")
+
+        initialize = False
+        t0 = time.time()
+
+        ts = scanner.run(**run_kwargs)
+        stdout, stderr = scanner.last_output
+
+        if "LASER_OFF_422" in stderr:
+            print("[Manager] Detected LASER_OFF_422 -> relock laser and retry scan.")
+
+            new_422_freq, _, _ = relock_laser(scanner, laser_to_relock=422)
+            config["frequency_422"] = new_422_freq
+
+            print("[Manager] Resuming the interrupted scan ...")
+            continue
+
+        print(f"[Manager] Scan done in {time.time()-t0:.1f}s")
+        return ts
+
+
 def relock_laser(
     scanner:            SingleParameterScan,
     laser_to_relock:    int =   422,
