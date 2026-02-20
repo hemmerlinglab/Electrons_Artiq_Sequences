@@ -1,0 +1,8 @@
+{
+  "date": "20260220",
+  "after": "020000",
+  "rf_filter": 2.5,
+  "n_runs": 318,
+  "n_u2": 36,
+  "out_log": "/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/batch_processing_scripts/result/20260220/output_log.txt"
+}

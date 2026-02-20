@@ -27,7 +27,7 @@ OUT_DIR.mkdir(parents=True, exist_ok=True)
 # Modify this list based on your experimental needs (e.g., dBm or Voltage)
 PARAMETERS = ["RF_amplitude", "U2"]
 SCANNING = 1    # 0 = RF_amplitude, 1 = U2
-VALUES_TO_SCAN = np.linspace(+0.10, -0.60, 36)
+VALUES_TO_SCAN = np.linspace(-0.60, -0.80, 11)
 #[-0.40, -0.35, -0.30, -0.25, -0.21, -0.18, -0.15, -0.13, -0.11, -0.10]
 
 param_scan = PARAMETERS[SCANNING]
