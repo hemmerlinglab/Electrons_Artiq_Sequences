@@ -48,7 +48,7 @@ def set_extraction_pulse(self):
     self.ext_pulser.set_carr_ampl(2, self.ext_pulse_level)
     
     # Parts to ensure
-    self.ext_pulser.set_burst_mode(2, True)
+    self.ext_pulser.set_burst_mode(2, True)   # Channel 2 = extraction pulse
 
     return
 
@@ -65,8 +65,8 @@ def set_loading_pulse(self):
     self.ext_pulser.set_carr_delay(1, 0.0)
     self.ext_pulser.set_carr_ampl(1, 1.0)
     self.ext_pulser.set_carr_offset(1, 0.5)
-    self.ext_pulser.set_burst_mode(2, True)
-    
+    self.ext_pulser.set_burst_mode(1, True)   # Channel 1 = loading pulse (was incorrectly set to 2)
+
     # Make sure the pulser is on
     # both channel is switched here because we do not want this recurring
     self.ext_pulser.on(1)
