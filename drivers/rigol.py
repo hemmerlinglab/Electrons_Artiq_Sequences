@@ -27,10 +27,6 @@ class DSG821(BaseVisaInstrument):
 
 # Rigol DG4162 160 MHz Dual-Channel Function/Arbitrary Waveform Generator
 class DG4162(BaseVisaInstrument):
-    """
-    Rigol DG4162 function generator driver.
-    Channel numbers are 1 or 2.
-    """
 
     def __init__(self, IP="192.168.42.181"):
         super().__init__(IP)
@@ -39,37 +35,29 @@ class DG4162(BaseVisaInstrument):
     # Output control
     # -------------------------------------------------------------------------
     def on(self, channel=1):
-        """Enable output for the specified channel."""
         self.write(f":OUTPut{channel}:STATe ON")
 
-    def off(self, channel=1):
-        """Disable output for the specified channel."""
+    def off(self, channel=1, kill_socket=False):
         self.write(f":OUTPut{channel}:STATe OFF")
+        if kill_socket:
+            super().close()
 
     # -------------------------------------------------------------------------
     # Function / waveform
     # -------------------------------------------------------------------------
     def set_function(self, channel, func):
-        """
-        Set waveform function.
-        func: 'SINusoid', 'SQUare', 'TRIangle', 'RAMP', 'PULSe', 'NOISe', 'DC', 'ARB'
-        """
         self.write(f":SOURce{channel}:FUNCtion {func}")
 
     def set_frequency(self, channel, freq_hz):
-        """Set frequency in Hz (float or int)."""
         self.write(f":SOURce{channel}:FREQuency {float(freq_hz)}")
 
     def set_voltage_high(self, channel, volts):
-        """Set high level voltage (V)."""
         self.write(f":SOURce{channel}:VOLTage:HIGH {float(volts)}")
 
     def set_voltage_low(self, channel, volts):
-        """Set low level voltage (V)."""
         self.write(f":SOURce{channel}:VOLTage:LOW {float(volts)}")
 
     def set_pulse_duty(self, channel, duty_percent):
-        """Set pulse duty cycle (0–100%)."""
         self.write(f":SOURce{channel}:FUNCtion:PULSe:DCYCle {float(duty_percent)}")
 
     # -------------------------------------------------------------------------

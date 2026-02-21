@@ -121,6 +121,13 @@ def close_instruments(self):
         print("[Error] Failed to close the extraction pulse and AOM controller")
         traceback.print_exc()
 
+    # 5) Close Final Signal Generator (DG4162)
+    try:
+        self.signal.off(kill_socket=True)
+    except Exception:
+        print("[Error] Failed to close the final signal and RST generator")
+        traceback.print_exc()
+
 def printout_final_result(self):
 
     # Extract best observed point

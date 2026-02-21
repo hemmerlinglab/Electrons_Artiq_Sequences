@@ -47007,3 +47007,2075 @@ stderr:
   arr = np.array(self.get_dataset(hlp['var']))
 
 ============================================================
+
+============================================================
+timestamp: 20260220_155300
+stdout:
+b'Keysight Technologies,N9000B,MY60251535,A.32.01\n'
+Successfully sent setpoint 768.708843 THz to laser 390!
+Successfully sent setpoint 709.079620 THz to laser 422!
+[MCP] Applying MCP Voltage: 400.000, 2400.000, 2600.000
+
+****************************************************************************************************
+* Starting new scan
+****************************************************************************************************
+
+ 0/120: E=(-0.326,	-0.199,	-0.040):	signal=0.000
+ 1/120: E=(0.011,	-0.163,	0.398):	signal=0.000
+ 2/120: E=(-0.052,	-0.202,	0.038):	signal=0.000
+ 3/120: E=(-0.140,	-0.241,	0.057):	signal=0.000
+ 4/120: E=(-0.211,	-0.035,	0.217):	signal=0.000
+ 5/120: E=(0.025,	0.214,	0.158):	signal=0.000
+ 6/120: E=(-0.113,	0.194,	0.317):	signal=0.000
+ 7/120: E=(-0.237,	0.060,	-0.094):	signal=0.000
+ 8/120: E=(-0.165,	-0.015,	-0.019):	signal=0.000
+ 9/120: E=(-0.099,	-0.053,	0.358):	signal=0.000
+10/120: E=(-0.266,	0.033,	0.112):	signal=0.000
+11/120: E=(0.121,	0.235,	0.150):	signal=0.000
+12/120: E=(-0.031,	-0.089,	0.339):	signal=0.000
+13/120: E=(0.064,	0.164,	0.250):	signal=0.000
+14/120: E=(-0.176,	0.096,	0.191):	signal=0.000
+15/120: E=(-0.293,	-0.107,	0.095):	signal=0.000
+16/120: E=(0.099,	-0.130,	0.292):	signal=0.000
+17/120: E=(0.126,	0.102,	0.007):	signal=0.000
+18/120: E=(-0.013,	0.146,	-0.071):	signal=0.000
+19/120: E=(-0.303,	0.007,	0.229):	signal=0.000
+  suggest_next: nan, nan
+20/120: E=(-0.163,	-0.232,	-0.068):	signal=0.000
+  suggest_next: nan, nan
+21/120: E=(-0.242,	0.121,	0.130):	signal=0.000
+  suggest_next: nan, nan
+22/120: E=(-0.053,	-0.027,	0.033):	signal=0.033
+  suggest_next: 0.029, 0.446
+23/120: E=(-0.034,	-0.005,	0.036):	signal=0.023
+  suggest_next: 0.030, 0.428
+24/120: E=(-0.070,	-0.022,	0.023):	signal=0.045
+  suggest_next: 0.034, 0.625
+25/120: E=(-0.089,	-0.006,	-0.010):	signal=0.067
+  suggest_next: 0.057, 0.565
+26/120: E=(-0.072,	-0.002,	-0.037):	signal=0.093
+  suggest_next: 0.066, 0.671
+27/120: E=(-0.093,	-0.001,	-0.071):	signal=0.087
+  suggest_next: 0.089, 0.541
+28/120: E=(-0.031,	-0.017,	-0.079):	signal=0.009
+  suggest_next: 0.075, 0.644
+29/120: E=(-0.097,	0.035,	-0.065):	signal=0.104
+  suggest_next: 0.104, 0.187
+30/120: E=(-0.094,	0.019,	-0.055):	signal=0.092
+  suggest_next: 0.059, 0.821
+31/120: E=(-0.100,	0.093,	-0.092):	signal=0.000
+  suggest_next: 0.087, 0.484
+32/120: E=(-0.061,	0.035,	-0.053):	signal=0.059
+  suggest_next: 0.030, 0.927
+33/120: E=(-0.038,	-0.087,	-0.029):	signal=0.003
+  suggest_next: 0.058, 0.689
+34/120: E=(-0.138,	0.058,	-0.047):	signal=0.002
+  suggest_next: 0.018, 1.000
+35/120: E=(-0.321,	-0.248,	0.306):	signal=0.000
+Resetting Ex, Ey, and Ez to default [0.0, 0.0, 0.0] ...
+Saving data...
+Config file written.
+Experiment /home/electrons/software/data/20260220/20260220_155300 finished.
+Experiment finished.
+
+==== Optimization results (find_optimal_E) ====
+Best observed (incumbent):
+  value = 0.10430009149130832
+  E = [-0.09667889654751516, 0.03477840974019836, -0.06504022982095153]
+Best predicted by GP (posterior mean on candidate grid):
+  mean = 2.294146066683063
+  E = [-0.10295879247001516, 0.029239966850179155, -0.09073593471502008]
+  14.  15.  16.  17.  18.  19.  20.  21.  22.  23.  24.  25.  26.  27.
+  28.  29.  30.  31.  32.  33.  34.  35.  36.  37.  38.  39.  40.  41.
+  42.  43.  44.  45.  46.  47.  48.  49.  50.  51.  52.  53.  54.  55.
+  56.  57.  58.  59.  60.  61.  62.  63.  64.  65.  66.  67.  68.  69.
+  70.  71.  72.  73.  74.  75.  76.  77.  78.  79.  80.  81.  82.  83.
+  84.  85.  86.  87.  88.  89.  90.  91.  92.  93.  94.  95.  96.  97.
+  98.  99. 100. 101. 102. 103. 104. 105. 106. 107. 108. 109. 110. 111.
+ 112. 113. 114. 115. 116. 117. 118. 119.]
+
+
+stderr:
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/helper_functions.py:182: RuntimeWarning: invalid value encountered in true_divide
+  return (ys - y_mean) / y_std, (y_mean, y_std)
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/helper_functions.py:182: RuntimeWarning: invalid value encountered in true_divide
+  return (ys - y_mean) / y_std, (y_mean, y_std)
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/helper_functions.py:182: RuntimeWarning: invalid value encountered in true_divide
+  return (ys - y_mean) / y_std, (y_mean, y_std)
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/analyze_functions.py:219: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
+  arr = np.array(self.get_dataset(hlp['var']))
+
+============================================================
+
+============================================================
+timestamp: 20260220_155436
+stdout:
+b'Keysight Technologies,N9000B,MY60251535,A.32.01\n'
+Successfully sent setpoint 768.708843 THz to laser 390!
+Successfully sent setpoint 709.079620 THz to laser 422!
+[MCP] Applying MCP Voltage: 400.000, 2400.000, 2600.000
+
+****************************************************************************************************
+* Starting new scan
+****************************************************************************************************
+
+ 0/120: E=(-0.231,	0.182,	0.247):	signal=0.000
+ 1/120: E=(-0.322,	0.112,	0.363):	signal=0.000
+ 2/120: E=(-0.011,	0.028,	0.178):	signal=0.001
+ 3/120: E=(-0.054,	0.020,	0.312):	signal=0.023
+ 4/120: E=(-0.335,	-0.116,	0.130):	signal=0.000
+ 5/120: E=(-0.046,	-0.016,	-0.078):	signal=0.013
+ 6/120: E=(0.036,	-0.211,	0.331):	signal=0.000
+ 7/120: E=(0.144,	-0.074,	0.258):	signal=0.000
+ 8/120: E=(-0.198,	-0.129,	0.151):	signal=0.000
+ 9/120: E=(0.103,	0.235,	0.388):	signal=0.000
+10/120: E=(0.004,	-0.164,	0.104):	signal=0.000
+11/120: E=(-0.162,	0.137,	-0.044):	signal=0.000
+12/120: E=(-0.135,	-0.083,	0.223):	signal=0.000
+13/120: E=(-0.106,	-0.185,	0.014):	signal=0.000
+14/120: E=(-0.289,	-0.037,	0.097):	signal=0.000
+15/120: E=(-0.265,	0.072,	0.060):	signal=0.000
+16/120: E=(0.090,	0.092,	0.275):	signal=0.000
+17/120: E=(0.051,	-0.233,	-0.070):	signal=0.000
+18/120: E=(-0.096,	0.209,	-0.014):	signal=0.000
+19/120: E=(-0.204,	0.155,	0.037):	signal=0.000
+  suggest_next: 0.021, 0.341
+20/120: E=(-0.072,	0.019,	0.322):	signal=0.012
+  suggest_next: 0.023, 0.429
+21/120: E=(-0.036,	0.033,	0.313):	signal=0.005
+  suggest_next: 0.024, 0.632
+22/120: E=(-0.044,	-0.013,	0.303):	signal=0.002
+  suggest_next: 0.017, 0.605
+23/120: E=(-0.062,	0.024,	0.281):	signal=0.026
+  suggest_next: 0.023, 0.418
+24/120: E=(-0.090,	0.031,	0.290):	signal=0.043
+  suggest_next: 0.023, 0.909
+25/120: E=(-0.140,	0.078,	0.260):	signal=0.000
+  suggest_next: 0.016, 0.742
+26/120: E=(-0.106,	-0.012,	0.263):	signal=0.001
+  suggest_next: 0.033, 0.462
+27/120: E=(-0.082,	0.060,	0.287):	signal=0.020
+  suggest_next: 0.007, 0.986
+28/120: E=(0.040,	-0.040,	-0.047):	signal=0.000
+  suggest_next: 0.006, 0.990
+29/120: E=(-0.139,	-0.031,	-0.048):	signal=0.000
+Resetting Ex, Ey, and Ez to default [0.0, 0.0, 0.0] ...
+Saving data...
+Config file written.
+Experiment /home/electrons/software/data/20260220/20260220_155436 finished.
+Experiment finished.
+
+==== Optimization results (find_optimal_E) ====
+Best observed (incumbent):
+  value = 0.04349796103307658
+  E = [-0.08955649733131804, 0.03128438172315334, 0.28958288605374816]
+Best predicted by GP (posterior mean on candidate grid):
+  mean = 2.66652877139491
+  E = [-0.07508022030068906, 0.036058301533053116, 0.28210249309777113]
+  14.  15.  16.  17.  18.  19.  20.  21.  22.  23.  24.  25.  26.  27.
+  28.  29.  30.  31.  32.  33.  34.  35.  36.  37.  38.  39.  40.  41.
+  42.  43.  44.  45.  46.  47.  48.  49.  50.  51.  52.  53.  54.  55.
+  56.  57.  58.  59.  60.  61.  62.  63.  64.  65.  66.  67.  68.  69.
+  70.  71.  72.  73.  74.  75.  76.  77.  78.  79.  80.  81.  82.  83.
+  84.  85.  86.  87.  88.  89.  90.  91.  92.  93.  94.  95.  96.  97.
+  98.  99. 100. 101. 102. 103. 104. 105. 106. 107. 108. 109. 110. 111.
+ 112. 113. 114. 115. 116. 117. 118. 119.]
+
+
+stderr:
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/analyze_functions.py:219: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
+  arr = np.array(self.get_dataset(hlp['var']))
+
+============================================================
+
+============================================================
+timestamp: 20260220_155557
+stdout:
+b'Keysight Technologies,N9000B,MY60251535,A.32.01\n'
+Successfully sent setpoint 768.708843 THz to laser 390!
+Successfully sent setpoint 709.079620 THz to laser 422!
+[MCP] Applying MCP Voltage: 400.000, 2400.000, 2600.000
+
+****************************************************************************************************
+* Starting new scan
+****************************************************************************************************
+
+ 0/120: E=(-0.311,	0.144,	0.365):	signal=0.000
+ 1/120: E=(0.128,	0.169,	0.315):	signal=0.000
+ 2/120: E=(-0.085,	-0.053,	-0.020):	signal=0.000
+ 3/120: E=(-0.042,	0.026,	0.144):	signal=0.048
+ 4/120: E=(-0.074,	-0.204,	0.184):	signal=0.000
+ 5/120: E=(0.067,	0.226,	0.386):	signal=0.001
+ 6/120: E=(-0.008,	0.071,	0.078):	signal=0.001
+ 7/120: E=(-0.212,	-0.113,	0.175):	signal=0.000
+ 8/120: E=(-0.333,	0.104,	0.291):	signal=0.001
+ 9/120: E=(0.027,	-0.182,	0.123):	signal=0.001
+10/120: E=(0.116,	-0.139,	0.011):	signal=0.000
+11/120: E=(0.020,	-0.099,	-0.078):	signal=0.000
+12/120: E=(-0.127,	-0.168,	-0.049):	signal=0.000
+13/120: E=(-0.235,	0.086,	-0.054):	signal=0.000
+14/120: E=(-0.163,	-0.005,	0.212):	signal=0.000
+15/120: E=(-0.117,	0.215,	0.250):	signal=0.000
+16/120: E=(0.081,	-0.041,	0.038):	signal=0.000
+17/120: E=(-0.263,	0.004,	0.066):	signal=0.000
+18/120: E=(-0.275,	-0.247,	0.331):	signal=0.000
+19/120: E=(-0.188,	0.190,	0.255):	signal=0.000
+  suggest_next: 0.031, 0.771
+20/120: E=(-0.053,	-0.017,	0.132):	signal=0.033
+  suggest_next: 0.033, 0.725
+21/120: E=(-0.047,	0.040,	0.186):	signal=0.041
+  suggest_next: 0.040, 0.450
+22/120: E=(-0.039,	0.057,	0.160):	signal=0.013
+  suggest_next: 0.044, 0.718
+23/120: E=(-0.020,	0.004,	0.200):	signal=0.000
+  suggest_next: 0.048, 0.624
+24/120: E=(-0.081,	0.002,	0.162):	signal=0.056
+  suggest_next: 0.046, 0.579
+25/120: E=(-0.091,	0.014,	0.204):	signal=0.055
+  suggest_next: 0.044, 0.657
+26/120: E=(-0.106,	0.035,	0.153):	signal=0.068
+  suggest_next: 0.071, 0.246
+27/120: E=(-0.096,	0.036,	0.171):	signal=0.080
+  suggest_next: 0.046, 0.783
+28/120: E=(-0.113,	0.082,	0.202):	signal=0.000
+  suggest_next: 0.018, 0.960
+29/120: E=(-0.102,	0.046,	0.058):	signal=0.031
+  suggest_next: 0.017, 0.972
+30/120: E=(-0.114,	0.128,	0.036):	signal=0.000
+  suggest_next: 0.014, 1.000
+31/120: E=(0.140,	-0.243,	0.385):	signal=0.001
+Resetting Ex, Ey, and Ez to default [0.0, 0.0, 0.0] ...
+Saving data...
+Config file written.
+Experiment /home/electrons/software/data/20260220/20260220_155557 finished.
+Experiment finished.
+
+==== Optimization results (find_optimal_E) ====
+Best observed (incumbent):
+  value = 0.07979002624671916
+  E = [-0.095846189306458, 0.03550922799575873, 0.17142260776648796]
+Best predicted by GP (posterior mean on candidate grid):
+  mean = 2.481035312652268
+  E = [-0.07978576211637872, 0.018168186185606006, 0.1567942692566728]
+  14.  15.  16.  17.  18.  19.  20.  21.  22.  23.  24.  25.  26.  27.
+  28.  29.  30.  31.  32.  33.  34.  35.  36.  37.  38.  39.  40.  41.
+  42.  43.  44.  45.  46.  47.  48.  49.  50.  51.  52.  53.  54.  55.
+  56.  57.  58.  59.  60.  61.  62.  63.  64.  65.  66.  67.  68.  69.
+  70.  71.  72.  73.  74.  75.  76.  77.  78.  79.  80.  81.  82.  83.
+  84.  85.  86.  87.  88.  89.  90.  91.  92.  93.  94.  95.  96.  97.
+  98.  99. 100. 101. 102. 103. 104. 105. 106. 107. 108. 109. 110. 111.
+ 112. 113. 114. 115. 116. 117. 118. 119.]
+
+
+stderr:
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/analyze_functions.py:219: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
+  arr = np.array(self.get_dataset(hlp['var']))
+
+============================================================
+
+============================================================
+timestamp: 20260220_155722
+stdout:
+b'Keysight Technologies,N9000B,MY60251535,A.32.01\n'
+Successfully sent setpoint 768.708843 THz to laser 390!
+Successfully sent setpoint 709.079620 THz to laser 422!
+[MCP] Applying MCP Voltage: 400.000, 2400.000, 2600.000
+
+****************************************************************************************************
+* Starting new scan
+****************************************************************************************************
+
+ 0/120: E=(-0.087,	-0.049,	0.173):	signal=0.000
+ 1/120: E=(-0.053,	0.238,	-0.028):	signal=0.000
+ 2/120: E=(-0.256,	-0.170,	0.235):	signal=0.000
+ 3/120: E=(0.019,	0.071,	0.186):	signal=0.000
+ 4/120: E=(0.117,	-0.133,	0.145):	signal=0.000
+ 5/120: E=(-0.185,	-0.082,	0.047):	signal=0.002
+ 6/120: E=(-0.173,	0.115,	0.112):	signal=0.000
+ 7/120: E=(-0.278,	-0.052,	0.212):	signal=0.000
+ 8/120: E=(-0.350,	0.010,	0.362):	signal=0.000
+ 9/120: E=(-0.249,	0.045,	0.269):	signal=0.000
+10/120: E=(-0.014,	-0.201,	0.002):	signal=0.000
+11/120: E=(0.027,	-0.198,	0.297):	signal=0.000
+12/120: E=(-0.220,	0.223,	0.306):	signal=0.000
+13/120: E=(-0.134,	-0.021,	0.378):	signal=0.000
+14/120: E=(-0.112,	-0.124,	-0.003):	signal=0.000
+15/120: E=(0.081,	0.145,	0.335):	signal=0.000
+16/120: E=(-0.317,	0.188,	-0.090):	signal=0.000
+17/120: E=(0.060,	0.151,	-0.073):	signal=0.000
+18/120: E=(0.132,	0.085,	0.083):	signal=0.000
+19/120: E=(-0.047,	-0.238,	0.062):	signal=0.000
+  suggest_next: 0.001, 0.583
+20/120: E=(-0.208,	-0.081,	0.066):	signal=0.000
+  suggest_next: 0.001, 0.637
+21/120: E=(-0.180,	-0.112,	0.024):	signal=0.000
+  suggest_next: 0.002, 0.831
+22/120: E=(-0.142,	-0.044,	0.034):	signal=0.000
+  suggest_next: 0.000, 0.967
+23/120: E=(-0.138,	-0.123,	0.103):	signal=0.000
+  suggest_next: 0.000, 0.979
+24/120: E=(-0.214,	-0.042,	-0.032):	signal=0.000
+  suggest_next: 0.000, 0.997
+25/120: E=(-0.047,	-0.094,	-0.093):	signal=0.002
+  suggest_next: 0.001, 0.639
+26/120: E=(-0.014,	-0.093,	-0.081):	signal=0.000
+  suggest_next: 0.002, 0.403
+27/120: E=(-0.067,	-0.087,	-0.097):	signal=0.000
+  suggest_next: 0.001, 0.827
+28/120: E=(-0.066,	-0.143,	-0.070):	signal=0.000
+  suggest_next: 0.000, 1.000
+29/120: E=(-0.333,	-0.240,	-0.087):	signal=0.000
+  suggest_next: 0.000, 1.000
+30/120: E=(-0.346,	0.225,	0.096):	signal=0.000
+  suggest_next: 0.000, 1.000
+31/120: E=(0.124,	-0.048,	0.372):	signal=0.000
+Resetting Ex, Ey, and Ez to default [0.0, 0.0, 0.0] ...
+Saving data...
+Config file written.
+Experiment /home/electrons/software/data/20260220/20260220_155722 finished.
+Experiment finished.
+
+==== Optimization results (find_optimal_E) ====
+Best observed (incumbent):
+  value = 0.0016849199663016006
+  E = [-0.04673328719212083, -0.09385401002937269, -0.09323057000716185]
+Best predicted by GP (posterior mean on candidate grid):
+  mean = 2.3007637959652087
+  E = [-0.04399917662563246, -0.11469506709278399, -0.09777971430531181]
+  14.  15.  16.  17.  18.  19.  20.  21.  22.  23.  24.  25.  26.  27.
+  28.  29.  30.  31.  32.  33.  34.  35.  36.  37.  38.  39.  40.  41.
+  42.  43.  44.  45.  46.  47.  48.  49.  50.  51.  52.  53.  54.  55.
+  56.  57.  58.  59.  60.  61.  62.  63.  64.  65.  66.  67.  68.  69.
+  70.  71.  72.  73.  74.  75.  76.  77.  78.  79.  80.  81.  82.  83.
+  84.  85.  86.  87.  88.  89.  90.  91.  92.  93.  94.  95.  96.  97.
+  98.  99. 100. 101. 102. 103. 104. 105. 106. 107. 108. 109. 110. 111.
+ 112. 113. 114. 115. 116. 117. 118. 119.]
+
+
+stderr:
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/analyze_functions.py:219: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
+  arr = np.array(self.get_dataset(hlp['var']))
+
+============================================================
+
+============================================================
+timestamp: 20260220_155848
+stdout:
+b'Keysight Technologies,N9000B,MY60251535,A.32.01\n'
+Successfully sent setpoint 768.708843 THz to laser 390!
+Successfully sent setpoint 709.079620 THz to laser 422!
+[MCP] Applying MCP Voltage: 400.000, 2400.000, 2600.000
+
+****************************************************************************************************
+* Starting new scan
+****************************************************************************************************
+
+ 0/120: E=(0.104,	-0.247,	-0.054):	signal=0.000
+ 1/120: E=(-0.089,	-0.195,	0.155):	signal=0.000
+ 2/120: E=(-0.048,	0.028,	-0.006):	signal=0.056
+ 3/120: E=(-0.002,	-0.098,	0.127):	signal=0.000
+ 4/120: E=(-0.074,	-0.068,	0.365):	signal=0.000
+ 5/120: E=(-0.344,	0.190,	0.002):	signal=0.000
+ 6/120: E=(-0.174,	0.218,	0.236):	signal=0.000
+ 7/120: E=(0.060,	-0.214,	0.106):	signal=0.000
+ 8/120: E=(-0.271,	-0.107,	0.262):	signal=0.000
+ 9/120: E=(-0.237,	-0.045,	0.033):	signal=0.000
+10/120: E=(-0.277,	0.099,	0.312):	signal=0.000
+11/120: E=(0.078,	0.247,	-0.028):	signal=0.000
+12/120: E=(0.013,	-0.024,	0.186):	signal=0.000
+13/120: E=(-0.117,	0.128,	0.095):	signal=0.000
+14/120: E=(-0.208,	0.155,	0.215):	signal=0.000
+15/120: E=(-0.307,	0.124,	0.280):	signal=0.000
+16/120: E=(0.132,	-0.134,	0.071):	signal=0.000
+17/120: E=(0.046,	0.067,	-0.087):	signal=0.000
+18/120: E=(-0.177,	0.007,	0.384):	signal=0.000
+19/120: E=(-0.145,	-0.171,	0.338):	signal=0.000
+  suggest_next: 0.046, 0.524
+20/120: E=(-0.072,	0.033,	0.027):	signal=0.106
+  suggest_next: 0.089, 0.550
+21/120: E=(-0.068,	0.030,	0.057):	signal=0.102
+  suggest_next: 0.079, 0.723
+22/120: E=(-0.093,	-0.005,	0.034):	signal=0.044
+  suggest_next: 0.054, 0.866
+23/120: E=(-0.057,	0.100,	0.050):	signal=0.002
+  suggest_next: 0.079, 0.563
+24/120: E=(-0.106,	0.041,	0.031):	signal=0.063
+  suggest_next: 0.078, 0.577
+25/120: E=(-0.036,	0.007,	0.035):	signal=0.033
+  suggest_next: 0.056, 0.697
+26/120: E=(-0.078,	0.010,	0.101):	signal=0.077
+  suggest_next: 0.101, 0.131
+27/120: E=(-0.079,	0.037,	0.039):	signal=0.084
+  suggest_next: 0.055, 0.757
+28/120: E=(-0.062,	0.062,	0.112):	signal=0.009
+  suggest_next: 0.044, 0.863
+29/120: E=(-0.104,	0.071,	-0.033):	signal=0.000
+  suggest_next: 0.029, 0.950
+30/120: E=(-0.129,	-0.038,	0.146):	signal=0.000
+  suggest_next: 0.019, 1.000
+31/120: E=(0.149,	0.237,	0.356):	signal=0.000
+  suggest_next: 0.018, 1.000
+32/120: E=(0.150,	-0.229,	0.328):	signal=0.000
+Resetting Ex, Ey, and Ez to default [0.0, 0.0, 0.0] ...
+Saving data...
+Config file written.
+Experiment /home/electrons/software/data/20260220/20260220_155848 finished.
+Experiment finished.
+
+==== Optimization results (find_optimal_E) ====
+Best observed (incumbent):
+  value = 0.1057759220598469
+  E = [-0.07248481804152107, 0.032952383574854305, 0.02733280843355601]
+Best predicted by GP (posterior mean on candidate grid):
+  mean = 2.269993354580813
+  E = [-0.0762990908425134, 0.042254737833816725, 0.039384810279978005]
+  14.  15.  16.  17.  18.  19.  20.  21.  22.  23.  24.  25.  26.  27.
+  28.  29.  30.  31.  32.  33.  34.  35.  36.  37.  38.  39.  40.  41.
+  42.  43.  44.  45.  46.  47.  48.  49.  50.  51.  52.  53.  54.  55.
+  56.  57.  58.  59.  60.  61.  62.  63.  64.  65.  66.  67.  68.  69.
+  70.  71.  72.  73.  74.  75.  76.  77.  78.  79.  80.  81.  82.  83.
+  84.  85.  86.  87.  88.  89.  90.  91.  92.  93.  94.  95.  96.  97.
+  98.  99. 100. 101. 102. 103. 104. 105. 106. 107. 108. 109. 110. 111.
+ 112. 113. 114. 115. 116. 117. 118. 119.]
+
+
+stderr:
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/analyze_functions.py:219: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
+  arr = np.array(self.get_dataset(hlp['var']))
+
+============================================================
+
+============================================================
+timestamp: 20260220_160017
+stdout:
+b'Keysight Technologies,N9000B,MY60251535,A.32.01\n'
+Successfully sent setpoint 768.708843 THz to laser 390!
+Successfully sent setpoint 709.079620 THz to laser 422!
+[MCP] Applying MCP Voltage: 400.000, 2400.000, 2600.000
+
+****************************************************************************************************
+* Starting new scan
+****************************************************************************************************
+
+ 0/120: E=(-0.137,	-0.016,	0.023):	signal=0.002
+ 1/120: E=(-0.118,	0.169,	0.090):	signal=0.000
+ 2/120: E=(-0.319,	-0.072,	0.166):	signal=0.000
+ 3/120: E=(-0.034,	0.247,	0.304):	signal=0.000
+ 4/120: E=(-0.183,	0.190,	-0.036):	signal=0.000
+ 5/120: E=(-0.097,	-0.211,	0.118):	signal=0.000
+ 6/120: E=(-0.339,	-0.241,	0.034):	signal=0.000
+ 7/120: E=(-0.257,	-0.146,	0.235):	signal=0.001
+ 8/120: E=(0.091,	-0.151,	0.354):	signal=0.000
+ 9/120: E=(-0.209,	-0.033,	-0.055):	signal=0.000
+10/120: E=(0.069,	-0.196,	0.343):	signal=0.001
+11/120: E=(-0.010,	-0.093,	0.209):	signal=0.000
+12/120: E=(0.125,	0.019,	0.185):	signal=0.000
+13/120: E=(-0.241,	0.068,	-0.089):	signal=0.000
+14/120: E=(0.146,	0.081,	0.074):	signal=0.000
+15/120: E=(-0.283,	0.123,	0.265):	signal=0.000
+16/120: E=(0.049,	0.140,	-0.005):	signal=0.000
+17/120: E=(0.018,	-0.119,	0.139):	signal=0.000
+18/120: E=(-0.060,	0.205,	0.386):	signal=0.000
+19/120: E=(-0.171,	0.028,	0.284):	signal=0.000
+  suggest_next: 0.001, 0.669
+20/120: E=(-0.121,	0.017,	0.032):	signal=0.034
+  suggest_next: 0.031, 0.608
+21/120: E=(-0.092,	0.019,	0.047):	signal=0.109
+  suggest_next: 0.076, 0.820
+22/120: E=(-0.061,	-0.013,	0.083):	signal=0.039
+  suggest_next: 0.038, 0.953
+23/120: E=(-0.009,	0.023,	0.028):	signal=0.000
+  suggest_next: 0.075, 0.698
+24/120: E=(-0.097,	0.029,	0.089):	signal=0.110
+  suggest_next: 0.089, 0.664
+25/120: E=(-0.095,	0.063,	0.052):	signal=0.007
+  suggest_next: 0.093, 0.507
+26/120: E=(-0.111,	0.009,	0.107):	signal=0.024
+  suggest_next: 0.051, 0.797
+27/120: E=(-0.043,	0.038,	0.114):	signal=0.055
+  suggest_next: 0.095, 0.247
+28/120: E=(-0.068,	0.021,	0.090):	signal=0.100
+  suggest_next: 0.108, 0.221
+29/120: E=(-0.064,	0.026,	0.074):	signal=0.081
+  suggest_next: 0.109, 0.113
+30/120: E=(-0.084,	0.029,	0.076):	signal=0.123
+  suggest_next: 0.030, 0.961
+31/120: E=(-0.066,	-0.052,	-0.018):	signal=0.023
+  suggest_next: 0.028, 0.974
+32/120: E=(-0.062,	0.103,	0.180):	signal=0.000
+  suggest_next: 0.023, 0.994
+33/120: E=(0.015,	0.019,	-0.078):	signal=0.000
+Resetting Ex, Ey, and Ez to default [0.0, 0.0, 0.0] ...
+Saving data...
+Config file written.
+Experiment /home/electrons/software/data/20260220/20260220_160017 finished.
+Experiment finished.
+
+==== Optimization results (find_optimal_E) ====
+Best observed (incumbent):
+  value = 0.12322580645161291
+  E = [-0.08369648253891748, 0.028658189628257502, 0.07565956013880051]
+Best predicted by GP (posterior mean on candidate grid):
+  mean = 1.9508323473062128
+  E = [-0.07867432301519728, 0.027900717107620987, 0.10543248952638976]
+  14.  15.  16.  17.  18.  19.  20.  21.  22.  23.  24.  25.  26.  27.
+  28.  29.  30.  31.  32.  33.  34.  35.  36.  37.  38.  39.  40.  41.
+  42.  43.  44.  45.  46.  47.  48.  49.  50.  51.  52.  53.  54.  55.
+  56.  57.  58.  59.  60.  61.  62.  63.  64.  65.  66.  67.  68.  69.
+  70.  71.  72.  73.  74.  75.  76.  77.  78.  79.  80.  81.  82.  83.
+  84.  85.  86.  87.  88.  89.  90.  91.  92.  93.  94.  95.  96.  97.
+  98.  99. 100. 101. 102. 103. 104. 105. 106. 107. 108. 109. 110. 111.
+ 112. 113. 114. 115. 116. 117. 118. 119.]
+
+
+stderr:
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/analyze_functions.py:219: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
+  arr = np.array(self.get_dataset(hlp['var']))
+
+============================================================
+
+============================================================
+timestamp: 20260220_160148
+stdout:
+b'Keysight Technologies,N9000B,MY60251535,A.32.01\n'
+Successfully sent setpoint 768.708843 THz to laser 390!
+Successfully sent setpoint 709.079620 THz to laser 422!
+[MCP] Applying MCP Voltage: 400.000, 2400.000, 2600.000
+
+****************************************************************************************************
+* Starting new scan
+****************************************************************************************************
+
+ 0/120: E=(0.050,	-0.177,	0.380):	signal=0.000
+ 1/120: E=(-0.322,	0.087,	-0.009):	signal=0.000
+ 2/120: E=(-0.145,	-0.053,	0.178):	signal=0.000
+ 3/120: E=(-0.061,	0.134,	-0.097):	signal=0.000
+ 4/120: E=(-0.018,	0.048,	-0.028):	signal=0.000
+ 5/120: E=(-0.043,	0.109,	0.217):	signal=0.000
+ 6/120: E=(-0.248,	0.213,	0.291):	signal=0.000
+ 7/120: E=(-0.110,	0.067,	0.267):	signal=0.005
+ 8/120: E=(0.144,	-0.092,	0.150):	signal=0.000
+ 9/120: E=(0.096,	0.242,	0.366):	signal=0.000
+10/120: E=(-0.335,	0.155,	0.327):	signal=0.000
+11/120: E=(-0.082,	-0.227,	0.137):	signal=0.000
+12/120: E=(-0.270,	-0.214,	0.109):	signal=0.000
+13/120: E=(0.074,	-0.157,	0.036):	signal=0.000
+14/120: E=(-0.204,	-0.119,	-0.059):	signal=0.000
+15/120: E=(-0.300,	0.182,	0.096):	signal=0.000
+16/120: E=(-0.162,	-0.005,	0.321):	signal=0.000
+17/120: E=(0.101,	-0.133,	0.241):	signal=0.000
+18/120: E=(-0.180,	-0.042,	0.017):	signal=0.002
+19/120: E=(0.005,	0.009,	0.062):	signal=0.001
+  suggest_next: 0.004, 0.517
+20/120: E=(-0.124,	0.065,	0.289):	signal=0.008
+  suggest_next: 0.006, 0.694
+21/120: E=(-0.127,	0.078,	0.332):	signal=0.000
+  suggest_next: 0.005, 0.599
+22/120: E=(-0.159,	0.031,	0.289):	signal=0.000
+  suggest_next: 0.002, 0.976
+23/120: E=(-0.180,	0.135,	0.272):	signal=0.000
+  suggest_next: 0.003, 0.846
+24/120: E=(-0.062,	0.046,	0.292):	signal=0.021
+  suggest_next: 0.017, 0.547
+25/120: E=(-0.078,	0.036,	0.317):	signal=0.023
+  suggest_next: 0.021, 0.442
+26/120: E=(-0.061,	0.023,	0.289):	signal=0.010
+  suggest_next: 0.025, 0.395
+27/120: E=(-0.065,	0.052,	0.328):	signal=0.012
+  suggest_next: 0.020, 0.241
+28/120: E=(-0.087,	0.048,	0.292):	signal=0.030
+  suggest_next: 0.004, 1.000
+29/120: E=(0.149,	0.237,	0.041):	signal=0.000
+  suggest_next: 0.004, 1.000
+30/120: E=(-0.329,	-0.203,	0.370):	signal=0.000
+Resetting Ex, Ey, and Ez to default [0.0, 0.0, 0.0] ...
+Saving data...
+Config file written.
+Experiment /home/electrons/software/data/20260220/20260220_160148 finished.
+Experiment finished.
+
+==== Optimization results (find_optimal_E) ====
+Best observed (incumbent):
+  value = 0.030289123451124368
+  E = [-0.08729893574411934, 0.04798683351970362, 0.29216189333367637]
+Best predicted by GP (posterior mean on candidate grid):
+  mean = 2.528328233285148
+  E = [-0.10039372101612906, 0.045248300384613804, 0.3202947223809053]
+  14.  15.  16.  17.  18.  19.  20.  21.  22.  23.  24.  25.  26.  27.
+  28.  29.  30.  31.  32.  33.  34.  35.  36.  37.  38.  39.  40.  41.
+  42.  43.  44.  45.  46.  47.  48.  49.  50.  51.  52.  53.  54.  55.
+  56.  57.  58.  59.  60.  61.  62.  63.  64.  65.  66.  67.  68.  69.
+  70.  71.  72.  73.  74.  75.  76.  77.  78.  79.  80.  81.  82.  83.
+  84.  85.  86.  87.  88.  89.  90.  91.  92.  93.  94.  95.  96.  97.
+  98.  99. 100. 101. 102. 103. 104. 105. 106. 107. 108. 109. 110. 111.
+ 112. 113. 114. 115. 116. 117. 118. 119.]
+
+
+stderr:
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/analyze_functions.py:219: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
+  arr = np.array(self.get_dataset(hlp['var']))
+
+============================================================
+
+============================================================
+timestamp: 20260220_160311
+stdout:
+b'Keysight Technologies,N9000B,MY60251535,A.32.01\n'
+Successfully sent setpoint 768.708843 THz to laser 390!
+Successfully sent setpoint 709.079620 THz to laser 422!
+[MCP] Applying MCP Voltage: 400.000, 2400.000, 2600.000
+
+****************************************************************************************************
+* Starting new scan
+****************************************************************************************************
+
+ 0/120: E=(-0.208,	0.170,	0.110):	signal=0.000
+ 1/120: E=(-0.176,	0.245,	0.013):	signal=0.000
+ 2/120: E=(0.144,	0.067,	0.371):	signal=0.000
+ 3/120: E=(-0.114,	0.120,	0.057):	signal=0.002
+ 4/120: E=(0.052,	-0.054,	-0.003):	signal=0.000
+ 5/120: E=(-0.325,	0.129,	0.161):	signal=0.000
+ 6/120: E=(-0.012,	0.049,	0.212):	signal=0.000
+ 7/120: E=(0.082,	0.204,	0.268):	signal=0.000
+ 8/120: E=(0.012,	-0.140,	0.092):	signal=0.000
+ 9/120: E=(-0.277,	-0.013,	0.301):	signal=0.000
+10/120: E=(-0.127,	0.006,	0.289):	signal=0.001
+11/120: E=(0.031,	0.181,	-0.080):	signal=0.000
+12/120: E=(0.117,	-0.112,	0.179):	signal=0.000
+13/120: E=(-0.241,	-0.237,	0.246):	signal=0.000
+14/120: E=(-0.267,	-0.045,	0.349):	signal=0.001
+15/120: E=(-0.047,	0.087,	0.391):	signal=0.000
+16/120: E=(-0.338,	-0.177,	0.049):	signal=0.000
+17/120: E=(-0.094,	-0.219,	0.145):	signal=0.000
+18/120: E=(-0.162,	-0.161,	-0.028):	signal=0.000
+19/120: E=(-0.055,	-0.077,	-0.056):	signal=0.000
+  suggest_next: 0.001, 0.631
+20/120: E=(-0.097,	0.150,	0.054):	signal=0.000
+  suggest_next: 0.002, 0.635
+21/120: E=(-0.142,	0.093,	0.071):	signal=0.000
+  suggest_next: 0.001, 0.848
+22/120: E=(-0.080,	0.077,	0.044):	signal=0.005
+  suggest_next: 0.003, 0.833
+23/120: E=(-0.098,	0.073,	-0.006):	signal=0.003
+  suggest_next: 0.003, 0.812
+24/120: E=(-0.026,	0.074,	0.058):	signal=0.000
+  suggest_next: 0.002, 0.750
+25/120: E=(-0.053,	0.039,	0.013):	signal=0.060
+  suggest_next: 0.052, 0.475
+26/120: E=(-0.061,	0.021,	0.021):	signal=0.090
+  suggest_next: 0.059, 0.752
+27/120: E=(-0.020,	-0.008,	0.019):	signal=0.005
+  suggest_next: 0.049, 0.878
+28/120: E=(-0.108,	-0.027,	0.021):	signal=0.000
+  suggest_next: 0.040, 0.652
+29/120: E=(-0.095,	0.017,	-0.018):	signal=0.078
+  suggest_next: 0.047, 0.764
+30/120: E=(-0.062,	0.023,	-0.057):	signal=0.077
+Resetting Ex, Ey, and Ez to default [0.0, 0.0, 0.0] ...
+Saving data...
+Config file written.
+Experiment /home/electrons/software/data/20260220/20260220_160311 finished.
+Experiment finished.
+
+==== Optimization results (find_optimal_E) ====
+Best observed (incumbent):
+  value = 0.08980115458627325
+  E = [-0.061051328749291756, 0.02139870482635642, 0.020651350073572813]
+Best predicted by GP (posterior mean on candidate grid):
+  mean = 2.9463380874582312
+  E = [-0.06602943248278359, 0.01656628819850342, 0.009978186635117209]
+  14.  15.  16.  17.  18.  19.  20.  21.  22.  23.  24.  25.  26.  27.
+  28.  29.  30.  31.  32.  33.  34.  35.  36.  37.  38.  39.  40.  41.
+  42.  43.  44.  45.  46.  47.  48.  49.  50.  51.  52.  53.  54.  55.
+  56.  57.  58.  59.  60.  61.  62.  63.  64.  65.  66.  67.  68.  69.
+  70.  71.  72.  73.  74.  75.  76.  77.  78.  79.  80.  81.  82.  83.
+  84.  85.  86.  87.  88.  89.  90.  91.  92.  93.  94.  95.  96.  97.
+  98.  99. 100. 101. 102. 103. 104. 105. 106. 107. 108. 109. 110. 111.
+ 112. 113. 114. 115. 116. 117. 118. 119.]
+
+
+stderr:
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/analyze_functions.py:219: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
+  arr = np.array(self.get_dataset(hlp['var']))
+
+============================================================
+
+============================================================
+timestamp: 20260220_160434
+stdout:
+b'Keysight Technologies,N9000B,MY60251535,A.32.01\n'
+Successfully sent setpoint 768.708843 THz to laser 390!
+Successfully sent setpoint 709.079620 THz to laser 422!
+[MCP] Applying MCP Voltage: 400.000, 2400.000, 2600.000
+
+****************************************************************************************************
+* Starting new scan
+****************************************************************************************************
+
+ 0/120: E=(-0.144,	0.074,	0.266):	signal=0.000
+ 1/120: E=(-0.022,	0.137,	-0.030):	signal=0.000
+ 2/120: E=(-0.171,	-0.074,	0.300):	signal=0.000
+ 3/120: E=(0.097,	0.099,	0.016):	signal=0.000
+ 4/120: E=(0.046,	-0.145,	-0.079):	signal=0.000
+ 5/120: E=(-0.266,	-0.166,	-0.020):	signal=0.000
+ 6/120: E=(-0.090,	-0.031,	-0.073):	signal=0.007
+ 7/120: E=(0.149,	-0.180,	0.227):	signal=0.000
+ 8/120: E=(-0.225,	0.195,	0.222):	signal=0.000
+ 9/120: E=(-0.296,	0.247,	0.085):	signal=0.002
+10/120: E=(-0.113,	0.114,	0.149):	signal=0.000
+11/120: E=(-0.349,	-0.227,	0.025):	signal=0.000
+12/120: E=(0.017,	-0.078,	0.181):	signal=0.000
+13/120: E=(-0.192,	-0.115,	0.334):	signal=0.000
+14/120: E=(-0.070,	0.004,	0.287):	signal=0.018
+15/120: E=(0.100,	-0.007,	0.360):	signal=0.000
+16/120: E=(-0.226,	-0.209,	0.175):	signal=0.000
+17/120: E=(0.057,	0.213,	0.121):	signal=0.000
+18/120: E=(-0.316,	0.165,	0.387):	signal=0.000
+19/120: E=(-0.045,	0.047,	0.071):	signal=0.035
+  suggest_next: 0.030, 0.510
+20/120: E=(-0.038,	0.023,	0.069):	signal=0.049
+  suggest_next: 0.045, 0.460
+21/120: E=(-0.017,	0.012,	0.064):	signal=0.007
+  suggest_next: 0.049, 0.652
+22/120: E=(-0.068,	0.028,	0.100):	signal=0.094
+  suggest_next: 0.081, 0.539
+23/120: E=(-0.091,	0.017,	0.119):	signal=0.072
+  suggest_next: 0.091, 0.507
+24/120: E=(-0.086,	0.006,	0.085):	signal=0.064
+  suggest_next: 0.050, 0.842
+25/120: E=(-0.024,	-0.005,	0.137):	signal=0.004
+  suggest_next: 0.036, 0.767
+26/120: E=(-0.059,	0.070,	0.147):	signal=0.007
+  suggest_next: 0.014, 0.998
+27/120: E=(-0.045,	0.055,	0.391):	signal=0.003
+  suggest_next: 0.013, 1.000
+28/120: E=(0.148,	0.236,	0.355):	signal=0.000
+  suggest_next: 0.012, 1.000
+29/120: E=(-0.300,	0.107,	-0.089):	signal=0.002
+Resetting Ex, Ey, and Ez to default [0.0, 0.0, 0.0] ...
+Saving data...
+Config file written.
+Experiment /home/electrons/software/data/20260220/20260220_160434 finished.
+Experiment finished.
+
+==== Optimization results (find_optimal_E) ====
+Best observed (incumbent):
+  value = 0.09426462237365134
+  E = [-0.06794873974091448, 0.027920501985300883, 0.09952964335108744]
+Best predicted by GP (posterior mean on candidate grid):
+  mean = 2.571253940488966
+  E = [-0.0673390717882813, 0.04045691340938257, 0.09443228054290087]
+  14.  15.  16.  17.  18.  19.  20.  21.  22.  23.  24.  25.  26.  27.
+  28.  29.  30.  31.  32.  33.  34.  35.  36.  37.  38.  39.  40.  41.
+  42.  43.  44.  45.  46.  47.  48.  49.  50.  51.  52.  53.  54.  55.
+  56.  57.  58.  59.  60.  61.  62.  63.  64.  65.  66.  67.  68.  69.
+  70.  71.  72.  73.  74.  75.  76.  77.  78.  79.  80.  81.  82.  83.
+  84.  85.  86.  87.  88.  89.  90.  91.  92.  93.  94.  95.  96.  97.
+  98.  99. 100. 101. 102. 103. 104. 105. 106. 107. 108. 109. 110. 111.
+ 112. 113. 114. 115. 116. 117. 118. 119.]
+
+
+stderr:
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/analyze_functions.py:219: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
+  arr = np.array(self.get_dataset(hlp['var']))
+
+============================================================
+
+============================================================
+timestamp: 20260220_160555
+stdout:
+b'Keysight Technologies,N9000B,MY60251535,A.32.01\n'
+Successfully sent setpoint 768.708843 THz to laser 390!
+Successfully sent setpoint 709.079620 THz to laser 422!
+[MCP] Applying MCP Voltage: 400.000, 2400.000, 2600.000
+
+****************************************************************************************************
+* Starting new scan
+****************************************************************************************************
+
+ 0/120: E=(-0.316,	0.059,	0.086):	signal=0.000
+ 1/120: E=(-0.085,	0.221,	-0.065):	signal=0.000
+ 2/120: E=(-0.234,	-0.013,	0.013):	signal=0.000
+ 3/120: E=(-0.008,	0.245,	-0.081):	signal=0.000
+ 4/120: E=(-0.338,	0.165,	0.140):	signal=0.000
+ 5/120: E=(-0.165,	0.093,	0.276):	signal=0.000
+ 6/120: E=(-0.297,	0.003,	-0.030):	signal=0.000
+ 7/120: E=(-0.108,	-0.112,	0.337):	signal=0.000
+ 8/120: E=(0.021,	-0.064,	0.181):	signal=0.000
+ 9/120: E=(0.085,	-0.236,	-0.015):	signal=0.000
+10/120: E=(-0.191,	-0.202,	0.156):	signal=0.000
+11/120: E=(0.128,	0.182,	0.202):	signal=0.000
+12/120: E=(0.125,	-0.186,	0.369):	signal=0.000
+13/120: E=(-0.126,	-0.171,	0.302):	signal=0.000
+14/120: E=(-0.269,	0.129,	0.119):	signal=0.000
+15/120: E=(0.031,	0.103,	0.031):	signal=0.000
+16/120: E=(-0.029,	-0.036,	0.259):	signal=0.000
+17/120: E=(-0.070,	-0.076,	0.072):	signal=0.000
+18/120: E=(0.052,	0.036,	0.236):	signal=0.000
+19/120: E=(-0.217,	-0.135,	0.393):	signal=0.000
+  suggest_next: nan, nan
+20/120: E=(-0.130,	-0.164,	0.119):	signal=0.000
+  suggest_next: nan, nan
+21/120: E=(-0.152,	-0.192,	-0.037):	signal=0.000
+  suggest_next: nan, nan
+22/120: E=(0.013,	0.038,	0.162):	signal=0.000
+  suggest_next: nan, nan
+23/120: E=(-0.236,	-0.103,	-0.024):	signal=0.002
+  suggest_next: 0.002, 0.353
+24/120: E=(-0.235,	-0.097,	-0.034):	signal=0.000
+  suggest_next: 0.001, 0.945
+25/120: E=(-0.264,	-0.127,	0.045):	signal=0.000
+  suggest_next: 0.001, 0.490
+26/120: E=(-0.228,	-0.108,	0.000):	signal=0.000
+  suggest_next: 0.001, 0.798
+27/120: E=(-0.281,	-0.142,	-0.010):	signal=0.000
+  suggest_next: 0.000, 0.915
+28/120: E=(-0.323,	0.241,	0.391):	signal=0.000
+  suggest_next: 0.000, 0.889
+29/120: E=(0.031,	0.216,	0.399):	signal=0.000
+Resetting Ex, Ey, and Ez to default [0.0, 0.0, 0.0] ...
+Saving data...
+Config file written.
+Experiment /home/electrons/software/data/20260220/20260220_160555 finished.
+Experiment finished.
+
+==== Optimization results (find_optimal_E) ====
+Best observed (incumbent):
+  value = 0.001784121320249777
+  E = [-0.23605845289945449, -0.10271723423777546, -0.024260312105246082]
+Best predicted by GP (posterior mean on candidate grid):
+  mean = -0.09400926567439004
+  E = [0.14289533847523184, 0.054727644719461455, -0.09658471945470437]
+  14.  15.  16.  17.  18.  19.  20.  21.  22.  23.  24.  25.  26.  27.
+  28.  29.  30.  31.  32.  33.  34.  35.  36.  37.  38.  39.  40.  41.
+  42.  43.  44.  45.  46.  47.  48.  49.  50.  51.  52.  53.  54.  55.
+  56.  57.  58.  59.  60.  61.  62.  63.  64.  65.  66.  67.  68.  69.
+  70.  71.  72.  73.  74.  75.  76.  77.  78.  79.  80.  81.  82.  83.
+  84.  85.  86.  87.  88.  89.  90.  91.  92.  93.  94.  95.  96.  97.
+  98.  99. 100. 101. 102. 103. 104. 105. 106. 107. 108. 109. 110. 111.
+ 112. 113. 114. 115. 116. 117. 118. 119.]
+
+
+stderr:
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/helper_functions.py:182: RuntimeWarning: invalid value encountered in true_divide
+  return (ys - y_mean) / y_std, (y_mean, y_std)
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/helper_functions.py:182: RuntimeWarning: invalid value encountered in true_divide
+  return (ys - y_mean) / y_std, (y_mean, y_std)
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/helper_functions.py:182: RuntimeWarning: invalid value encountered in true_divide
+  return (ys - y_mean) / y_std, (y_mean, y_std)
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/helper_functions.py:182: RuntimeWarning: invalid value encountered in true_divide
+  return (ys - y_mean) / y_std, (y_mean, y_std)
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/analyze_functions.py:219: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
+  arr = np.array(self.get_dataset(hlp['var']))
+
+============================================================
+
+============================================================
+timestamp: 20260220_160716
+stdout:
+b'Keysight Technologies,N9000B,MY60251535,A.32.01\n'
+Successfully sent setpoint 768.708843 THz to laser 390!
+Successfully sent setpoint 709.079620 THz to laser 422!
+[MCP] Applying MCP Voltage: 400.000, 2400.000, 2600.000
+
+****************************************************************************************************
+* Starting new scan
+****************************************************************************************************
+
+ 0/120: E=(0.077,	0.135,	0.309):	signal=0.000
+ 1/120: E=(-0.111,	-0.036,	0.071):	signal=0.000
+ 2/120: E=(0.113,	0.003,	0.048):	signal=0.000
+ 3/120: E=(0.041,	-0.085,	0.142):	signal=0.000
+ 4/120: E=(-0.161,	0.215,	0.285):	signal=0.000
+ 5/120: E=(-0.182,	-0.009,	0.216):	signal=0.000
+ 6/120: E=(-0.213,	-0.139,	0.008):	signal=0.000
+ 7/120: E=(-0.032,	-0.247,	0.165):	signal=0.000
+ 8/120: E=(-0.135,	0.050,	-0.057):	signal=0.000
+ 9/120: E=(-0.265,	-0.223,	-0.018):	signal=0.000
+10/120: E=(-0.348,	-0.181,	-0.084):	signal=0.000
+11/120: E=(0.068,	-0.169,	0.249):	signal=0.000
+12/120: E=(-0.078,	0.228,	0.326):	signal=0.000
+13/120: E=(-0.323,	0.115,	0.090):	signal=0.000
+14/120: E=(-0.012,	0.190,	0.183):	signal=0.000
+15/120: E=(-0.295,	0.159,	0.382):	signal=0.000
+16/120: E=(-0.067,	0.092,	0.119):	signal=0.004
+17/120: E=(0.140,	-0.110,	-0.038):	signal=0.000
+18/120: E=(0.010,	-0.054,	0.365):	signal=0.000
+19/120: E=(-0.243,	0.070,	0.261):	signal=0.000
+  suggest_next: 0.003, 0.590
+20/120: E=(-0.086,	0.089,	0.095):	signal=0.006
+  suggest_next: 0.005, 0.697
+21/120: E=(-0.073,	0.104,	0.060):	signal=0.003
+  suggest_next: 0.006, 0.466
+22/120: E=(-0.110,	0.083,	0.102):	signal=0.000
+  suggest_next: 0.002, 0.925
+23/120: E=(-0.057,	0.013,	0.054):	signal=0.055
+  suggest_next: 0.047, 0.458
+24/120: E=(-0.047,	0.033,	0.060):	signal=0.073
+  suggest_next: 0.064, 0.397
+25/120: E=(-0.031,	0.023,	0.051):	signal=0.021
+  suggest_next: 0.051, 0.706
+26/120: E=(-0.041,	0.030,	0.106):	signal=0.053
+  suggest_next: 0.076, 0.236
+27/120: E=(-0.057,	0.036,	0.078):	signal=0.076
+  suggest_next: 0.061, 0.643
+28/120: E=(-0.102,	0.030,	0.046):	signal=0.087
+  suggest_next: 0.074, 0.466
+29/120: E=(-0.092,	0.053,	0.027):	signal=0.011
+  suggest_next: 0.092, 0.233
+30/120: E=(-0.080,	0.020,	0.070):	signal=0.102
+  suggest_next: 0.087, 0.336
+31/120: E=(-0.121,	0.013,	0.059):	signal=0.003
+  suggest_next: 0.028, 0.962
+32/120: E=(0.025,	0.106,	0.051):	signal=0.000
+  suggest_next: 0.023, 0.965
+33/120: E=(-0.138,	-0.111,	0.111):	signal=0.000
+  suggest_next: 0.019, 0.972
+34/120: E=(0.021,	0.021,	0.179):	signal=0.000
+Resetting Ex, Ey, and Ez to default [0.0, 0.0, 0.0] ...
+Saving data...
+Config file written.
+Experiment /home/electrons/software/data/20260220/20260220_160716 finished.
+Experiment finished.
+
+==== Optimization results (find_optimal_E) ====
+Best observed (incumbent):
+  value = 0.10194500335345406
+  E = [-0.08036136136414385, 0.02003526714061321, 0.0702084821399781]
+Best predicted by GP (posterior mean on candidate grid):
+  mean = 1.7479771722247561
+  E = [-0.04979691958294963, 0.04796653650349786, 0.05825122206449074]
+  14.  15.  16.  17.  18.  19.  20.  21.  22.  23.  24.  25.  26.  27.
+  28.  29.  30.  31.  32.  33.  34.  35.  36.  37.  38.  39.  40.  41.
+  42.  43.  44.  45.  46.  47.  48.  49.  50.  51.  52.  53.  54.  55.
+  56.  57.  58.  59.  60.  61.  62.  63.  64.  65.  66.  67.  68.  69.
+  70.  71.  72.  73.  74.  75.  76.  77.  78.  79.  80.  81.  82.  83.
+  84.  85.  86.  87.  88.  89.  90.  91.  92.  93.  94.  95.  96.  97.
+  98.  99. 100. 101. 102. 103. 104. 105. 106. 107. 108. 109. 110. 111.
+ 112. 113. 114. 115. 116. 117. 118. 119.]
+
+
+stderr:
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/analyze_functions.py:219: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
+  arr = np.array(self.get_dataset(hlp['var']))
+
+============================================================
+
+============================================================
+timestamp: 20260220_160849
+stdout:
+b'Keysight Technologies,N9000B,MY60251535,A.32.01\n'
+Successfully sent setpoint 768.708843 THz to laser 390!
+Successfully sent setpoint 709.079620 THz to laser 422!
+[MCP] Applying MCP Voltage: 400.000, 2400.000, 2600.000
+
+****************************************************************************************************
+* Starting new scan
+****************************************************************************************************
+
+ 0/120: E=(0.149,	-0.215,	0.284):	signal=0.000
+ 1/120: E=(-0.103,	-0.087,	0.345):	signal=0.000
+ 2/120: E=(-0.202,	0.157,	0.046):	signal=0.000
+ 3/120: E=(0.034,	0.176,	0.073):	signal=0.000
+ 4/120: E=(-0.166,	-0.244,	-0.049):	signal=0.000
+ 5/120: E=(-0.056,	-0.048,	0.257):	signal=0.000
+ 6/120: E=(-0.185,	-0.001,	-0.083):	signal=0.000
+ 7/120: E=(0.008,	0.041,	0.087):	signal=0.000
+ 8/120: E=(-0.037,	-0.144,	0.011):	signal=0.000
+ 9/120: E=(-0.327,	0.080,	0.357):	signal=0.001
+10/120: E=(0.082,	-0.179,	-0.060):	signal=0.000
+11/120: E=(-0.301,	0.232,	0.308):	signal=0.000
+12/120: E=(-0.243,	0.149,	0.187):	signal=0.000
+13/120: E=(-0.015,	-0.168,	0.174):	signal=0.000
+14/120: E=(-0.144,	0.125,	0.119):	signal=0.000
+15/120: E=(0.069,	0.220,	0.388):	signal=0.000
+16/120: E=(-0.278,	0.071,	0.241):	signal=0.000
+17/120: E=(-0.261,	0.011,	0.143):	signal=0.000
+18/120: E=(0.110,	-0.065,	0.222):	signal=0.000
+19/120: E=(-0.075,	-0.100,	-0.017):	signal=0.000
+  suggest_next: 0.001, 0.387
+20/120: E=(-0.324,	0.065,	0.354):	signal=0.000
+  suggest_next: 0.001, 0.923
+21/120: E=(-0.329,	0.154,	0.377):	signal=0.000
+  suggest_next: 0.001, 0.665
+22/120: E=(-0.316,	0.107,	0.331):	signal=0.000
+  suggest_next: 0.000, 0.899
+23/120: E=(-0.272,	0.094,	0.389):	signal=0.000
+  suggest_next: 0.000, 0.995
+24/120: E=(-0.175,	0.043,	0.248):	signal=0.000
+  suggest_next: 0.000, 1.000
+25/120: E=(-0.307,	-0.249,	0.292):	signal=0.000
+  suggest_next: 0.000, 1.000
+26/120: E=(-0.329,	-0.192,	0.049):	signal=0.000
+  suggest_next: 0.000, 1.000
+27/120: E=(0.139,	0.059,	-0.077):	signal=0.000
+  suggest_next: 0.001, 0.613
+28/120: E=(-0.343,	0.113,	0.391):	signal=0.000
+  suggest_next: 0.000, 1.000
+29/120: E=(-0.046,	0.172,	-0.097):	signal=0.000
+Resetting Ex, Ey, and Ez to default [0.0, 0.0, 0.0] ...
+Saving data...
+Config file written.
+Experiment /home/electrons/software/data/20260220/20260220_160849 finished.
+Experiment finished.
+
+==== Optimization results (find_optimal_E) ====
+Best observed (incumbent):
+  value = 0.0012217470983506415
+  E = [-0.32703489743050945, 0.07973182980404386, 0.35667846116894775]
+Best predicted by GP (posterior mean on candidate grid):
+  mean = 1.1753848464696146
+  E = [-0.3338533144628227, 0.09346130774687439, 0.34443375051495717]
+  14.  15.  16.  17.  18.  19.  20.  21.  22.  23.  24.  25.  26.  27.
+  28.  29.  30.  31.  32.  33.  34.  35.  36.  37.  38.  39.  40.  41.
+  42.  43.  44.  45.  46.  47.  48.  49.  50.  51.  52.  53.  54.  55.
+  56.  57.  58.  59.  60.  61.  62.  63.  64.  65.  66.  67.  68.  69.
+  70.  71.  72.  73.  74.  75.  76.  77.  78.  79.  80.  81.  82.  83.
+  84.  85.  86.  87.  88.  89.  90.  91.  92.  93.  94.  95.  96.  97.
+  98.  99. 100. 101. 102. 103. 104. 105. 106. 107. 108. 109. 110. 111.
+ 112. 113. 114. 115. 116. 117. 118. 119.]
+
+
+stderr:
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/analyze_functions.py:219: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
+  arr = np.array(self.get_dataset(hlp['var']))
+
+============================================================
+
+============================================================
+timestamp: 20260220_161010
+stdout:
+b'Keysight Technologies,N9000B,MY60251535,A.32.01\n'
+Successfully sent setpoint 768.708843 THz to laser 390!
+Successfully sent setpoint 709.079620 THz to laser 422!
+[MCP] Applying MCP Voltage: 400.000, 2400.000, 2600.000
+
+****************************************************************************************************
+* Starting new scan
+****************************************************************************************************
+
+ 0/120: E=(-0.029,	-0.022,	0.001):	signal=0.001
+ 1/120: E=(-0.092,	0.231,	-0.065):	signal=0.000
+ 2/120: E=(-0.265,	-0.206,	0.155):	signal=0.000
+ 3/120: E=(-0.004,	0.186,	0.369):	signal=0.000
+ 4/120: E=(-0.117,	0.023,	-0.086):	signal=0.012
+ 5/120: E=(-0.293,	-0.173,	-0.033):	signal=0.000
+ 6/120: E=(0.098,	0.162,	0.058):	signal=0.000
+ 7/120: E=(-0.300,	-0.105,	0.100):	signal=0.000
+ 8/120: E=(-0.180,	0.104,	0.283):	signal=0.000
+ 9/120: E=(0.021,	0.093,	0.093):	signal=0.000
+10/120: E=(-0.141,	0.149,	0.196):	signal=0.000
+11/120: E=(0.128,	-0.062,	0.044):	signal=0.000
+12/120: E=(-0.238,	-0.178,	0.344):	signal=0.000
+13/120: E=(-0.205,	0.203,	-0.014):	signal=0.000
+14/120: E=(-0.074,	0.033,	0.301):	signal=0.020
+15/120: E=(0.070,	-0.086,	0.134):	signal=0.000
+16/120: E=(-0.340,	-0.043,	0.233):	signal=0.000
+17/120: E=(0.120,	0.061,	0.212):	signal=0.000
+18/120: E=(-0.175,	-0.146,	0.397):	signal=0.000
+19/120: E=(0.047,	-0.236,	0.272):	signal=0.000
+  suggest_next: 0.015, 0.658
+20/120: E=(-0.104,	0.033,	0.282):	signal=0.021
+  suggest_next: 0.017, 0.656
+21/120: E=(-0.080,	-0.024,	0.293):	signal=0.000
+  suggest_next: 0.022, 0.356
+22/120: E=(-0.083,	0.052,	0.301):	signal=0.013
+  suggest_next: 0.013, 0.743
+23/120: E=(-0.149,	0.022,	0.255):	signal=0.000
+  suggest_next: 0.013, 0.888
+24/120: E=(-0.053,	0.035,	0.240):	signal=0.016
+  suggest_next: 0.011, 0.786
+25/120: E=(-0.012,	0.021,	0.281):	signal=0.000
+  suggest_next: 0.020, 0.291
+26/120: E=(-0.097,	0.039,	0.266):	signal=0.042
+  suggest_next: 0.027, 0.605
+27/120: E=(-0.092,	0.041,	0.218):	signal=0.058
+  suggest_next: 0.035, 0.767
+28/120: E=(-0.124,	0.039,	0.174):	signal=0.002
+  suggest_next: 0.014, 0.932
+29/120: E=(-0.015,	0.008,	0.362):	signal=0.000
+Resetting Ex, Ey, and Ez to default [0.0, 0.0, 0.0] ...
+Saving data...
+Config file written.
+Experiment /home/electrons/software/data/20260220/20260220_161010 finished.
+Experiment finished.
+
+==== Optimization results (find_optimal_E) ====
+Best observed (incumbent):
+  value = 0.05804749340369393
+  E = [-0.09172160085194359, 0.04063179254353544, 0.2178629603853516]
+Best predicted by GP (posterior mean on candidate grid):
+  mean = 2.9565763793168736
+  E = [-0.10629002983007851, 0.03541289628829841, 0.24989363220363178]
+  14.  15.  16.  17.  18.  19.  20.  21.  22.  23.  24.  25.  26.  27.
+  28.  29.  30.  31.  32.  33.  34.  35.  36.  37.  38.  39.  40.  41.
+  42.  43.  44.  45.  46.  47.  48.  49.  50.  51.  52.  53.  54.  55.
+  56.  57.  58.  59.  60.  61.  62.  63.  64.  65.  66.  67.  68.  69.
+  70.  71.  72.  73.  74.  75.  76.  77.  78.  79.  80.  81.  82.  83.
+  84.  85.  86.  87.  88.  89.  90.  91.  92.  93.  94.  95.  96.  97.
+  98.  99. 100. 101. 102. 103. 104. 105. 106. 107. 108. 109. 110. 111.
+ 112. 113. 114. 115. 116. 117. 118. 119.]
+
+
+stderr:
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/analyze_functions.py:219: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
+  arr = np.array(self.get_dataset(hlp['var']))
+
+============================================================
+
+============================================================
+timestamp: 20260220_161130
+stdout:
+b'Keysight Technologies,N9000B,MY60251535,A.32.01\n'
+Successfully sent setpoint 768.708843 THz to laser 390!
+Successfully sent setpoint 709.079620 THz to laser 422!
+[MCP] Applying MCP Voltage: 400.000, 2400.000, 2600.000
+
+****************************************************************************************************
+* Starting new scan
+****************************************************************************************************
+
+ 0/120: E=(0.075,	-0.223,	0.309):	signal=0.000
+ 1/120: E=(0.046,	0.042,	0.271):	signal=0.000
+ 2/120: E=(-0.083,	-0.026,	0.349):	signal=0.000
+ 3/120: E=(-0.109,	0.213,	0.364):	signal=0.000
+ 4/120: E=(-0.255,	0.177,	0.073):	signal=0.000
+ 5/120: E=(-0.213,	-0.240,	0.114):	signal=0.000
+ 6/120: E=(-0.342,	-0.068,	0.076):	signal=0.000
+ 7/120: E=(0.020,	0.054,	0.038):	signal=0.000
+ 8/120: E=(0.111,	-0.118,	0.293):	signal=0.000
+ 9/120: E=(-0.325,	-0.167,	0.014):	signal=0.000
+10/120: E=(-0.153,	0.233,	0.167):	signal=0.000
+11/120: E=(-0.196,	0.142,	0.143):	signal=0.000
+12/120: E=(0.149,	-0.082,	0.202):	signal=0.000
+13/120: E=(-0.002,	-0.137,	0.177):	signal=0.000
+14/120: E=(-0.236,	0.020,	-0.013):	signal=0.000
+15/120: E=(-0.279,	-0.007,	0.243):	signal=0.000
+16/120: E=(-0.068,	-0.187,	0.377):	signal=0.000
+17/120: E=(-0.141,	0.117,	-0.082):	signal=0.000
+18/120: E=(0.050,	0.157,	-0.075):	signal=0.000
+19/120: E=(-0.041,	0.088,	-0.032):	signal=0.000
+  suggest_next: nan, nan
+20/120: E=(-0.148,	-0.249,	0.259):	signal=0.000
+  suggest_next: nan, nan
+21/120: E=(-0.123,	-0.127,	0.030):	signal=0.000
+  suggest_next: nan, nan
+22/120: E=(-0.076,	0.237,	-0.083):	signal=0.000
+  suggest_next: nan, nan
+23/120: E=(0.027,	0.031,	0.129):	signal=0.001
+  suggest_next: 0.001, 0.664
+24/120: E=(-0.007,	0.040,	0.132):	signal=0.000
+  suggest_next: 0.001, 0.515
+25/120: E=(0.044,	0.039,	0.109):	signal=0.000
+  suggest_next: 0.001, 0.863
+26/120: E=(0.037,	-0.013,	0.169):	signal=0.000
+  suggest_next: 0.000, 0.749
+27/120: E=(0.051,	0.050,	0.163):	signal=0.000
+  suggest_next: 0.000, 0.942
+28/120: E=(0.038,	-0.045,	0.091):	signal=0.000
+  suggest_next: 0.000, 0.984
+29/120: E=(0.057,	0.043,	-0.053):	signal=0.001
+Resetting Ex, Ey, and Ez to default [0.0, 0.0, 0.0] ...
+Saving data...
+Config file written.
+Experiment /home/electrons/software/data/20260220/20260220_161130 finished.
+Experiment finished.
+
+==== Optimization results (find_optimal_E) ====
+Best observed (incumbent):
+  value = 0.0013080444735120995
+  E = [0.05680345290062194, 0.0425582282557998, -0.05264216884809065]
+Best predicted by GP (posterior mean on candidate grid):
+  mean = 4.005620251677522
+  E = [0.04887566100087043, 0.04657785697365435, -0.04159811683352308]
+  14.  15.  16.  17.  18.  19.  20.  21.  22.  23.  24.  25.  26.  27.
+  28.  29.  30.  31.  32.  33.  34.  35.  36.  37.  38.  39.  40.  41.
+  42.  43.  44.  45.  46.  47.  48.  49.  50.  51.  52.  53.  54.  55.
+  56.  57.  58.  59.  60.  61.  62.  63.  64.  65.  66.  67.  68.  69.
+  70.  71.  72.  73.  74.  75.  76.  77.  78.  79.  80.  81.  82.  83.
+  84.  85.  86.  87.  88.  89.  90.  91.  92.  93.  94.  95.  96.  97.
+  98.  99. 100. 101. 102. 103. 104. 105. 106. 107. 108. 109. 110. 111.
+ 112. 113. 114. 115. 116. 117. 118. 119.]
+
+
+stderr:
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/helper_functions.py:182: RuntimeWarning: invalid value encountered in true_divide
+  return (ys - y_mean) / y_std, (y_mean, y_std)
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/helper_functions.py:182: RuntimeWarning: invalid value encountered in true_divide
+  return (ys - y_mean) / y_std, (y_mean, y_std)
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/helper_functions.py:182: RuntimeWarning: invalid value encountered in true_divide
+  return (ys - y_mean) / y_std, (y_mean, y_std)
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/helper_functions.py:182: RuntimeWarning: invalid value encountered in true_divide
+  return (ys - y_mean) / y_std, (y_mean, y_std)
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/analyze_functions.py:219: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
+  arr = np.array(self.get_dataset(hlp['var']))
+
+============================================================
+
+============================================================
+timestamp: 20260220_161251
+stdout:
+b'Keysight Technologies,N9000B,MY60251535,A.32.01\n'
+Successfully sent setpoint 768.708843 THz to laser 390!
+Successfully sent setpoint 709.079620 THz to laser 422!
+[MCP] Applying MCP Voltage: 400.000, 2400.000, 2600.000
+
+****************************************************************************************************
+* Starting new scan
+****************************************************************************************************
+
+ 0/120: E=(-0.046,	0.086,	0.137):	signal=0.001
+ 1/120: E=(-0.141,	0.188,	0.225):	signal=0.000
+ 2/120: E=(-0.327,	0.213,	0.278):	signal=0.002
+ 3/120: E=(-0.268,	-0.123,	0.214):	signal=0.000
+ 4/120: E=(0.146,	0.233,	-0.082):	signal=0.002
+ 5/120: E=(-0.090,	-0.127,	0.185):	signal=0.000
+ 6/120: E=(-0.010,	-0.088,	-0.017):	signal=0.000
+ 7/120: E=(0.080,	0.053,	0.274):	signal=0.000
+ 8/120: E=(0.018,	-0.044,	0.393):	signal=0.000
+ 9/120: E=(-0.200,	-0.238,	0.032):	signal=0.000
+10/120: E=(0.035,	-0.179,	0.371):	signal=0.000
+11/120: E=(0.108,	-0.167,	0.153):	signal=0.000
+12/120: E=(-0.172,	0.048,	0.304):	signal=0.000
+13/120: E=(-0.283,	-0.221,	0.066):	signal=0.000
+14/120: E=(0.071,	-0.067,	-0.052):	signal=0.000
+15/120: E=(-0.205,	0.145,	0.089):	signal=0.002
+16/120: E=(-0.235,	0.171,	-0.040):	signal=0.000
+17/120: E=(-0.109,	0.115,	0.003):	signal=0.000
+18/120: E=(-0.317,	-0.021,	0.101):	signal=0.002
+19/120: E=(-0.060,	0.021,	0.332):	signal=0.002
+  suggest_next: 0.002, 0.568
+20/120: E=(-0.039,	0.003,	0.320):	signal=0.002
+  suggest_next: 0.002, 0.825
+21/120: E=(-0.101,	0.042,	0.375):	signal=0.003
+  suggest_next: 0.002, 0.704
+22/120: E=(-0.081,	0.077,	0.359):	signal=0.002
+  suggest_next: 0.002, 0.414
+23/120: E=(-0.068,	0.002,	0.343):	signal=0.001
+  suggest_next: 0.003, 0.448
+24/120: E=(-0.055,	0.061,	0.325):	signal=0.006
+  suggest_next: 0.005, 0.660
+25/120: E=(-0.023,	0.088,	0.325):	signal=0.000
+  suggest_next: 0.004, 0.619
+26/120: E=(-0.078,	0.036,	0.297):	signal=0.017
+  suggest_next: 0.013, 0.477
+27/120: E=(-0.107,	0.029,	0.294):	signal=0.036
+  suggest_next: 0.029, 0.583
+28/120: E=(-0.121,	0.029,	0.265):	signal=0.008
+  suggest_next: 0.013, 0.872
+29/120: E=(-0.142,	-0.026,	0.336):	signal=0.000
+  suggest_next: 0.004, 0.977
+30/120: E=(0.029,	-0.075,	0.299):	signal=0.000
+  suggest_next: 0.018, 0.572
+31/120: E=(-0.099,	0.075,	0.296):	signal=0.000
+Resetting Ex, Ey, and Ez to default [0.0, 0.0, 0.0] ...
+Saving data...
+Config file written.
+Experiment /home/electrons/software/data/20260220/20260220_161251 finished.
+Experiment finished.
+
+==== Optimization results (find_optimal_E) ====
+Best observed (incumbent):
+  value = 0.035594035594035595
+  E = [-0.10676411511613912, 0.028998211151026798, 0.2943221994167281]
+Best predicted by GP (posterior mean on candidate grid):
+  mean = 3.296869359936805
+  E = [-0.10996318603721464, 0.004834305059065069, 0.303213131123924]
+  14.  15.  16.  17.  18.  19.  20.  21.  22.  23.  24.  25.  26.  27.
+  28.  29.  30.  31.  32.  33.  34.  35.  36.  37.  38.  39.  40.  41.
+  42.  43.  44.  45.  46.  47.  48.  49.  50.  51.  52.  53.  54.  55.
+  56.  57.  58.  59.  60.  61.  62.  63.  64.  65.  66.  67.  68.  69.
+  70.  71.  72.  73.  74.  75.  76.  77.  78.  79.  80.  81.  82.  83.
+  84.  85.  86.  87.  88.  89.  90.  91.  92.  93.  94.  95.  96.  97.
+  98.  99. 100. 101. 102. 103. 104. 105. 106. 107. 108. 109. 110. 111.
+ 112. 113. 114. 115. 116. 117. 118. 119.]
+
+
+stderr:
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/analyze_functions.py:219: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
+  arr = np.array(self.get_dataset(hlp['var']))
+
+============================================================
+
+============================================================
+timestamp: 20260220_161417
+stdout:
+b'Keysight Technologies,N9000B,MY60251535,A.32.01\n'
+Successfully sent setpoint 768.708843 THz to laser 390!
+Successfully sent setpoint 709.079620 THz to laser 422!
+[MCP] Applying MCP Voltage: 400.000, 2400.000, 2600.000
+
+****************************************************************************************************
+* Starting new scan
+****************************************************************************************************
+
+ 0/120: E=(0.068,	0.095,	0.273):	signal=0.000
+ 1/120: E=(-0.313,	-0.044,	0.345):	signal=0.000
+ 2/120: E=(0.139,	0.035,	0.037):	signal=0.001
+ 3/120: E=(0.044,	-0.016,	0.221):	signal=0.000
+ 4/120: E=(-0.206,	0.149,	0.181):	signal=0.000
+ 5/120: E=(-0.074,	-0.110,	0.226):	signal=0.000
+ 6/120: E=(-0.006,	0.219,	0.011):	signal=0.000
+ 7/120: E=(-0.149,	-0.178,	-0.062):	signal=0.000
+ 8/120: E=(-0.078,	-0.148,	0.359):	signal=0.000
+ 9/120: E=(-0.349,	-0.208,	0.318):	signal=0.000
+10/120: E=(-0.258,	-0.172,	0.275):	signal=0.000
+11/120: E=(-0.116,	0.165,	0.076):	signal=0.000
+12/120: E=(-0.177,	-0.097,	-0.021):	signal=0.000
+13/120: E=(-0.284,	-0.070,	-0.084):	signal=0.000
+14/120: E=(0.085,	0.059,	-0.043):	signal=0.000
+15/120: E=(-0.165,	0.120,	0.159):	signal=0.000
+16/120: E=(-0.038,	0.010,	0.118):	signal=0.017
+17/120: E=(0.004,	0.228,	0.140):	signal=0.000
+18/120: E=(0.117,	-0.230,	0.391):	signal=0.000
+19/120: E=(-0.246,	0.188,	0.060):	signal=0.000
+  suggest_next: 0.013, 0.613
+20/120: E=(-0.054,	-0.033,	0.102):	signal=0.013
+  suggest_next: 0.015, 0.490
+21/120: E=(-0.023,	0.013,	0.084):	signal=0.004
+  suggest_next: 0.014, 0.633
+22/120: E=(-0.047,	0.039,	0.143):	signal=0.040
+  suggest_next: 0.032, 0.675
+23/120: E=(-0.085,	0.049,	0.150):	signal=0.039
+  suggest_next: 0.032, 0.721
+24/120: E=(-0.039,	0.073,	0.178):	signal=0.000
+  suggest_next: 0.031, 0.584
+25/120: E=(-0.089,	0.073,	0.128):	signal=0.004
+  suggest_next: 0.048, 0.476
+26/120: E=(-0.089,	0.019,	0.158):	signal=0.062
+  suggest_next: 0.037, 0.797
+27/120: E=(-0.082,	0.003,	0.210):	signal=0.034
+  suggest_next: 0.055, 0.311
+28/120: E=(-0.104,	0.017,	0.155):	signal=0.026
+  suggest_next: 0.010, 0.991
+29/120: E=(0.023,	-0.071,	0.027):	signal=0.001
+  suggest_next: 0.022, 0.809
+30/120: E=(-0.034,	-0.036,	0.174):	signal=0.001
+  suggest_next: 0.049, 0.317
+31/120: E=(-0.086,	0.028,	0.190):	signal=0.074
+Resetting Ex, Ey, and Ez to default [0.0, 0.0, 0.0] ...
+Saving data...
+Config file written.
+Experiment /home/electrons/software/data/20260220/20260220_161417 finished.
+Experiment finished.
+
+==== Optimization results (find_optimal_E) ====
+Best observed (incumbent):
+  value = 0.07391537225495447
+  E = [-0.08586159075153549, 0.027688886361276033, 0.19048195614794458]
+Best predicted by GP (posterior mean on candidate grid):
+  mean = 2.835283043292402
+  E = [-0.0856852996711141, 0.04208861118170376, 0.19380124188555306]
+  14.  15.  16.  17.  18.  19.  20.  21.  22.  23.  24.  25.  26.  27.
+  28.  29.  30.  31.  32.  33.  34.  35.  36.  37.  38.  39.  40.  41.
+  42.  43.  44.  45.  46.  47.  48.  49.  50.  51.  52.  53.  54.  55.
+  56.  57.  58.  59.  60.  61.  62.  63.  64.  65.  66.  67.  68.  69.
+  70.  71.  72.  73.  74.  75.  76.  77.  78.  79.  80.  81.  82.  83.
+  84.  85.  86.  87.  88.  89.  90.  91.  92.  93.  94.  95.  96.  97.
+  98.  99. 100. 101. 102. 103. 104. 105. 106. 107. 108. 109. 110. 111.
+ 112. 113. 114. 115. 116. 117. 118. 119.]
+
+
+stderr:
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/analyze_functions.py:219: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
+  arr = np.array(self.get_dataset(hlp['var']))
+
+============================================================
+
+============================================================
+timestamp: 20260220_161543
+stdout:
+b'Keysight Technologies,N9000B,MY60251535,A.32.01\n'
+Successfully sent setpoint 768.708843 THz to laser 390!
+Successfully sent setpoint 709.079620 THz to laser 422!
+[MCP] Applying MCP Voltage: 400.000, 2400.000, 2600.000
+
+****************************************************************************************************
+* Starting new scan
+****************************************************************************************************
+
+ 0/120: E=(-0.024,	-0.048,	-0.032):	signal=0.000
+ 1/120: E=(0.033,	-0.011,	0.398):	signal=0.001
+ 2/120: E=(0.090,	0.226,	-0.098):	signal=0.000
+ 3/120: E=(-0.171,	0.086,	-0.063):	signal=0.000
+ 4/120: E=(-0.035,	0.136,	0.204):	signal=0.000
+ 5/120: E=(-0.210,	0.066,	0.279):	signal=0.000
+ 6/120: E=(0.126,	0.014,	0.060):	signal=0.000
+ 7/120: E=(-0.061,	0.172,	0.199):	signal=0.000
+ 8/120: E=(-0.279,	0.194,	0.262):	signal=0.000
+ 9/120: E=(0.024,	-0.092,	0.023):	signal=0.000
+10/120: E=(-0.145,	-0.204,	-0.022):	signal=0.000
+11/120: E=(-0.082,	0.118,	0.040):	signal=0.000
+12/120: E=(-0.186,	0.046,	0.083):	signal=0.000
+13/120: E=(-0.232,	0.218,	0.165):	signal=0.000
+14/120: E=(0.111,	-0.104,	0.328):	signal=0.000
+15/120: E=(-0.251,	-0.237,	0.104):	signal=0.000
+16/120: E=(-0.115,	-0.050,	0.311):	signal=0.001
+17/120: E=(-0.323,	-0.133,	0.250):	signal=0.000
+18/120: E=(-0.339,	-0.153,	0.357):	signal=0.000
+19/120: E=(0.061,	-0.182,	0.132):	signal=0.000
+  suggest_next: 0.001, 0.512
+20/120: E=(-0.034,	-0.041,	0.360):	signal=0.000
+  suggest_next: 0.001, 0.536
+21/120: E=(-0.121,	-0.077,	0.313):	signal=0.000
+  suggest_next: 0.001, 0.801
+22/120: E=(-0.128,	-0.001,	0.284):	signal=0.000
+  suggest_next: 0.001, 0.768
+23/120: E=(-0.097,	-0.023,	0.358):	signal=0.000
+  suggest_next: 0.001, 0.719
+24/120: E=(0.066,	0.011,	0.380):	signal=0.000
+  suggest_next: 0.001, 0.839
+25/120: E=(-0.068,	-0.034,	0.278):	signal=0.000
+  suggest_next: 0.000, 0.912
+26/120: E=(0.050,	-0.079,	0.397):	signal=0.000
+  suggest_next: 0.000, 0.924
+27/120: E=(0.001,	0.049,	0.370):	signal=0.000
+  suggest_next: 0.000, 0.719
+28/120: E=(-0.163,	-0.029,	0.312):	signal=0.000
+  suggest_next: 0.000, 0.999
+29/120: E=(-0.326,	0.059,	0.338):	signal=0.000
+Resetting Ex, Ey, and Ez to default [0.0, 0.0, 0.0] ...
+Saving data...
+Config file written.
+Experiment /home/electrons/software/data/20260220/20260220_161543 finished.
+Experiment finished.
+
+==== Optimization results (find_optimal_E) ====
+Best observed (incumbent):
+  value = 0.000974184120798831
+  E = [-0.11545944460738819, -0.050070672698427354, 0.31111967538709906]
+Best predicted by GP (posterior mean on candidate grid):
+  mean = 2.6587528258398447
+  E = [0.04166278402138279, -0.012696803669626222, 0.39935209724268605]
+  14.  15.  16.  17.  18.  19.  20.  21.  22.  23.  24.  25.  26.  27.
+  28.  29.  30.  31.  32.  33.  34.  35.  36.  37.  38.  39.  40.  41.
+  42.  43.  44.  45.  46.  47.  48.  49.  50.  51.  52.  53.  54.  55.
+  56.  57.  58.  59.  60.  61.  62.  63.  64.  65.  66.  67.  68.  69.
+  70.  71.  72.  73.  74.  75.  76.  77.  78.  79.  80.  81.  82.  83.
+  84.  85.  86.  87.  88.  89.  90.  91.  92.  93.  94.  95.  96.  97.
+  98.  99. 100. 101. 102. 103. 104. 105. 106. 107. 108. 109. 110. 111.
+ 112. 113. 114. 115. 116. 117. 118. 119.]
+
+
+stderr:
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/analyze_functions.py:219: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
+  arr = np.array(self.get_dataset(hlp['var']))
+
+============================================================
+
+============================================================
+timestamp: 20260220_161704
+stdout:
+b'Keysight Technologies,N9000B,MY60251535,A.32.01\n'
+Successfully sent setpoint 768.708843 THz to laser 390!
+Successfully sent setpoint 709.079620 THz to laser 422!
+[MCP] Applying MCP Voltage: 400.000, 2400.000, 2600.000
+
+****************************************************************************************************
+* Starting new scan
+****************************************************************************************************
+
+ 0/120: E=(-0.095,	-0.098,	0.358):	signal=0.000
+ 1/120: E=(0.147,	0.080,	0.195):	signal=0.000
+ 2/120: E=(0.073,	-0.220,	-0.035):	signal=0.000
+ 3/120: E=(-0.226,	-0.163,	-0.050):	signal=0.000
+ 4/120: E=(-0.101,	0.114,	0.137):	signal=0.001
+ 5/120: E=(-0.056,	-0.022,	0.074):	signal=0.023
+ 6/120: E=(-0.174,	-0.101,	0.045):	signal=0.000
+ 7/120: E=(-0.267,	0.150,	0.273):	signal=0.000
+ 8/120: E=(-0.035,	0.066,	0.396):	signal=0.003
+ 9/120: E=(0.115,	0.243,	0.115):	signal=0.000
+10/120: E=(-0.001,	-0.058,	-0.015):	signal=0.000
+11/120: E=(-0.285,	0.201,	0.013):	signal=0.000
+12/120: E=(-0.188,	-0.200,	0.292):	signal=0.000
+13/120: E=(-0.350,	-0.139,	0.173):	signal=0.000
+14/120: E=(0.027,	0.144,	0.201):	signal=0.000
+15/120: E=(-0.127,	-0.242,	-0.080):	signal=0.000
+16/120: E=(0.095,	0.190,	0.326):	signal=0.000
+17/120: E=(-0.321,	-0.037,	0.316):	signal=0.000
+18/120: E=(-0.215,	0.046,	0.245):	signal=0.000
+19/120: E=(0.008,	0.001,	0.084):	signal=0.000
+  suggest_next: 0.018, 0.590
+20/120: E=(-0.053,	-0.045,	0.093):	signal=0.011
+  suggest_next: 0.016, 0.805
+21/120: E=(-0.087,	-0.015,	0.028):	signal=0.017
+  suggest_next: 0.023, 0.280
+22/120: E=(-0.067,	-0.010,	0.049):	signal=0.055
+  suggest_next: 0.032, 0.707
+23/120: E=(-0.092,	0.020,	0.063):	signal=0.087
+  suggest_next: 0.071, 0.711
+24/120: E=(-0.095,	0.063,	0.052):	signal=0.005
+  suggest_next: 0.043, 0.877
+25/120: E=(-0.125,	-0.006,	0.116):	signal=0.000
+  suggest_next: 0.066, 0.447
+26/120: E=(-0.064,	0.033,	0.054):	signal=0.087
+  suggest_next: 0.079, 0.248
+27/120: E=(-0.057,	0.020,	0.068):	signal=0.066
+  suggest_next: 0.086, 0.131
+28/120: E=(-0.068,	0.019,	0.053):	signal=0.086
+  suggest_next: 0.045, 0.714
+29/120: E=(-0.036,	0.013,	0.002):	signal=0.023
+  suggest_next: 0.027, 0.945
+30/120: E=(-0.027,	-0.082,	0.170):	signal=0.000
+  suggest_next: 0.081, 0.145
+31/120: E=(-0.091,	0.022,	0.055):	signal=0.088
+  suggest_next: 0.024, 0.968
+32/120: E=(-0.062,	-0.139,	0.079):	signal=0.000
+  suggest_next: 0.087, 0.125
+33/120: E=(-0.074,	0.025,	0.046):	signal=0.100
+  suggest_next: 0.019, 0.999
+34/120: E=(0.123,	-0.060,	0.097):	signal=0.000
+  suggest_next: 0.019, 0.999
+35/120: E=(-0.144,	0.226,	0.182):	signal=0.002
+  suggest_next: 0.018, 1.000
+36/120: E=(0.140,	-0.177,	0.387):	signal=0.000
+Resetting Ex, Ey, and Ez to default [0.0, 0.0, 0.0] ...
+Saving data...
+Config file written.
+Experiment /home/electrons/software/data/20260220/20260220_161704 finished.
+Experiment finished.
+
+==== Optimization results (find_optimal_E) ====
+Best observed (incumbent):
+  value = 0.09950248756218906
+  E = [-0.07380782490915949, 0.025413338985503353, 0.04590988454253314]
+Best predicted by GP (posterior mean on candidate grid):
+  mean = 1.9765212487486519
+  E = [-0.08147970873411131, 0.02351244252070983, 0.03257063161471052]
+  14.  15.  16.  17.  18.  19.  20.  21.  22.  23.  24.  25.  26.  27.
+  28.  29.  30.  31.  32.  33.  34.  35.  36.  37.  38.  39.  40.  41.
+  42.  43.  44.  45.  46.  47.  48.  49.  50.  51.  52.  53.  54.  55.
+  56.  57.  58.  59.  60.  61.  62.  63.  64.  65.  66.  67.  68.  69.
+  70.  71.  72.  73.  74.  75.  76.  77.  78.  79.  80.  81.  82.  83.
+  84.  85.  86.  87.  88.  89.  90.  91.  92.  93.  94.  95.  96.  97.
+  98.  99. 100. 101. 102. 103. 104. 105. 106. 107. 108. 109. 110. 111.
+ 112. 113. 114. 115. 116. 117. 118. 119.]
+
+
+stderr:
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/analyze_functions.py:219: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
+  arr = np.array(self.get_dataset(hlp['var']))
+
+============================================================
+
+============================================================
+timestamp: 20260220_161843
+stdout:
+b'Keysight Technologies,N9000B,MY60251535,A.32.01\n'
+Successfully sent setpoint 768.708843 THz to laser 390!
+Successfully sent setpoint 709.079620 THz to laser 422!
+[MCP] Applying MCP Voltage: 400.000, 2400.000, 2600.000
+
+****************************************************************************************************
+* Starting new scan
+****************************************************************************************************
+
+ 0/120: E=(-0.257,	-0.023,	0.056):	signal=0.000
+ 1/120: E=(0.057,	-0.153,	0.325):	signal=0.000
+ 2/120: E=(-0.210,	0.051,	0.299):	signal=0.000
+ 3/120: E=(-0.177,	-0.222,	0.171):	signal=0.000
+ 4/120: E=(-0.278,	-0.055,	0.306):	signal=0.000
+ 5/120: E=(-0.012,	0.033,	0.096):	signal=0.000
+ 6/120: E=(0.138,	0.170,	0.242):	signal=0.000
+ 7/120: E=(-0.042,	0.114,	0.139):	signal=0.000
+ 8/120: E=(-0.154,	-0.191,	-0.002):	signal=0.000
+ 9/120: E=(-0.072,	-0.144,	-0.079):	signal=0.000
+10/120: E=(0.115,	0.202,	0.213):	signal=0.000
+11/120: E=(-0.117,	-0.120,	0.010):	signal=0.000
+12/120: E=(-0.231,	-0.241,	0.108):	signal=0.000
+13/120: E=(-0.312,	-0.035,	0.264):	signal=0.000
+14/120: E=(0.032,	-0.078,	-0.050):	signal=0.000
+15/120: E=(-0.135,	0.094,	-0.053):	signal=0.000
+16/120: E=(-0.094,	0.181,	0.381):	signal=0.000
+17/120: E=(0.013,	0.135,	0.189):	signal=0.000
+18/120: E=(0.090,	0.004,	0.354):	signal=0.000
+19/120: E=(-0.337,	0.241,	0.041):	signal=0.000
+  suggest_next: nan, nan
+20/120: E=(-0.246,	-0.123,	0.019):	signal=0.000
+  suggest_next: nan, nan
+21/120: E=(-0.000,	0.080,	-0.066):	signal=0.000
+  suggest_next: nan, nan
+22/120: E=(0.076,	-0.057,	0.334):	signal=0.000
+  suggest_next: nan, nan
+23/120: E=(-0.025,	-0.109,	0.301):	signal=0.000
+  suggest_next: nan, nan
+24/120: E=(0.044,	-0.240,	0.345):	signal=0.000
+  suggest_next: nan, nan
+25/120: E=(-0.029,	-0.109,	0.192):	signal=0.000
+  suggest_next: nan, nan
+26/120: E=(-0.027,	-0.200,	0.115):	signal=0.000
+  suggest_next: nan, nan
+27/120: E=(-0.174,	-0.144,	0.001):	signal=0.002
+  suggest_next: 0.001, 0.871
+28/120: E=(-0.179,	-0.083,	-0.017):	signal=0.000
+  suggest_next: 0.001, 0.525
+29/120: E=(-0.213,	-0.152,	0.005):	signal=0.000
+  suggest_next: 0.001, 0.799
+30/120: E=(-0.201,	-0.125,	0.055):	signal=0.000
+Resetting Ex, Ey, and Ez to default [0.0, 0.0, 0.0] ...
+Saving data...
+Config file written.
+Experiment /home/electrons/software/data/20260220/20260220_161843 finished.
+Experiment finished.
+
+==== Optimization results (find_optimal_E) ====
+Best observed (incumbent):
+  value = 0.001728608470181504
+  E = [-0.1735217533222271, -0.14409901017499738, 0.001009137379412925]
+Best predicted by GP (posterior mean on candidate grid):
+  mean = 3.5629059992978234
+  E = [-0.15485717275043862, -0.13884361597007602, -0.01636513297647106]
+  14.  15.  16.  17.  18.  19.  20.  21.  22.  23.  24.  25.  26.  27.
+  28.  29.  30.  31.  32.  33.  34.  35.  36.  37.  38.  39.  40.  41.
+  42.  43.  44.  45.  46.  47.  48.  49.  50.  51.  52.  53.  54.  55.
+  56.  57.  58.  59.  60.  61.  62.  63.  64.  65.  66.  67.  68.  69.
+  70.  71.  72.  73.  74.  75.  76.  77.  78.  79.  80.  81.  82.  83.
+  84.  85.  86.  87.  88.  89.  90.  91.  92.  93.  94.  95.  96.  97.
+  98.  99. 100. 101. 102. 103. 104. 105. 106. 107. 108. 109. 110. 111.
+ 112. 113. 114. 115. 116. 117. 118. 119.]
+
+
+stderr:
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/helper_functions.py:182: RuntimeWarning: invalid value encountered in true_divide
+  return (ys - y_mean) / y_std, (y_mean, y_std)
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/helper_functions.py:182: RuntimeWarning: invalid value encountered in true_divide
+  return (ys - y_mean) / y_std, (y_mean, y_std)
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/helper_functions.py:182: RuntimeWarning: invalid value encountered in true_divide
+  return (ys - y_mean) / y_std, (y_mean, y_std)
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/helper_functions.py:182: RuntimeWarning: invalid value encountered in true_divide
+  return (ys - y_mean) / y_std, (y_mean, y_std)
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/helper_functions.py:182: RuntimeWarning: invalid value encountered in true_divide
+  return (ys - y_mean) / y_std, (y_mean, y_std)
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/helper_functions.py:182: RuntimeWarning: invalid value encountered in true_divide
+  return (ys - y_mean) / y_std, (y_mean, y_std)
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/helper_functions.py:182: RuntimeWarning: invalid value encountered in true_divide
+  return (ys - y_mean) / y_std, (y_mean, y_std)
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/helper_functions.py:182: RuntimeWarning: invalid value encountered in true_divide
+  return (ys - y_mean) / y_std, (y_mean, y_std)
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/analyze_functions.py:219: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
+  arr = np.array(self.get_dataset(hlp['var']))
+
+============================================================
+
+============================================================
+timestamp: 20260220_162006
+stdout:
+b'Keysight Technologies,N9000B,MY60251535,A.32.01\n'
+Successfully sent setpoint 768.708843 THz to laser 390!
+Successfully sent setpoint 709.079620 THz to laser 422!
+[MCP] Applying MCP Voltage: 400.000, 2400.000, 2600.000
+
+****************************************************************************************************
+* Starting new scan
+****************************************************************************************************
+
+ 0/120: E=(-0.192,	-0.149,	-0.100):	signal=0.000
+ 1/120: E=(0.110,	0.122,	-0.074):	signal=0.000
+ 2/120: E=(-0.108,	-0.103,	0.380):	signal=0.000
+ 3/120: E=(-0.252,	0.092,	0.134):	signal=0.000
+ 4/120: E=(-0.216,	0.027,	0.328):	signal=0.000
+ 5/120: E=(-0.008,	-0.038,	0.057):	signal=0.000
+ 6/120: E=(-0.087,	0.219,	0.261):	signal=0.000
+ 7/120: E=(0.012,	-0.099,	0.106):	signal=0.000
+ 8/120: E=(-0.226,	-0.198,	-0.049):	signal=0.000
+ 9/120: E=(0.091,	0.060,	0.297):	signal=0.000
+10/120: E=(-0.050,	-0.226,	0.245):	signal=0.000
+11/120: E=(0.031,	0.130,	-0.015):	signal=0.000
+12/120: E=(-0.029,	0.003,	0.085):	signal=0.002
+13/120: E=(0.074,	-0.162,	0.162):	signal=0.001
+14/120: E=(-0.145,	-0.061,	0.043):	signal=0.000
+15/120: E=(-0.161,	-0.015,	0.192):	signal=0.000
+16/120: E=(0.134,	0.199,	0.315):	signal=0.001
+17/120: E=(-0.323,	-0.217,	0.362):	signal=0.000
+18/120: E=(-0.295,	0.171,	0.005):	signal=0.000
+19/120: E=(-0.330,	0.249,	0.204):	signal=0.000
+  suggest_next: 0.002, 0.620
+20/120: E=(-0.061,	0.008,	0.075):	signal=0.037
+  suggest_next: 0.039, 0.432
+21/120: E=(-0.083,	0.013,	0.071):	signal=0.064
+  suggest_next: 0.030, 0.914
+22/120: E=(-0.147,	0.044,	0.093):	signal=0.000
+  suggest_next: 0.053, 0.484
+23/120: E=(-0.109,	0.005,	0.058):	signal=0.000
+  suggest_next: 0.043, 0.774
+24/120: E=(-0.095,	0.056,	0.115):	signal=0.001
+  suggest_next: 0.031, 0.806
+25/120: E=(-0.058,	0.038,	0.032):	signal=0.053
+  suggest_next: 0.041, 0.599
+26/120: E=(-0.054,	0.073,	0.026):	signal=0.000
+  suggest_next: 0.036, 0.661
+27/120: E=(-0.024,	0.013,	0.014):	signal=0.003
+  suggest_next: 0.013, 0.964
+28/120: E=(-0.168,	-0.129,	0.085):	signal=0.000
+  suggest_next: 0.054, 0.214
+29/120: E=(-0.063,	0.017,	0.049):	signal=0.074
+Resetting Ex, Ey, and Ez to default [0.0, 0.0, 0.0] ...
+Saving data...
+Config file written.
+Experiment /home/electrons/software/data/20260220/20260220_162006 finished.
+Experiment finished.
+
+==== Optimization results (find_optimal_E) ====
+Best observed (incumbent):
+  value = 0.07373271889400922
+  E = [-0.0630544054164156, 0.016928853510945308, 0.048843436635950144]
+Best predicted by GP (posterior mean on candidate grid):
+  mean = 2.9395155870101917
+  E = [-0.07320085598571913, 0.03984183264024577, 0.0461683780279839]
+  14.  15.  16.  17.  18.  19.  20.  21.  22.  23.  24.  25.  26.  27.
+  28.  29.  30.  31.  32.  33.  34.  35.  36.  37.  38.  39.  40.  41.
+  42.  43.  44.  45.  46.  47.  48.  49.  50.  51.  52.  53.  54.  55.
+  56.  57.  58.  59.  60.  61.  62.  63.  64.  65.  66.  67.  68.  69.
+  70.  71.  72.  73.  74.  75.  76.  77.  78.  79.  80.  81.  82.  83.
+  84.  85.  86.  87.  88.  89.  90.  91.  92.  93.  94.  95.  96.  97.
+  98.  99. 100. 101. 102. 103. 104. 105. 106. 107. 108. 109. 110. 111.
+ 112. 113. 114. 115. 116. 117. 118. 119.]
+
+
+stderr:
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/analyze_functions.py:219: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
+  arr = np.array(self.get_dataset(hlp['var']))
+
+============================================================
+
+============================================================
+timestamp: 20260220_162127
+stdout:
+b'Keysight Technologies,N9000B,MY60251535,A.32.01\n'
+Successfully sent setpoint 768.708843 THz to laser 390!
+Successfully sent setpoint 709.079620 THz to laser 422!
+[MCP] Applying MCP Voltage: 400.000, 2400.000, 2600.000
+
+****************************************************************************************************
+* Starting new scan
+****************************************************************************************************
+
+ 0/120: E=(-0.064,	-0.146,	0.365):	signal=0.001
+ 1/120: E=(-0.267,	-0.152,	0.006):	signal=0.000
+ 2/120: E=(0.015,	-0.083,	0.044):	signal=0.000
+ 3/120: E=(-0.170,	-0.113,	0.089):	signal=0.000
+ 4/120: E=(-0.005,	0.141,	0.381):	signal=0.000
+ 5/120: E=(0.145,	-0.194,	0.073):	signal=0.000
+ 6/120: E=(-0.214,	0.208,	0.180):	signal=0.000
+ 7/120: E=(-0.087,	0.168,	0.208):	signal=0.000
+ 8/120: E=(0.117,	-0.231,	-0.012):	signal=0.000
+ 9/120: E=(0.032,	-0.024,	-0.047):	signal=0.000
+10/120: E=(-0.279,	-0.073,	0.272):	signal=0.000
+11/120: E=(-0.249,	-0.040,	0.124):	signal=0.000
+12/120: E=(-0.193,	0.077,	0.296):	signal=0.000
+13/120: E=(-0.036,	0.013,	0.320):	signal=0.000
+14/120: E=(0.076,	0.113,	0.235):	signal=0.000
+15/120: E=(-0.344,	0.061,	-0.096):	signal=0.000
+16/120: E=(-0.106,	0.195,	0.173):	signal=0.002
+17/120: E=(0.053,	0.040,	0.132):	signal=0.000
+18/120: E=(-0.303,	0.237,	0.326):	signal=0.000
+19/120: E=(-0.129,	-0.224,	-0.071):	signal=0.000
+  suggest_next: 0.001, 0.829
+20/120: E=(-0.128,	0.156,	0.144):	signal=0.002
+  suggest_next: 0.002, 0.404
+21/120: E=(-0.102,	0.169,	0.150):	signal=0.000
+  suggest_next: 0.002, 0.430
+22/120: E=(-0.134,	0.201,	0.166):	signal=0.000
+  suggest_next: 0.002, 0.779
+23/120: E=(-0.164,	0.115,	0.157):	signal=0.000
+  suggest_next: 0.002, 0.517
+24/120: E=(-0.086,	0.217,	0.187):	signal=0.000
+  suggest_next: 0.001, 0.886
+25/120: E=(-0.131,	0.127,	0.083):	signal=0.002
+  suggest_next: 0.002, 0.556
+26/120: E=(-0.159,	0.135,	0.076):	signal=0.000
+  suggest_next: 0.002, 0.425
+27/120: E=(-0.113,	0.113,	0.100):	signal=0.000
+  suggest_next: 0.001, 0.897
+28/120: E=(-0.077,	0.154,	0.050):	signal=0.000
+  suggest_next: 0.001, 0.817
+29/120: E=(-0.066,	-0.188,	0.334):	signal=0.000
+  suggest_next: 0.001, 0.753
+30/120: E=(-0.103,	-0.120,	0.370):	signal=0.000
+  suggest_next: 0.001, 0.680
+31/120: E=(-0.032,	-0.125,	0.350):	signal=0.000
+  suggest_next: 0.002, 0.556
+32/120: E=(-0.072,	-0.157,	0.397):	signal=0.000
+  suggest_next: 0.001, 0.894
+33/120: E=(-0.278,	0.221,	0.178):	signal=0.000
+  suggest_next: 0.000, 0.937
+34/120: E=(-0.132,	0.094,	0.013):	signal=0.000
+  suggest_next: 0.001, 0.707
+35/120: E=(-0.152,	0.169,	0.206):	signal=0.000
+Resetting Ex, Ey, and Ez to default [0.0, 0.0, 0.0] ...
+Saving data...
+Config file written.
+Experiment /home/electrons/software/data/20260220/20260220_162127 finished.
+Experiment finished.
+
+==== Optimization results (find_optimal_E) ====
+Best observed (incumbent):
+  value = 0.0018198362147406734
+  E = [-0.13098363651249872, 0.12652913171017477, 0.08339411677408298]
+Best predicted by GP (posterior mean on candidate grid):
+  mean = 2.0043895088537678
+  E = [-0.12156468216540256, 0.13157434502655596, 0.06665137230996582]
+  14.  15.  16.  17.  18.  19.  20.  21.  22.  23.  24.  25.  26.  27.
+  28.  29.  30.  31.  32.  33.  34.  35.  36.  37.  38.  39.  40.  41.
+  42.  43.  44.  45.  46.  47.  48.  49.  50.  51.  52.  53.  54.  55.
+  56.  57.  58.  59.  60.  61.  62.  63.  64.  65.  66.  67.  68.  69.
+  70.  71.  72.  73.  74.  75.  76.  77.  78.  79.  80.  81.  82.  83.
+  84.  85.  86.  87.  88.  89.  90.  91.  92.  93.  94.  95.  96.  97.
+  98.  99. 100. 101. 102. 103. 104. 105. 106. 107. 108. 109. 110. 111.
+ 112. 113. 114. 115. 116. 117. 118. 119.]
+
+
+stderr:
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/analyze_functions.py:219: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
+  arr = np.array(self.get_dataset(hlp['var']))
+
+============================================================
+
+============================================================
+timestamp: 20260220_162303
+stdout:
+b'Keysight Technologies,N9000B,MY60251535,A.32.01\n'
+Successfully sent setpoint 768.708843 THz to laser 390!
+Successfully sent setpoint 709.079620 THz to laser 422!
+[MCP] Applying MCP Voltage: 400.000, 2400.000, 2600.000
+
+****************************************************************************************************
+* Starting new scan
+****************************************************************************************************
+
+ 0/120: E=(-0.025,	-0.095,	0.217):	signal=0.000
+ 1/120: E=(-0.053,	0.137,	-0.018):	signal=0.000
+ 2/120: E=(0.081,	0.151,	0.039):	signal=0.000
+ 3/120: E=(0.043,	0.215,	0.012):	signal=0.000
+ 4/120: E=(-0.309,	-0.181,	0.112):	signal=0.000
+ 5/120: E=(-0.124,	0.024,	-0.054):	signal=0.002
+ 6/120: E=(-0.186,	0.117,	0.345):	signal=0.001
+ 7/120: E=(-0.222,	-0.029,	0.380):	signal=0.000
+ 8/120: E=(-0.252,	-0.004,	-0.095):	signal=0.000
+ 9/120: E=(-0.277,	-0.074,	-0.027):	signal=0.000
+10/120: E=(-0.026,	0.246,	0.293):	signal=0.000
+11/120: E=(-0.231,	-0.131,	0.238):	signal=0.000
+12/120: E=(-0.080,	-0.154,	0.072):	signal=0.000
+13/120: E=(-0.152,	0.192,	0.137):	signal=0.000
+14/120: E=(-0.149,	-0.102,	0.179):	signal=0.000
+15/120: E=(0.109,	0.048,	0.371):	signal=0.001
+16/120: E=(0.127,	0.091,	0.318):	signal=0.000
+17/120: E=(-0.334,	0.061,	0.088):	signal=0.000
+18/120: E=(0.068,	-0.210,	0.165):	signal=0.000
+19/120: E=(0.009,	-0.230,	0.252):	signal=0.000
+  suggest_next: 0.002, 0.518
+20/120: E=(-0.130,	0.017,	-0.078):	signal=0.000
+  suggest_next: 0.003, 0.509
+21/120: E=(-0.105,	0.039,	-0.035):	signal=0.035
+  suggest_next: 0.029, 0.742
+22/120: E=(-0.109,	0.043,	0.010):	signal=0.013
+  suggest_next: 0.036, 0.565
+23/120: E=(-0.093,	0.070,	-0.034):	signal=0.000
+  suggest_next: 0.018, 0.953
+24/120: E=(-0.028,	0.017,	-0.031):	signal=0.001
+  suggest_next: 0.014, 0.783
+25/120: E=(-0.067,	-0.006,	0.010):	signal=0.062
+  suggest_next: 0.033, 0.815
+26/120: E=(-0.074,	-0.060,	0.014):	signal=0.000
+  suggest_next: 0.036, 0.611
+27/120: E=(-0.050,	0.026,	0.024):	signal=0.050
+  suggest_next: 0.056, 0.305
+28/120: E=(-0.063,	0.028,	-0.002):	signal=0.084
+  suggest_next: 0.080, 0.159
+29/120: E=(-0.068,	0.020,	0.001):	signal=0.077
+  suggest_next: 0.058, 0.452
+30/120: E=(-0.074,	0.010,	-0.043):	signal=0.081
+  suggest_next: 0.021, 0.939
+31/120: E=(-0.105,	-0.062,	-0.092):	signal=0.000
+  suggest_next: 0.013, 0.996
+32/120: E=(-0.104,	0.234,	0.013):	signal=0.002
+Resetting Ex, Ey, and Ez to default [0.0, 0.0, 0.0] ...
+Saving data...
+Config file written.
+Experiment /home/electrons/software/data/20260220/20260220_162303 finished.
+Experiment finished.
+
+==== Optimization results (find_optimal_E) ====
+Best observed (incumbent):
+  value = 0.08397480755773268
+  E = [-0.06314375218482698, 0.028394833153585652, -0.0024475826626935565]
+Best predicted by GP (posterior mean on candidate grid):
+  mean = 2.9184881523070083
+  E = [-0.0740043762471918, 0.008776212010028095, -0.01864490678961607]
+  14.  15.  16.  17.  18.  19.  20.  21.  22.  23.  24.  25.  26.  27.
+  28.  29.  30.  31.  32.  33.  34.  35.  36.  37.  38.  39.  40.  41.
+  42.  43.  44.  45.  46.  47.  48.  49.  50.  51.  52.  53.  54.  55.
+  56.  57.  58.  59.  60.  61.  62.  63.  64.  65.  66.  67.  68.  69.
+  70.  71.  72.  73.  74.  75.  76.  77.  78.  79.  80.  81.  82.  83.
+  84.  85.  86.  87.  88.  89.  90.  91.  92.  93.  94.  95.  96.  97.
+  98.  99. 100. 101. 102. 103. 104. 105. 106. 107. 108. 109. 110. 111.
+ 112. 113. 114. 115. 116. 117. 118. 119.]
+
+
+stderr:
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/analyze_functions.py:219: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
+  arr = np.array(self.get_dataset(hlp['var']))
+
+============================================================
+
+============================================================
+timestamp: 20260220_162432
+stdout:
+b'Keysight Technologies,N9000B,MY60251535,A.32.01\n'
+Successfully sent setpoint 768.708843 THz to laser 390!
+Successfully sent setpoint 709.079620 THz to laser 422!
+[MCP] Applying MCP Voltage: 400.000, 2400.000, 2600.000
+
+****************************************************************************************************
+* Starting new scan
+****************************************************************************************************
+
+ 0/120: E=(-0.178,	-0.100,	-0.090):	signal=0.000
+ 1/120: E=(-0.205,	0.132,	-0.027):	signal=0.000
+ 2/120: E=(-0.151,	-0.145,	0.078):	signal=0.000
+ 3/120: E=(-0.254,	-0.019,	0.298):	signal=0.001
+ 4/120: E=(-0.301,	0.092,	0.388):	signal=0.000
+ 5/120: E=(0.144,	-0.166,	0.206):	signal=0.000
+ 6/120: E=(0.076,	0.064,	0.180):	signal=0.000
+ 7/120: E=(-0.001,	-0.064,	0.149):	signal=0.000
+ 8/120: E=(0.074,	0.105,	0.114):	signal=0.000
+ 9/120: E=(-0.103,	0.238,	0.263):	signal=0.000
+10/120: E=(-0.055,	-0.247,	0.063):	signal=0.000
+11/120: E=(-0.327,	-0.200,	0.031):	signal=0.000
+12/120: E=(-0.131,	-0.091,	0.239):	signal=0.000
+13/120: E=(-0.037,	0.042,	0.370):	signal=0.002
+14/120: E=(-0.293,	-0.178,	0.151):	signal=0.000
+15/120: E=(0.013,	-0.036,	0.024):	signal=0.000
+16/120: E=(-0.239,	0.220,	0.314):	signal=0.000
+17/120: E=(0.043,	0.024,	-0.025):	signal=0.000
+18/120: E=(0.123,	0.154,	0.334):	signal=0.000
+19/120: E=(-0.076,	0.179,	-0.056):	signal=0.000
+  suggest_next: 0.001, 0.612
+20/120: E=(-0.065,	0.079,	0.353):	signal=0.000
+  suggest_next: 0.001, 0.710
+21/120: E=(0.005,	0.044,	0.381):	signal=0.000
+  suggest_next: 0.002, 0.721
+22/120: E=(-0.049,	-0.001,	0.373):	signal=0.000
+  suggest_next: 0.001, 0.747
+23/120: E=(-0.298,	-0.022,	0.302):	signal=0.000
+  suggest_next: 0.001, 0.830
+24/120: E=(-0.222,	-0.058,	0.321):	signal=0.000
+  suggest_next: 0.001, 0.712
+25/120: E=(-0.229,	0.012,	0.316):	signal=0.000
+  suggest_next: 0.001, 0.640
+26/120: E=(-0.256,	0.002,	0.266):	signal=0.000
+  suggest_next: 0.001, 0.642
+27/120: E=(-0.057,	0.066,	0.396):	signal=0.000
+  suggest_next: 0.001, 0.788
+28/120: E=(-0.051,	0.041,	0.309):	signal=0.000
+  suggest_next: 0.000, 0.962
+29/120: E=(-0.251,	-0.078,	0.230):	signal=0.000
+Resetting Ex, Ey, and Ez to default [0.0, 0.0, 0.0] ...
+Saving data...
+Config file written.
+Experiment /home/electrons/software/data/20260220/20260220_162432 finished.
+Experiment finished.
+
+==== Optimization results (find_optimal_E) ====
+Best observed (incumbent):
+  value = 0.0015521924718665113
+  E = [-0.037028157991297106, 0.042357996420138044, 0.37012537368941867]
+Best predicted by GP (posterior mean on candidate grid):
+  mean = 2.638407596046479
+  E = [-0.04419109655160297, 0.03512668598236929, 0.3568112928990532]
+  14.  15.  16.  17.  18.  19.  20.  21.  22.  23.  24.  25.  26.  27.
+  28.  29.  30.  31.  32.  33.  34.  35.  36.  37.  38.  39.  40.  41.
+  42.  43.  44.  45.  46.  47.  48.  49.  50.  51.  52.  53.  54.  55.
+  56.  57.  58.  59.  60.  61.  62.  63.  64.  65.  66.  67.  68.  69.
+  70.  71.  72.  73.  74.  75.  76.  77.  78.  79.  80.  81.  82.  83.
+  84.  85.  86.  87.  88.  89.  90.  91.  92.  93.  94.  95.  96.  97.
+  98.  99. 100. 101. 102. 103. 104. 105. 106. 107. 108. 109. 110. 111.
+ 112. 113. 114. 115. 116. 117. 118. 119.]
+
+
+stderr:
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/analyze_functions.py:219: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
+  arr = np.array(self.get_dataset(hlp['var']))
+
+============================================================
+
+============================================================
+timestamp: 20260220_162552
+stdout:
+b'Keysight Technologies,N9000B,MY60251535,A.32.01\n'
+Successfully sent setpoint 768.708843 THz to laser 390!
+Successfully sent setpoint 709.079620 THz to laser 422!
+[MCP] Applying MCP Voltage: 400.000, 2400.000, 2600.000
+
+****************************************************************************************************
+* Starting new scan
+****************************************************************************************************
+
+ 0/120: E=(-0.093,	0.030,	0.227):	signal=0.056
+ 1/120: E=(0.132,	0.242,	0.142):	signal=0.000
+ 2/120: E=(-0.335,	-0.099,	0.007):	signal=0.000
+ 3/120: E=(-0.150,	0.192,	0.203):	signal=0.000
+ 4/120: E=(-0.064,	0.120,	0.088):	signal=0.000
+ 5/120: E=(0.094,	-0.120,	0.029):	signal=0.000
+ 6/120: E=(0.003,	-0.053,	-0.016):	signal=0.000
+ 7/120: E=(-0.171,	-0.232,	0.317):	signal=0.000
+ 8/120: E=(-0.117,	0.082,	0.376):	signal=0.000
+ 9/120: E=(-0.203,	0.224,	0.109):	signal=0.000
+10/120: E=(0.028,	-0.164,	0.251):	signal=0.000
+11/120: E=(-0.197,	-0.147,	-0.043):	signal=0.000
+12/120: E=(0.056,	0.018,	-0.100):	signal=0.000
+13/120: E=(-0.278,	0.059,	0.333):	signal=0.000
+14/120: E=(-0.038,	-0.043,	0.056):	signal=0.000
+15/120: E=(-0.006,	-0.212,	-0.072):	signal=0.000
+16/120: E=(-0.309,	-0.199,	0.165):	signal=0.000
+17/120: E=(-0.254,	-0.006,	0.186):	signal=0.000
+18/120: E=(0.109,	0.172,	0.299):	signal=0.000
+19/120: E=(-0.239,	0.148,	0.355):	signal=0.000
+  suggest_next: 0.046, 0.537
+20/120: E=(-0.112,	0.035,	0.210):	signal=0.006
+  suggest_next: 0.056, 0.594
+21/120: E=(-0.095,	0.024,	0.258):	signal=0.033
+  suggest_next: 0.061, 0.465
+22/120: E=(-0.071,	0.018,	0.230):	signal=0.032
+  suggest_next: 0.015, 0.977
+23/120: E=(-0.061,	0.114,	0.209):	signal=0.000
+  suggest_next: 0.023, 0.796
+24/120: E=(-0.076,	0.072,	0.278):	signal=0.001
+  suggest_next: 0.005, 1.000
+25/120: E=(-0.337,	0.192,	-0.098):	signal=0.000
+  suggest_next: 0.005, 0.997
+26/120: E=(-0.136,	-0.086,	0.264):	signal=0.001
+  suggest_next: 0.005, 1.000
+27/120: E=(-0.034,	0.249,	-0.082):	signal=0.000
+  suggest_next: 0.005, 1.000
+28/120: E=(0.118,	-0.050,	0.382):	signal=0.000
+  suggest_next: 0.004, 1.000
+29/120: E=(-0.123,	-0.248,	0.117):	signal=0.000
+Resetting Ex, Ey, and Ez to default [0.0, 0.0, 0.0] ...
+Saving data...
+Config file written.
+Experiment /home/electrons/software/data/20260220/20260220_162552 finished.
+Experiment finished.
+
+==== Optimization results (find_optimal_E) ====
+Best observed (incumbent):
+  value = 0.05612594113620808
+  E = [-0.0933047219432453, 0.029759076307865617, 0.22681508761694877]
+Best predicted by GP (posterior mean on candidate grid):
+  mean = 2.72863943910092
+  E = [-0.08821675245443977, 0.02177370772852605, 0.2391251918746987]
+  14.  15.  16.  17.  18.  19.  20.  21.  22.  23.  24.  25.  26.  27.
+  28.  29.  30.  31.  32.  33.  34.  35.  36.  37.  38.  39.  40.  41.
+  42.  43.  44.  45.  46.  47.  48.  49.  50.  51.  52.  53.  54.  55.
+  56.  57.  58.  59.  60.  61.  62.  63.  64.  65.  66.  67.  68.  69.
+  70.  71.  72.  73.  74.  75.  76.  77.  78.  79.  80.  81.  82.  83.
+  84.  85.  86.  87.  88.  89.  90.  91.  92.  93.  94.  95.  96.  97.
+  98.  99. 100. 101. 102. 103. 104. 105. 106. 107. 108. 109. 110. 111.
+ 112. 113. 114. 115. 116. 117. 118. 119.]
+
+
+stderr:
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/analyze_functions.py:219: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
+  arr = np.array(self.get_dataset(hlp['var']))
+
+============================================================

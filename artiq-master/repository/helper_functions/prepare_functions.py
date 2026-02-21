@@ -7,7 +7,7 @@ import os
 # instruments within the `drivers` directory
 sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/drivers")
 from bk_4053 import BK4053
-from rigol   import DSG821
+from rigol   import DSG821, DG4162
 from laser_controller import LaserClient
 from RF_controller    import RFController
 
@@ -75,6 +75,7 @@ def prepare_instruments(self):
 
     self.ext_pulser        = BK4053()      # extraction pulse generator and AOM controller
     self.tickler           = DSG821()      # tickle pulse generator
+    self.signal            = DG4162()      # final signal for ARTIQ and threshold detector reset
     self.laser             = LaserClient() # Laser Lock GUI client
 
     # trap drive and measurement
@@ -100,19 +101,19 @@ def prepare_initialization(self):
     self.laser.set_frequency(390, self.frequency_390)
     self.laser.set_frequency(422, self.frequency_422)
 
-    # 1. RF
+    # 2. RF
     #------------------------------------------------------
     if self.RF_on:
         self.rf.on()
     else:
         self.rf.off(kill_sockets=False)
 
-    # 2. DC voltages
+    # 3. DC voltages
     #------------------------------------------------------
     zotino_initialization(self)
     set_multipoles(self)
 
-    # 3. Mesh, MCP, and Threshold voltage
+    # 4. Mesh, MCP, and Threshold voltage
     #------------------------------------------------------
     #self.mesh = Mesh(initial_voltage = self.mesh_voltage)
     set_mesh_voltage(self, self.mesh_voltage)
@@ -120,12 +121,17 @@ def prepare_initialization(self):
     set_MCP_voltages(self, self.MCP_front)
     set_threshold_voltage(self, self.threshold_voltage*1e-3)
 
-    # 4. Extraction Pulse
+    # 5. Final Signal
+    #------------------------------------------------------
+    self.signal.configure_ch1_pulse_burst()
+    self.signal.on(1)
+
+    # 6. Extraction Pulse
     #------------------------------------------------------
     set_extraction_pulse(self)
     set_loading_pulse(self)
 
-    # 5. Tickle Pulse
+    # 7. Tickle Pulse
     #------------------------------------------------------
     if self.tickle_on:
         self.tickler.on()
