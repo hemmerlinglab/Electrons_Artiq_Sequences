@@ -153,7 +153,7 @@ def _scan_load_time(self, val, scan_values, scan_check = False):
         return _limit_check(self.scanning_parameter, scan_values, [0, 10000])
     
     else:
-        self.load_time = val
+        self.load_time = int(round(val))  # Integer us for kernel/ARTIQ compatibility
         update_detection_time(self)
         set_loading_pulse(self)
         set_extraction_pulse(self)
