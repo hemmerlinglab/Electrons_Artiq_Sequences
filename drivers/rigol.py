@@ -1,4 +1,5 @@
 from base_instruments import BaseVisaInstrument
+import time
 
 # Rigol DSG821 Function Generator
 class DSG821(BaseVisaInstrument):
@@ -30,6 +31,7 @@ class DG4162(BaseVisaInstrument):
 
     def __init__(self, IP="192.168.42.181"):
         super().__init__(IP)
+        self.mode = None
 
     # -------------------------------------------------------------------------
     # Output control
@@ -37,28 +39,37 @@ class DG4162(BaseVisaInstrument):
     def on(self, channel=1):
         self.write(f":OUTPut{channel}:STATe ON")
 
-    def off(self, channel=1, kill_socket=False):
-        self.write(f":OUTPut{channel}:STATe OFF")
+    def off(self, channel=1, disable_output=True, kill_socket=False):
+        if disable_output:
+            self.write(f":OUTPut{channel}:STATe OFF")
         if kill_socket:
             super().close()
 
     # -------------------------------------------------------------------------
     # Function / waveform
     # -------------------------------------------------------------------------
-    def set_function(self, channel, func):
-        self.write(f":SOURce{channel}:FUNCtion {func}")
+    def set_function(self, channel, function):
+        self.write(f":SOURce{channel}:FUNCtion {function}")
 
-    def set_frequency(self, channel, freq_hz):
-        self.write(f":SOURce{channel}:FREQuency {float(freq_hz)}")
+    def set_frequency(self, channel, frequency):
+        # frequency unit: Hz
+        self.write(f":SOURce{channel}:FREQuency {float(frequency)}")
 
-    def set_voltage_high(self, channel, volts):
-        self.write(f":SOURce{channel}:VOLTage:HIGH {float(volts)}")
+    def set_voltage_high(self, channel, voltage):
+        # voltage unit: V
+        self.write(f":SOURce{channel}:VOLTage:HIGH {float(voltage)}")
 
-    def set_voltage_low(self, channel, volts):
-        self.write(f":SOURce{channel}:VOLTage:LOW {float(volts)}")
+    def set_voltage_low(self, channel, voltage):
+        # voltage unit: V
+        self.write(f":SOURce{channel}:VOLTage:LOW {float(voltage)}")
 
-    def set_pulse_duty(self, channel, duty_percent):
-        self.write(f":SOURce{channel}:FUNCtion:PULSe:DCYCle {float(duty_percent)}")
+    def set_pulse_duty(self, channel, duty):
+        # duty unit: percentage
+        self.write(f":SOURce{channel}:FUNCtion:PULSe:DCYCle {float(duty)}")
+
+    def set_pulse_width(self, channel, width):
+        # width unit: s
+        self.write(f":SOURce{channel}:PULSe:WIDTh {float(width)}")
 
     # -------------------------------------------------------------------------
     # Burst mode
@@ -85,18 +96,39 @@ class DG4162(BaseVisaInstrument):
         else:
             self.write(f":SOURce{channel}:BURSt:NCYCles {int(n)}")
 
+    def set_burst_trigger_source(self, channel, source):
+        # source: INTernal | EXTernal | MANual
+        self.write(f":SOURce{channel}:BURSt:TRIGger:SOURce {source}")
+
+    def set_burst_trigger_slope(self, channel, slope):
+        # slope: POSitive | NEGative
+        self.write(f":SOURce{channel}:BURSt:TRIGger:SLOPe {slope}")
+
+    def burst_trigger_immediate(self, channel):
+        self.write(f":SOURce{channel}:BURSt:TRIGger:IMMediate")
+
     # -------------------------------------------------------------------------
-    # Preset: Channel 1 with your specified configuration
+    # Special Commands
     # -------------------------------------------------------------------------
-    def configure_ch1_pulse_burst(
-        self,
-        freq_hz=700e3,
-        high_v=5.0,
-        low_v=0.0,
-        duty_percent=30.0,
-        burst_ncycles="INFinity",
-        output_on=True,
-    ):
+    def send_force_reset(self):
+        if self.mode == "force rst":
+            self.burst_trigger_immediate(1)
+            time.sleep(0.001)
+        else:
+            print("[DG4162] Current mode is incorrect, ignoring command!")
+
+    # -------------------------------------------------------------------------
+    # Preset: Channel 1 Modes for signal and reset
+    # -------------------------------------------------------------------------
+    def config_general(self):
+        """General Initialization when ARTIQ stats"""
+        channel = 1
+        self.set_function(channel, "PULSe")
+        self.set_burst_state(channel, True)
+        self.set_burst_mode(channel, "TRIGgered")
+        self.set_burst_trigger_slope(channel, "POSitive")
+
+    def set_to_signal_mode(self):
         """
         Configure Channel 1 for burst pulse output:
         - Pulse waveform
@@ -104,18 +136,31 @@ class DG4162(BaseVisaInstrument):
         - freq=700 kHz, High=5 V, Low=0 V, Duty=30%
         - output ON by default
         """
-        ch = 1
-        self.set_function(ch, "PULSe")
-        self.set_frequency(ch, freq_hz)
-        self.set_voltage_high(ch, high_v)
-        self.set_voltage_low(ch, low_v)
-        self.set_pulse_duty(ch, duty_percent)
-        self.set_burst_state(ch, True)
-        self.set_burst_mode(ch, "TRIGgered")
-        self.set_burst_ncycles(ch, burst_ncycles)
-        if output_on:
-            self.on(ch)
+        channel = 1
+        self.mode = "signal"
+        self.set_frequency(channel, 700e3)
+        self.set_voltage_high(channel, 5.0)
+        self.set_voltage_low(channel, 0.0)
+        self.set_pulse_duty(channel, 30.0)
+        self.set_burst_ncycles(channel, 1)
+        self.set_burst_trigger_source(channel, "EXTernal")
 
+        self.on(channel)
+
+    def set_to_force_rst_mode(self):
+        """
+        Configuration for forcefully resetting the envelop threshold detector
+        """
+        channel = 1
+        self.mode = "force rst"
+        self.set_frequency(channel, 20e3)
+        self.set_pulse_duty(channel, 10.0)
+        self.set_voltage_high(channel, 5.0)
+        self.set_voltage_low(channel, 0.0)
+        self.set_burst_ncycles(channel, 5)
+        self.set_burst_trigger_source(channel, "MANual")
+
+        self.on(channel)
 
 ################################################################
 # Testing Code
@@ -132,7 +177,13 @@ if __name__ == "__main__":
 
     fg.close()
 
+if __name__ == "__main__":
     dg = DG4162()
     dg.id()
-    dg.configure_ch1_pulse_burst()
+
+    dg.config_general()
+    dg.set_to_force_rst_mode()
+    dg.send_force_reset()
+    dg.set_to_signal_mode()
+
     dg.close()

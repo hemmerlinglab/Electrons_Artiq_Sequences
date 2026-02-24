@@ -1,12 +1,26 @@
 from artiq.language.core import TerminationRequested
+from artiq.coredevice.exceptions import RTIOOverflow, RTIOUnderflow
 import numpy as np
 import time
 
-from base_sequences import count_histogram, count_events, record_laser_frequencies, bare_counting, record_RF_amplitude, set_multipoles
+from base_sequences import (
+    count_histogram,
+    count_events,
+    record_laser_frequencies,
+    bare_counting,
+    record_RF_amplitude,
+    set_multipoles,
+    sampler_read,
+    recover_threshold_detector
+)
 from helper_functions import latin_hypercube, bo_suggest_next
 
+MAX_RTIO_RETRIES = 3
+MAX_LASER_RETRIES = 3
+MAX_DETECTOR_RETRIES = 99
+
 # ===================================================================
-# 0) Customized Error for Laser Jump
+# 0) Customized Errors for Laser Jump and Detector Anomly
 class LaserError(RuntimeError):
     def __init__(self, laser_id: int, message: str = None, actual=None, setpoint=None):
         self.laser_id = int(laser_id)
@@ -16,9 +30,63 @@ class LaserError(RuntimeError):
             message = f"Laser frequency of {self.laser_id} is off, please fix it manually!"
         super().__init__(message)
 
+class DetectorError(RuntimeError):
+    pass
+
 # ===================================================================
 # 1) Master Functions for Run (For Experiment)
-def measure(self, ind, print_result = False, validate_390 = False, validate_422 = True):
+def run_experiment_with_retries(self, experiment_function, ind, **kwargs):
+    """
+    experiment_function: `measure` or `bo_sampling`
+    """
+    # Initialize number of retries
+    rtio_retries     = 0
+    laser_retreis    = 0
+    detector_retries = 0
+
+    while True:
+
+        # Perform Experiments
+        try:
+            return experiment_function(self, ind, **kwargs)
+
+        # Handle RTIO Errors
+        except (RTIOOverflow, RTIOUnderflow) as e:
+            record_RTIO_error(self, ind, e)
+            rtio_retries += 1
+            if rtio_retries <= MAX_RTIO_RETRIES:
+                print(f"Retrying ({rtio_retries}/{MAX_RTIO_RETRIES}) ...")
+                continue
+            print(f"Failed after {MAX_RTIO_RETRIES} trials, terminating experiment ...")
+            raise RuntimeError("Unable to address RTIO error!")
+
+        # Handle Laser Errors
+        except LaserError as e:
+            record_laser_error(self, ind, e)
+            laser_retreis += 1
+            t0 = time.time()
+            handle_laser_jump(self, laser_to_fix=int(e.laser_id))
+            dt = time.time() - t0
+            too_long = dt > 10
+            too_many = laser_retries > MAX_LASER_RETRIES
+            if (self.laser_failure == "raise error") and (too_long or too_many):
+                raise RuntimeError(f"LASER_OFF_{int(e.laser_id)}") from e
+            continue
+
+        except DetectorError as e:
+            record_detector_error(self, ind, e)
+            detector_retries += 1
+            ok = recover_threshold_detector(self)
+            if ok:
+                print(f"Recovered detector, Retrying ({detector_retries}/{MAX_DETECTOR_RETRIES}) ...")
+                continue
+            if detector_retries <= MAX_DETECTOR_RETRIES:
+                print(f"Failed to recover detector, Retrying ({detector_retries}/{MAX_DETECTOR_RETRIES}) ...")
+            raise RuntimeError("Unable to address detector error!")
+
+# ===================================================================
+# 1) Top Level Controllers
+def measure(self, ind, print_result=False, validate_390=False, validate_422=True):
 
     if self.scheduler.check_pause():
         raise TerminationRequested("Termination requested during scan")
@@ -73,6 +141,8 @@ def measure(self, ind, print_result = False, validate_390 = False, validate_422 
         if print_result:
             print(f"Recorded Number of electrons: {cts}")
 
+    return 0
+
 def record_RTIO_error(self, ind, err):
 
     # constant
@@ -89,6 +159,16 @@ def record_RTIO_error(self, ind, err):
     # Wait for a period of time
     # e.g. wait for the unstable amplifier behavior to disappear
     time.sleep(HOST_SLEEP_S)
+
+def record_laser_error(self, ind, err):
+    print(f"Laser error ({err})")
+    err = (ind, type(err).__name__)
+    self.err_list.append(err)
+
+def record_detector_error(self, ind, err):
+    print(f"Detector error ({err})")
+    err = (ind, type(err).__name__)
+    self.err_list.append(err)
 
 def handle_laser_jump(self, laser_to_fix = 422, tol = 1e-5):
     """
@@ -114,7 +194,7 @@ def initial_sampling(self):
 
     for ind, pt in enumerate(init_points):
         t0 = time.time()
-        measure_optimize(self, ind, pt)
+        run_experiment_with_retries(self, measure_optimize, ind, E_field=pt)
         self.mutate_dataset("time_cost", ind, time.time() - t0)
 
 def bo_sampling(self, ind):
@@ -138,7 +218,7 @@ def bo_sampling(self, ind):
 
     return ei
 
-def measure_optimize(self, ind, E_field):
+def measure_optimize(self, ind, E_field=None):
 
     # implement setpoint
     self.Ex, self.Ey, self.Ez = E_field
@@ -171,13 +251,13 @@ def trap_optimize(self, ind):
     if self.optimize_target == "trapped_signal":
         signal = cts_trapped
     elif self.optimize_target == "ratio_signal":
-        signal = cts_trapped / cts_loading
+        ssignal = (cts_trapped / cts_loading) if cts_loading > 0 else 0.0
     elif self.optimize_target == "ratio_weighted":
-        signal = (cts_trapped + 2 * cts_lost) / cts_loading
+        signal = ((cts_trapped + 2 * cts_lost) / cts_loading) if cts_loading > 0 else 0.0
     elif self.optimize_target == "lost_signal":
         signal = cts_lost
     elif self.optimize_target == "ratio_lost":
-        signal = cts_lost / cts_loading
+        signal = (cts_lost / cts_loading) if cts_loading > 0 else 0.0
     elif self.optimize_target == "loading_signal":
         signal = cts_loading
     else:
@@ -247,3 +327,9 @@ def store_to_dataset(self, my_ind, cts_trapped, cts_lost, cts_loading):
     # reset timestamps
     self.set_dataset('timestamps', [], broadcast=True)
     self.set_dataset('timestamps_loading', [], broadcast=True)
+
+    # handle threshold detector errors
+    if cts_loading == 0:
+        qbar = sampler_read(self)[4]
+        if qbar <= 0.5:
+            raise DetectorError("Threshold detector was dead!")

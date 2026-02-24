@@ -132,7 +132,7 @@ def load_common_parameters(self):
     # 6. RF Settings
     #------------------------------------------------------
     group_RF = "RF Drive Settings"
-    my_setattr(self, 'RF_on',             BooleanValue(default=False), group=group_RF)
+    my_setattr(self, 'RF_on',             BooleanValue(default=False), group=group_RF, scanable=False)
     my_setattr(self, 'RF_amp_mode',       EnumerationValue(['setpoint', 'actual', 'locked'], default='setpoint'), group=group_RF, scanable=False)
     my_setattr(self, 'RF_amplitude',      NumberValue(default=4,unit='dBm',scale=1,ndecimals=2,step=.01), group=group_RF)
     my_setattr(self, 'RF_frequency',      NumberValue(default=1.732,unit='GHz',scale=1,ndecimals=4,step=.0001), group=group_RF)

@@ -74,6 +74,22 @@ def set_loading_pulse(self):
 
     return
 
+# ========  Envelop Threshold Detector Control  ======== #
+def recover_threshold_detector(self, max_tries=64):
+
+    self.threshold_detector.set_to_force_rst_mode()
+
+    try:
+        for i in range(max_tries):
+            self.threshold_detector.send_force_reset()
+            qbar = sampler_read(self)[4]    # QBar was plugged into channel 4
+            if qbar > 0.5:                  # QBar = 0.7 when scope is DC50, 3.2 when scope is DC1M
+                return True
+        return False
+
+    finally:
+        self.threshold_detector.set_to_signal_mode()
+
 # ====  Calculate Detection Time Based on Set Times  ==== #
 def update_detection_time(self):
 
@@ -142,8 +158,9 @@ def set_electrode_voltages(self, channel_list, voltage_list):
         self.zotino0.write_gain_mu(channel_list[k], 65000)
         delay(100*us)
         self.zotino0.write_dac(channel_list[k], voltage_list[k])
-        self.zotino0.load()
-        delay(200*us)
+
+    self.zotino0.load()
+    delay(200*us)
 
     return
 
@@ -222,14 +239,20 @@ def sampler_read(self):
     
     readings = [0.0]*8
     self.sampler0.sample(readings)
-    self.set_dataset("sampler_voltages", readings, broadcast=True)
     self.core.break_realtime()
+
+    return (
+        readings[0], readings[1], readings[2], readings[3],
+        readings[4], readings[5], readings[6], readings[7]
+    )
 
 def get_MCP_voltages(self):
 
-    sampler_read(self)
+#    sampler_voltages = []
+#    for channel in range(3):
+#        sampler_voltages.append(sampler_read(self, channel))
+    sampler_voltages = sampler_read(self)[:3]
 
-    sampler_voltages = self.get_dataset("sampler_voltages")[:3]
     control_voltages = [0.0, 0.0, 0.0]
     high_voltages = [0.0, 0.0, 0.0]
 

@@ -6,15 +6,24 @@ import os
 
 # instruments within the `drivers` directory
 sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/drivers")
-from bk_4053 import BK4053
-from rigol   import DSG821, DG4162
+from bk_4053          import BK4053
+from rigol            import DSG821, DG4162
 from laser_controller import LaserClient
 from RF_controller    import RFController
 
 # something within the same directory
-from dc_electrodes import Electrodes
-from base_sequences import zotino_initialization, set_multipoles, update_detection_time, set_mesh_voltage, set_threshold_voltage, set_MCP_voltages, set_extraction_pulse, set_loading_pulse
+from dc_electrodes  import Electrodes
 from scan_functions import scan_parameter
+from base_sequences import (
+    zotino_initialization,
+    set_multipoles,
+    update_detection_time,
+    set_mesh_voltage,
+    set_threshold_voltage,
+    set_MCP_voltages,
+    set_extraction_pulse,
+    set_loading_pulse
+)
 
 # ===================================================================
 # 1) Master function for prepare
@@ -73,10 +82,10 @@ def optimizer_prepare(self):
 # 2) Subfunctions for prepare
 def prepare_instruments(self):
 
-    self.ext_pulser        = BK4053()      # extraction pulse generator and AOM controller
-    self.tickler           = DSG821()      # tickle pulse generator
-    self.signal            = DG4162()      # final signal for ARTIQ and threshold detector reset
-    self.laser             = LaserClient() # Laser Lock GUI client
+    self.ext_pulser         = BK4053()      # extraction pulse generator and AOM controller
+    self.tickler            = DSG821()      # tickle pulse generator
+    self.threshold_detector = DG4162()      # final signal for ARTIQ and threshold detector reset
+    self.laser              = LaserClient() # Laser Lock GUI client
 
     # trap drive and measurement
     self.rf = RFController(
@@ -113,18 +122,19 @@ def prepare_initialization(self):
     zotino_initialization(self)
     set_multipoles(self)
 
-    # 4. Mesh, MCP, and Threshold voltage
+    # 4. Mesh and MCP
     #------------------------------------------------------
     #self.mesh = Mesh(initial_voltage = self.mesh_voltage)
     set_mesh_voltage(self, self.mesh_voltage)
     self.current_MCP_front = self.MCP_front
     set_MCP_voltages(self, self.MCP_front)
-    set_threshold_voltage(self, self.threshold_voltage*1e-3)
 
-    # 5. Final Signal
+    # 5. Envelope Threshold Detector
     #------------------------------------------------------
-    self.signal.configure_ch1_pulse_burst()
-    self.signal.on(1)
+    set_threshold_voltage(self, self.threshold_voltage*1e-3)
+    self.threshold_detector.config_general()
+    self.threshold_detector.set_to_signal_mode()
+    self.threshold_detector.on(1)
 
     # 6. Extraction Pulse
     #------------------------------------------------------

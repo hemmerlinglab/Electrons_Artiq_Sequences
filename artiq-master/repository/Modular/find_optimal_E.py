@@ -1,5 +1,4 @@
 from artiq.experiment import EnvExperiment
-from artiq.coredevice.exceptions import RTIOOverflow, RTIOUnderflow
 import time
 import sys
 import os
@@ -7,10 +6,8 @@ import os
 sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions")
 from build_functions   import optimizer_build
 from prepare_functions import optimizer_prepare
-from run_functions     import initial_sampling, bo_sampling, record_RTIO_error
+from run_functions     import initial_sampling, bo_sampling, run_experiment_with_retries
 from analyze_functions import optimizer_analyze
-
-MAX_RETRIES = 3
 
 class FindOptimalE(EnvExperiment):
 
@@ -35,23 +32,8 @@ class FindOptimalE(EnvExperiment):
         for current_step in range(self.max_iteration):
 
             t0 = time.time()
-            retries = 0
 
-            while True:
-                try: ei = bo_sampling(self, current_step)
-                except (RTIOOverflow, RTIOUnderflow) as e:
-                    record_RTIO_error(self, current_step, e)
-
-                    # Not exceed maximum retries: retry the experiment for current set point
-                    retries += 1
-                    if retries <= MAX_RETRIES:
-                        print(f"Retrying ({retries/MAX_RETRIES}) ...")
-                        continue
-
-                    # Exceed maximum retries: abort and save
-                    print(f"Failed after {MAX_RETRIES} trials, terminating experiment ...")
-                    return
-                else: break
+            ei = run_experiment_with_retries(self, bo_sampling, current_step)
 
             # converge in advance: ei < tolerance event counter
             if ei < self.tolerance: low_ei_count += 1

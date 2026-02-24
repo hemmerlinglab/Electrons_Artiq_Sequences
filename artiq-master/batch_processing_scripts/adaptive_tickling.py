@@ -119,7 +119,7 @@ STEPSIZE_FINE = 0.25                        # 0.25 for scan, 0.5 for debug
 # 3) Scan Settings
 # ===================================================================
 RF_amplitude = 2.50
-E = [-0.200, 0.050, 0.030]
+E = [-0.07, +0.04, -0.01]
 
 U2_to_scan = np.linspace(-0.20, -0.25, 11)
 OUTSIDE_LOOP_REPEATS = 5
