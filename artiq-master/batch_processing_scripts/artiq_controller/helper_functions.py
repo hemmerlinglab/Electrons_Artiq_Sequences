@@ -70,7 +70,7 @@ def find_best_laser_frequency(timestamp):
     y_smooth = moving_average(y["loading_signal"])
     return float(x[np.argmax(y_smooth)])
 
-def analyze_rough_scan(timestamp, ynames=["ratio_signal", "ratio_lost"], stepsize=0.2):
+def analyze_rough_scan(timestamp, ynames=["ratio_signal", "ratio_lost"], stepsize=0.25):
 
     # Extract Data
     x, ys = load_data(timestamp, ynames=ynames)
@@ -113,7 +113,7 @@ def analyze_rough_scan(timestamp, ynames=["ratio_signal", "ratio_lost"], stepsiz
 
     return fine_scans
 
-def analyze_fine_scan(timestamp, ynames=["ratio_signal", "ratio_lost"], stepsize=0.2, r2_gate=0.90, scan_count=50, max_n_peaks=4, n_jobs=1):
+def analyze_fine_scan(timestamp, ynames=["ratio_signal", "ratio_lost"], stepsize=0.25, r2_gate=0.98, scan_count=50, max_n_peaks=5, n_jobs=1):
 
     modes = ["lost", "trapped"]
     x, ys = load_data(timestamp, ynames=ynames)
@@ -222,7 +222,7 @@ def find_peaks_and_plot(x, y, noise):
 
     return peaks
 
-def construct_scan_ranges(x, y, peaks, width=10.0, stepsize=0.2):
+def construct_scan_ranges(x, y, peaks, width=10.0, stepsize=0.25):
     """
     For utility function `analyze_rough_scan`
     """
@@ -264,7 +264,7 @@ def construct_scan_ranges(x, y, peaks, width=10.0, stepsize=0.2):
 
     return fine_scans
 
-def merge_scan_ranges(fine_scans_trapped, fine_scans_lost, x, y_trapped, y_lost, stepsize=0.2):
+def merge_scan_ranges(fine_scans_trapped, fine_scans_lost, x, y_trapped, y_lost, stepsize=0.25):
     """
     For utility function `analyze_rough_scan`
     """

@@ -17,7 +17,7 @@ from helper_functions import latin_hypercube, bo_suggest_next
 
 MAX_RTIO_RETRIES = 3
 MAX_LASER_RETRIES = 3
-MAX_DETECTOR_RETRIES = 99
+MAX_DETECTOR_RETRIES = 5
 
 # ===================================================================
 # 0) Customized Errors for Laser Jump and Detector Anomly
@@ -41,7 +41,7 @@ def run_experiment_with_retries(self, experiment_function, ind, **kwargs):
     """
     # Initialize number of retries
     rtio_retries     = 0
-    laser_retreis    = 0
+    laser_retries    = 0
     detector_retries = 0
 
     while True:
@@ -63,7 +63,7 @@ def run_experiment_with_retries(self, experiment_function, ind, **kwargs):
         # Handle Laser Errors
         except LaserError as e:
             record_laser_error(self, ind, e)
-            laser_retreis += 1
+            laser_retries += 1
             t0 = time.time()
             handle_laser_jump(self, laser_to_fix=int(e.laser_id))
             dt = time.time() - t0

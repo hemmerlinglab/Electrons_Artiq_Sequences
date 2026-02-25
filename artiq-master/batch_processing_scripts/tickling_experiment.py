@@ -9,7 +9,7 @@ import os
 import sys
 sys.path.append("/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/batch_processing_scripts/artiq_controller")
 from artiq_controller import SingleParameterScan
-from helper_functions import analyze_rough_scan, analyze_fine_scan, plot_fine_scan
+from helper_functions import analyze_fine_scan, plot_fine_scan
 from experiment_functions import run_with_422_relock
 
 # 0) Save Settings
@@ -94,8 +94,8 @@ config = {
     "mesh_voltage": 120,                    # unit: V
     "MCP_front": 400,                       # unit: V
     "threshold_voltage": 60,                # unit: mV
-    "wait_time": 90,                        # unit: us
-    "load_time": 210,                       # unit: us
+    "wait_time": 140,                        # unit: us
+    "load_time": 260,                       # unit: us
     #"frequency_422": 709.076730,            # unit: THz
     "frequency_390": 768.708843,            # unit: THz
     "laser_failure": "raise error",
@@ -107,7 +107,7 @@ config = {
     "U1": 0, "U3": 0, "U4": 0, "U5": 0,     # unit: V/m^2
     "tickle_on": True,
     "tickle_level": -10.0,                  # unit: MHz
-    "tickle_pulse_length": 80,              # unit: us
+    "tickle_pulse_length": 130,              # unit: us
     #"no_of_repeats": 16000
 }
 
@@ -118,7 +118,8 @@ STEPSIZE_FINE = 0.25                        # 0.25 for scan, 0.5 for debug
 
 # 3) Scan Settings
 # ===================================================================
-RF_amplitude = 2.50
+RF_amplitude_base = 2.50
+U2_base = -0.35
 E = [-0.07, +0.04, -0.01]
 
 U2_to_scan = np.linspace(-0.20, -0.25, 11)

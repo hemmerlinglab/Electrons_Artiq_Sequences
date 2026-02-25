@@ -123,7 +123,7 @@ def close_instruments(self):
 
     # 5) Close Final Signal Generator (DG4162)
     try:
-        self.signal.off(disable_output=False, kill_socket=True)
+        self.threshold_detector.off(disable_output=False, kill_socket=True)
     except Exception:
         print("[Error] Failed to close the final signal and RST generator")
         traceback.print_exc()

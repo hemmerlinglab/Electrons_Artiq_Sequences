@@ -75,8 +75,9 @@ def set_loading_pulse(self):
     return
 
 # ========  Envelop Threshold Detector Control  ======== #
-def recover_threshold_detector(self, max_tries=64):
+def recover_threshold_detector(self, max_tries=5):
 
+    set_threshold_voltage(self, 1.0)
     self.threshold_detector.set_to_force_rst_mode()
 
     try:
@@ -89,6 +90,7 @@ def recover_threshold_detector(self, max_tries=64):
 
     finally:
         self.threshold_detector.set_to_signal_mode()
+        set_threshold_voltage(self, self.threshold_voltage*1e-3)
 
 # ====  Calculate Detection Time Based on Set Times  ==== #
 def update_detection_time(self):
@@ -369,6 +371,11 @@ def count_histogram(self):
 
                 t_start = now_mu()
                 t_end = self.ttl3.gate_rising(self.detection_time*us)
+
+                # Trying to save data reading time, but it turns out this is not the bottleneck
+                #self.ttl3.gate_rising(50*us)
+                #delay((self.load_time-48)*us)
+                #t_end = self.ttl3.gate_rising((self.detection_time-self.load_time+48)*us)
 
             with sequential:
 

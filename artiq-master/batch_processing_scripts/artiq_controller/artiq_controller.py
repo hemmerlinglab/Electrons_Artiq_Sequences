@@ -3,8 +3,14 @@ import copy
 import re
 from datetime import datetime
 import os
+import json
 
 from config import drop_keys
+
+# 0) Helper Functions
+# =============================================================================
+def timestamp_string():
+    return datetime.now().strftime("%Y%m%d_%H%M%S")
 
 # 1) Master Class
 # =============================================================================
@@ -17,14 +23,23 @@ class ArtiqController:
             workdir: str = "/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/",
             log_path: str = "/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/batch_processing_scripts/result"
         ):
+
+        # Attributes
         self.exp_params = {}
         self.command = command
         self.script = script_path
         self.workdir = workdir    # Must set appropriately otherwise artiq would crash
         self.log_path = log_path
 
-        # In-memory profiles: name -> {"script": ..., "command": ..., "params": {...}}
-        self._profiles = {}
+        # Private Attributes
+        self._profiles = {}       # In-memory profiles: name -> {"script": ..., "command": ..., "params": {...}}
+        self._creation_time = timestamp_string()
+        self._creation_date = self._creation_time.split("_")[0]
+        self._instance_log = os.path.join(self.log_path, self._creation_date, f"{self._creation_time}.jsonl")
+
+        # Ensure save dirs
+        os.makedirs(self.log_path, exist_ok=True)
+        os.makedirs(os.path.join(self.log_path, self._creation_date), exist_ok=True)
 
     # -----------------------------
     # Basic configuration (fluent)
@@ -155,7 +170,7 @@ class ArtiqController:
 
         return "".join(out_lines), cp.stderr
 
-    def _write_log(self, timestamp: str, stdout: str, stderr: str):
+    def _write_output_log(self, timestamp: str, stdout: str, stderr: str):
 
         try:
             date, time = timestamp.split("_")
@@ -172,6 +187,24 @@ class ArtiqController:
             f.write("stderr:\n" + stderr + "\n")
             f.write("=" * 60 + "\n")
 
+    def _write_initial_instance_log(self, comment):
+
+        metadata = {
+            "experiment_comment": comment,
+            "command": self.command,
+            "script": self.script_path,
+            "workdir": self.workdir,
+            "log_path": self.log_path,
+        }
+
+    def _write_instance_log(self, timestamp):
+
+        run_entry = {
+            "experiment_timestamp": timestamp,
+            "started_at": self._last_run_time,
+            "ended_at": timestamp,
+        }
+
     # -----------------------------
     # Main Utilities
     # -----------------------------
@@ -180,18 +213,19 @@ class ArtiqController:
 
     def run(self) -> str:
 
-        self._last_run_time = datetime.now().strftime("%Y%m%d_%H%M%S")
+        self._last_run_time = timestamp_string()
         cp = subprocess.run(
             self._construct_args(),
             capture_output=True,
             text=True,
             cwd = self.workdir
         )
+        self._last_end_time = timestamp_string()
 
         stdout, stderr = self._clean_output(cp)
         self.last_output = (stdout, stderr)
         timestamp = self._extract_timestamps(stdout, stderr)
-        self._write_log(timestamp, stdout, stderr)
+        self._write_output_log(timestamp, stdout, stderr)
 
         return timestamp
 
