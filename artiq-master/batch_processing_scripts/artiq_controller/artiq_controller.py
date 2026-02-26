@@ -21,7 +21,8 @@ class ArtiqController:
             script_path: str = None,
             command: str = "artiq_run",
             workdir: str = "/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/",
-            log_path: str = "/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/batch_processing_scripts/result"
+            log_path: str = "/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/batch_processing_scripts/result",
+            comment: str = ""
         ):
 
         # Attributes
@@ -35,11 +36,13 @@ class ArtiqController:
         self._profiles = {}       # In-memory profiles: name -> {"script": ..., "command": ..., "params": {...}}
         self._creation_time = timestamp_string()
         self._creation_date = self._creation_time.split("_")[0]
-        self._instance_log = os.path.join(self.log_path, self._creation_date, f"{self._creation_time}.jsonl")
+        self._instance_log = os.path.join(self.log_path, self._creation_date, f"{self._creation_time}.json")
+        self._instance_log_initialized = False
 
         # Ensure save dirs
         os.makedirs(self.log_path, exist_ok=True)
         os.makedirs(os.path.join(self.log_path, self._creation_date), exist_ok=True)
+        self._write_initial_instance_log(comment)
 
     # -----------------------------
     # Basic configuration (fluent)
@@ -187,23 +190,43 @@ class ArtiqController:
             f.write("stderr:\n" + stderr + "\n")
             f.write("=" * 60 + "\n")
 
-    def _write_initial_instance_log(self, comment):
-
+    def _write_initial_instance_log(self, comment: str):
+        """
+        Write the instance log file with metadata header (once per instance).
+        Creates a beautiful, human-readable JSON structure.
+        """
         metadata = {
             "experiment_comment": comment,
             "command": self.command,
-            "script": self.script_path,
+            "script": self.script,
             "workdir": self.workdir,
             "log_path": self.log_path,
         }
-
-    def _write_instance_log(self, timestamp):
-
-        run_entry = {
-            "experiment_timestamp": timestamp,
-            "started_at": self._last_run_time,
-            "ended_at": timestamp,
+        doc = {
+            "metadata": metadata,
+            "runs": [],
         }
+        with open(self._instance_log, "w", encoding="utf-8") as f:
+            json.dump(doc, f, indent=2, ensure_ascii=False)
+        self._instance_log_initialized = True
+
+    def _write_instance_log(self, timestamp: str):
+        """
+        Append a run entry to the instance log.
+        Maintains a beautiful, readable JSON structure.
+        Includes exp_params (run parameters) in each run entry.
+        """
+        run_entry = {
+            "experiment_timestamp": timestamp if timestamp else self._last_run_time,
+            "started_at": self._last_run_time,
+            "ended_at": self._last_end_time,
+            "params": copy.deepcopy(self.exp_params),
+        }
+        with open(self._instance_log, "r", encoding="utf-8") as f:
+            doc = json.load(f)
+        doc["runs"].append(run_entry)
+        with open(self._instance_log, "w", encoding="utf-8") as f:
+            json.dump(doc, f, indent=2, ensure_ascii=False)
 
     # -----------------------------
     # Main Utilities
@@ -226,6 +249,7 @@ class ArtiqController:
         self.last_output = (stdout, stderr)
         timestamp = self._extract_timestamps(stdout, stderr)
         self._write_output_log(timestamp, stdout, stderr)
+        self._write_instance_log(timestamp)
 
         return timestamp
 
@@ -240,9 +264,10 @@ class SingleParameterScan(ArtiqController):
             self,
             command: str = "artiq_run",
             script_path: str = "/home/electrons/software/Electrons_Artiq_Sequences/"
-                               "artiq-master/repository/Modular/single_parameter_scan.py"
+                               "artiq-master/repository/Modular/single_parameter_scan.py",
+            comment: str = "",
         ):
-        super().__init__(script_path=script_path, command=command)
+        super().__init__(script_path=script_path, command=command, comment=comment)
 
     def run(
         self,
@@ -361,6 +386,28 @@ class FindOptimalE(ArtiqController):
         E_best_model = parse_vec(matches[1])
         return E_best_obs, E_best_model
 
+    def _write_instance_log(
+        self, timestamp: str, E_best_obs: tuple = None, E_best_model: tuple = None
+    ):
+        """
+        Override: append a run entry including exp_params, E_best_obs and E_best_model.
+        """
+        run_entry = {
+            "experiment_timestamp": timestamp,
+            "started_at": self._last_run_time,
+            "ended_at": timestamp,
+            "params": copy.deepcopy(self.exp_params),
+        }
+        if E_best_obs is not None:
+            run_entry["E_best_obs"] = list(E_best_obs)
+        if E_best_model is not None:
+            run_entry["E_best_model"] = list(E_best_model)
+        with open(self._instance_log, "r", encoding="utf-8") as f:
+            doc = json.load(f)
+        doc["runs"].append(run_entry)
+        with open(self._instance_log, "w", encoding="utf-8") as f:
+            json.dump(doc, f, indent=2, ensure_ascii=False)
+
     def run(
         self,
         *,
@@ -404,10 +451,12 @@ class FindOptimalE(ArtiqController):
 
         # Parse both E's and timestamp from the printed analyze output
         stdout, stderr = self._clean_output(cp)
+        self.last_output = (stdout, stderr)
         timestamp = self._extract_timestamps(stdout, stderr)
-        self._write_log(timestamp, stdout, stderr)
-
         E_best_obs, E_best_model = self._parse_optimal_Es(stdout, stderr)
+        self._write_output_log(timestamp, stdout, stderr)
+        self._write_instance_log(timestamp, E_best_obs, E_best_model)
+
         return E_best_obs, E_best_model, timestamp
 
 if __name__ == "__main__":
