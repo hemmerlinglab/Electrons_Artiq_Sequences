@@ -1,3 +1,4 @@
+import time
 from typing import Tuple
 from artiq_controller import SingleParameterScan
 from helper_functions import find_best_laser_frequency
