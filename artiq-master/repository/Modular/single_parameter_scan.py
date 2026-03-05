@@ -28,8 +28,6 @@ class SingleParamScan(EnvExperiment):
             return
 
         validate_422 = True
-        if self.scanning_parameter == "frequency_422":
-            validate_422 = False
 
         for ind in range(len(self.scan_values)):
 
@@ -39,8 +37,15 @@ class SingleParamScan(EnvExperiment):
             # Apply current setpoint
             scan_parameter(self, ind)
 
+            # When scanning 422, compare against current scan value (variable target)
+            expected_freq_422 = self.scan_values[ind] if self.scanning_parameter == "frequency_422" else None
+
             # Perform Experiment
-            run_experiment_with_retries(self, measure, ind, validate_422=validate_422)
+            run_experiment_with_retries(
+                self, measure, ind,
+                validate_422=validate_422,
+                expected_freq_422=expected_freq_422,
+            )
 
             # Record time cost for this experiment point
             self.mutate_dataset("time_cost", ind, time.time() - t0)
