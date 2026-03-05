@@ -86,7 +86,8 @@ def run_experiment_with_retries(self, experiment_function, ind, **kwargs):
 
 # ===================================================================
 # 1) Top Level Controllers
-def measure(self, ind, print_result=False, validate_390=False, validate_422=True):
+def measure(self, ind, print_result=False, validate_390=False, validate_422=True,
+            expected_freq_422=None, expected_freq_390=None):
 
     if self.scheduler.check_pause():
         raise TerminationRequested("Termination requested during scan")
@@ -94,10 +95,12 @@ def measure(self, ind, print_result=False, validate_390=False, validate_422=True
     if self.RF_amp_mode == "locked":
         self.rf.set_amplitude()
 
-    status_390, status_422 = record_laser_frequencies(self, ind)
+    status_390, status_422 = record_laser_frequencies(
+        self, ind, target_422=expected_freq_422, target_390=expected_freq_390
+    )
     record_RF_amplitude(self, ind)
 
-    # Validate laser frequencies
+    # Validate laser frequencies (compare actual vs expected setpoint)
     if validate_390 and not status_390:
         raise LaserError(390)
     if validate_422 and not status_422:

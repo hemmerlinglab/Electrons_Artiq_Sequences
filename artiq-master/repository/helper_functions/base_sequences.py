@@ -9,10 +9,11 @@ from helper_functions import calculate_input_voltage, calculate_Vsampler, calcul
 ###########################################################
 
 # ==============  Recording and Validating ============== #
-def record_laser_frequencies(self, idx, tol = 1e-5):
+def record_laser_frequencies(self, idx, tol=1e-5, target_422=None, target_390=None):
     """
     Fetch Last Frequencies of each laser from Laser Lock GUI and record them into dataset.
     When failed to fetch frequency, 0.0 will be returned according to the function.
+    target_422, target_390: optional; when provided, use for comparison instead of self.frequency_422/390.
     """
 
     freq_422 = self.laser.get_frequency(422)
@@ -21,8 +22,11 @@ def record_laser_frequencies(self, idx, tol = 1e-5):
     self.mutate_dataset('last_frequency_422', idx, freq_422)
     self.mutate_dataset('last_frequency_390', idx, freq_390)
 
-    status_422 = (abs(freq_422 - self.frequency_422) <= tol)
-    status_390 = (abs(freq_390 - self.frequency_390) <= tol)
+    ref_422 = target_422 if target_422 is not None else self.frequency_422
+    ref_390 = target_390 if target_390 is not None else self.frequency_390
+
+    status_422 = (abs(freq_422 - ref_422) <= tol)
+    status_390 = (abs(freq_390 - ref_390) <= tol)
 
     return status_390, status_422
 
