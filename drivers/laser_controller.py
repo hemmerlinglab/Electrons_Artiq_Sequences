@@ -1,4 +1,6 @@
 import socket
+import time
+
 
 class LaserClient:
 
@@ -66,13 +68,41 @@ class LaserClient:
 
         raise RuntimeError(f"Failed to set laser {laserid} to {setpoint:.6f} THz after {max_attempt} attempts!")
 
+    def switch_laser(self, laserid, max_attempt: int = 3) -> None:
+        """
+        Switch fiber to laser `laserid` via remote server (e.g. 422, 390).
+        Requires servo motor on the Laser Lock GUI side.
+        """
+        for attempt in range(max_attempt):
+            respond = self.query(f"{laserid},switch")
+            if respond == "1":
+                print(f"Successfully switched to laser {laserid}!")
+                return
+        raise RuntimeError(f"Failed to switch to laser {laserid} after {max_attempt} attempts!")
+
+    def get_setpoint(self, laserid, max_attempt: int = 3):
+        """
+        Get current lock setpoint (THz) of laser `laserid` from remote server.
+        Returns None if locker not running or laser not configured.
+        """
+        for attempt in range(max_attempt):
+            respond = self.query(f"{laserid},set?")
+            if respond == "0":
+                return None
+            try:
+                laserid_recv, setpoint = respond.split(",")
+                if laserid_recv != str(laserid):
+                    continue
+                return float(setpoint)
+            except Exception:
+                continue
+        return None
+
     def get_frequency(self, laserid, max_attempt: int = 3) -> float:
         """
-        Get last value of frequency of laser `laserid` from remote server.
-        Not that on the remote end the laser switching is manual, so the
-        last value could be very outdated, to upgrade this, either manually
-        switching laser channel or add a motor controlled physical switcher
-        to the optical setup and an update on the code.
+        Get last wavemeter reading (THz) of laser `laserid` from remote server.
+        Warning: returns cached value. If fiber was on another laser, the value may be stale.
+        Use switch_and_get_frequency() to switch first and ensure fresh reading.
         """
         respond = None
 
@@ -90,7 +120,6 @@ class LaserClient:
                 continue
 
         print(f"Failed to get last frequency of laser {laserid} after {max_attempt} attempts!")
-
         return 0.0
 
     def get_setpoint(self, laserid, max_attempt: int = 3) -> float:
@@ -110,8 +139,16 @@ class LaserClient:
                 continue
 
         print(f"Failed to get last setpoint of laser {laserid} after {max_attempt} attempts!")
-
         return 0.0
+
+    def switch_and_get_frequency(self, laserid, wait_after_switch: float = 1.5, max_attempt: int = 3) -> float:
+        """
+        Switch to laser `laserid`, wait for servo and wavemeter, then get fresh frequency.
+        Use this when you need the current value of a laser that may not be the active one.
+        """
+        self.switch_laser(laserid, max_attempt=max_attempt)
+        time.sleep(wait_after_switch)
+        return self.get_frequency(laserid, max_attempt=max_attempt)
 
     def close(self):
 
@@ -122,8 +159,6 @@ class LaserClient:
 
 
 if __name__ == "__main__":
-
-    import time
 
     laser_controller = LaserClient()
 
