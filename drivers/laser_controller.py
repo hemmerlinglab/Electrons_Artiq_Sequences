@@ -93,6 +93,26 @@ class LaserClient:
 
         return 0.0
 
+    def get_setpoint(self, laserid, max_attempt: int = 3) -> float:
+
+        respond = None
+
+        for attempt in range(max_attempt):
+            respond = self.query(f"{laserid},set?")
+            try:
+                laserid, last_setpoint = respond.split(',')
+                if laserid_recv != str(laserid):
+                    print("Mismatched Laser ID!")
+                    continue
+                return float(last_setpoint)
+
+            except Exception:
+                continue
+
+        print(f"Failed to get last setpoint of laser {laserid} after {max_attempt} attempts!")
+
+        return 0.0
+
     def close(self):
 
         try: self.rf.close()
@@ -112,6 +132,10 @@ if __name__ == "__main__":
             reply = laser_controller.set_frequency(422, 709.078240)
             time.sleep(15)
 
+        set_422 = laser_controller.get_setpoint(422)
+        print(f"422 setpoint: {set_422:.6f} THz")
+        set_390 = laser_controller.get_setpoint(390)
+        print(f"390 setpoint: {set_390:.6f} THz")
         freq_422 = laser_controller.get_frequency(422)
         print(f"422 frequency: {freq_422:.6f} THz")
         freq_390 = laser_controller.get_frequency(390)

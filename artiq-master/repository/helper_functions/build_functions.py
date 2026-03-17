@@ -72,9 +72,9 @@ def load_attributes(self):
     self.setattr_device('ttl4')      # For sending beginning signal
     self.setattr_device('ttl6')      # For triggering RF
     self.setattr_device('ttl11')     # For triggering AOM and extraction pulse
-    
+
     self.setattr_device('ttl8')      # For tickle signal ON/OFF
-    
+
     self.setattr_device('scheduler') # For "Terminate Instances" from Dashboard
     self.setattr_device('zotino0')   # For setting voltages of the mesh and DC electrodes
     self.setattr_device('sampler0')  # For reading current MCP high voltage control signal
@@ -86,24 +86,24 @@ def load_common_parameters(self):
     group_display = "Display Settings"
     my_setattr(self, 'histogram_on',      BooleanValue(default=True), group=group_display, scanable=False)
     my_setattr(self, 'bin_width',         NumberValue(default=1.0,unit='us',scale=1,ndecimals=1,step=0.1), group=group_display, scanable = False)
-    my_setattr(self, 'histogram_refresh', NumberValue(default=1000,unit='',scale=1,ndecimals=0,step=1), group=group_display, scanable = False)
+    my_setattr(self, 'histogram_refresh', NumberValue(default=5000,unit='',scale=1,ndecimals=0,step=1), group=group_display, scanable = False)
 
     # 2. Detector Settings
     #------------------------------------------------------
     group_detector = "Detector Settings"
-    my_setattr(self, 'mesh_voltage',      NumberValue(default=120,unit='V',scale=1,ndecimals=0,step=1), group=group_detector)
-    my_setattr(self, 'MCP_front',         NumberValue(default=400,unit='V',scale=1,ndecimals=0,step=1), group=group_detector)
+    my_setattr(self, 'mesh_voltage',      NumberValue(default=130,unit='V',scale=1,ndecimals=0,step=1), group=group_detector)
+    my_setattr(self, 'MCP_front',         NumberValue(default=500,unit='V',scale=1,ndecimals=0,step=1), group=group_detector)
     my_setattr(self, 'threshold_voltage', NumberValue(default=60,unit='mV',scale=1,ndecimals=0,step=1), group=group_detector)
 
     # 3. Sequence Settings
     #------------------------------------------------------
     # 3-1) General
     group_general = "Sequence Settings (Trapping & Lifetime Mode)"
-    my_setattr(self, 'load_time',         NumberValue(default=210,unit='us',scale=1,ndecimals=0,step=1), group=group_general)
+    my_setattr(self, 'load_time',         NumberValue(default=260,unit='us',scale=1,ndecimals=0,step=1), group=group_general)
 
     # 3-1) Trapping Mode
     group_trapping = "Sequence Settings (Trapping Mode)"
-    my_setattr(self, 'wait_time',         NumberValue(default=90,unit='us',scale=1,ndecimals=0,step=1), group=group_trapping)
+    my_setattr(self, 'wait_time',         NumberValue(default=140,unit='us',scale=1,ndecimals=0,step=1), group=group_trapping)
     my_setattr(self, 'no_of_repeats',     NumberValue(default=10000,unit='',scale=1,ndecimals=0,step=1), group=group_trapping)
 
     # 3-2) Counting Mode
@@ -125,16 +125,16 @@ def load_common_parameters(self):
     # 5. Laser Settings
     #------------------------------------------------------
     group_laser = "Laser Settings"
-    my_setattr(self, 'frequency_422',     NumberValue(default=709.076990,unit='THz',scale=1,ndecimals=6,step=1e-6), group=group_laser)
+    my_setattr(self, 'frequency_422',     NumberValue(default=709.079610,unit='THz',scale=1,ndecimals=6,step=1e-6), group=group_laser)
     my_setattr(self, 'frequency_390',     NumberValue(default=768.708843,unit='THz',scale=1,ndecimals=6,step=1e-6), group=group_laser)
     my_setattr(self, 'laser_failure',     EnumerationValue(['wait for fix', 'raise error'], default='wait for fix'), group=group_laser, scanable=False)
 
     # 6. RF Settings
     #------------------------------------------------------
     group_RF = "RF Drive Settings"
-    my_setattr(self, 'RF_on',             BooleanValue(default=False), group=group_RF, scanable=False)
+    my_setattr(self, 'RF_on',             BooleanValue(default=True), group=group_RF, scanable=False)
     my_setattr(self, 'RF_amp_mode',       EnumerationValue(['setpoint', 'actual', 'locked'], default='setpoint'), group=group_RF, scanable=False)
-    my_setattr(self, 'RF_amplitude',      NumberValue(default=4,unit='dBm',scale=1,ndecimals=2,step=.01), group=group_RF)
+    my_setattr(self, 'RF_amplitude',      NumberValue(default=2.5,unit='dBm',scale=1,ndecimals=2,step=.01), group=group_RF)
     my_setattr(self, 'RF_frequency',      NumberValue(default=1.732,unit='GHz',scale=1,ndecimals=4,step=.0001), group=group_RF)
 
     # 7. Extraction Pulse Settings
@@ -157,7 +157,7 @@ def load_common_parameters(self):
     #------------------------------------------------------
     group_DC = "DC Multipoles Settings"
     my_setattr(self, 'U1',                NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.001), group=group_DC)
-    my_setattr(self, 'U2',                NumberValue(default=-0.22,unit='V',scale=1,ndecimals=3,step=.001), group=group_DC)
+    my_setattr(self, 'U2',                NumberValue(default=-0.35,unit='V',scale=1,ndecimals=3,step=.001), group=group_DC)
     my_setattr(self, 'U3',                NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.001), group=group_DC)
     my_setattr(self, 'U4',                NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.001), group=group_DC)
     my_setattr(self, 'U5',                NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.001), group=group_DC)
@@ -167,9 +167,9 @@ def load_experiment_parameters(self):
     # 1. 1st Order Multipoles
     #------------------------------------------------------
     group_DC = "DC Multipoles Settings"
-    my_setattr(self, 'Ex',                  NumberValue(default=-0.199,unit='V',scale=1,ndecimals=3,step=.001), group=group_DC)
-    my_setattr(self, 'Ey',                  NumberValue(default=0.051,unit='V',scale=1,ndecimals=3,step=.001), group=group_DC)
-    my_setattr(self, 'Ez',                  NumberValue(default=-0.047,unit='V',scale=1,ndecimals=3,step=.001), group=group_DC)
+    my_setattr(self, 'Ex',                  NumberValue(default=-0.070,unit='V',scale=1,ndecimals=3,step=.001), group=group_DC)
+    my_setattr(self, 'Ey',                  NumberValue(default=0.046,unit='V',scale=1,ndecimals=3,step=.001), group=group_DC)
+    my_setattr(self, 'Ez',                  NumberValue(default=0.040,unit='V',scale=1,ndecimals=3,step=.001), group=group_DC)
 
     # 2. Tickle Settings
     #------------------------------------------------------
@@ -177,7 +177,7 @@ def load_experiment_parameters(self):
     my_setattr(self, 'tickle_on',           BooleanValue(default=False), group=group_tickling, scanable = False)
     my_setattr(self, 'tickle_level',        NumberValue(default=-10,unit='dBm',scale=1,ndecimals=1,step=1), group=group_tickling)
     my_setattr(self, 'tickle_frequency',    NumberValue(default=64,unit='MHz',scale=1,ndecimals=4,step=.0001), group=group_tickling)
-    my_setattr(self, 'tickle_pulse_length', NumberValue(default=80,unit='us',scale=1,ndecimals=1,step=1), group=group_tickling)
+    my_setattr(self, 'tickle_pulse_length', NumberValue(default=130,unit='us',scale=1,ndecimals=1,step=1), group=group_tickling)
 
 def load_ofat_parameters(self):
 

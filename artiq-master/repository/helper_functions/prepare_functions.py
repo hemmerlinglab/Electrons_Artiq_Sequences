@@ -33,10 +33,21 @@ def ofat_prepare(self):
     prepare_instruments(self)
 
     # 2) prepare datasets
-    self.set_dataset('lifetime', [0] * self.steps, broadcast=True)
+
     prepare_ofat_datasets(self)
 
     _prepare_with_effective_steps(self, prepare_common_datasets)
+
+    if self.mode == "Lifetime_fast":
+        self.set_dataset('lifetime', [0] * self.steps, broadcast=True)
+        out = np.repeat(self.scan_values, 2)
+        self.set_dataset('arr_of_setpoints', out, broadcast=True)
+
+    elif self.mode == "Lifetime":
+        self.set_dataset('lifetime', [0] * self.steps, broadcast=True)
+        n = len(self.wait_time_arr)
+        out = np.repeat(self.scan_values, n)
+        self.set_dataset('arr_of_setpoints', out, broadcast=True)
 
     # 3) prepare others
     prepare_initialization(self)
@@ -53,8 +64,8 @@ def doe_prepare(self):
         self.steps = 1
         self.scan_ok = True
 
-    self.set_dataset('lifetime', [0] * self.steps, broadcast=True)
     prepare_doe_datasets(self)
+    self.set_dataset('lifetime', [0] * self.steps, broadcast=True)
 
     if self.utility_mode == "DOE Scan":
         _prepare_with_effective_steps(self, prepare_common_datasets)
@@ -172,7 +183,8 @@ def prepare_saving_configuration(self):
     self.config_dict.append({'par' : 'sequence_file', 'val' : self.sequence_filename, 'cmt' : 'Filename of the main sequence file'})
 
     if self.mode in ("Lifetime", "Lifetime_fast"):
-        pass
+        tao = [{'var' : 'lifetime',  'name' : 'lifetime'}]
+        self.data_to_save.extend(tao)
 
     get_basefilename(self)
 
@@ -236,6 +248,8 @@ def prepare_common_datasets(self):
 
     # actual RF amplitude from keysight spec
     self.set_dataset('act_RF_amplitude',   [0] * self.steps, broadcast=True)
+        
+
 
 def prepare_ofat_datasets(self):
 
@@ -249,6 +263,7 @@ def prepare_ofat_datasets(self):
     self.set_dataset('arr_of_setpoints',   self.scan_values, broadcast=True)
 
     # counting mode datasets
+    # also used in Lifetime_fast & Lifetime mode
     self.set_dataset('scan_x',             self.scan_values, broadcast=True)
 
 def prepare_doe_datasets(self):
@@ -327,7 +342,7 @@ def load_doe_setpoints(file_path, allowed_params):
     return setpoints, response_columns, len(setpoints)
 
 def load_lifetime_wait_times(filepath):
-    hlp = np.genfromtxt(filepath, delimiter=",")
+    hlp = np.genfromtxt(filepath, delimiter=",", skip_header=1)
     wait_times = hlp[:,0]
     no_of_repeats = hlp[:,1]
     return wait_times, no_of_repeats
@@ -335,7 +350,7 @@ def load_lifetime_wait_times(filepath):
 def _lifetime_points_for_prepare(self):
 
     if self.mode == "Lifetime":
-        self.wait_time_arr, self.repeats_arr = load_lifetime_wait_times(self.wait_times_file)
+        self.wait_time_arr, self.repeats_arr = load_lifetime_wait_times(self.wait_times_path + self.wait_times_file)
         return len(self.wait_time_arr)
     elif self.mode == "Lifetime_fast":
         return 2

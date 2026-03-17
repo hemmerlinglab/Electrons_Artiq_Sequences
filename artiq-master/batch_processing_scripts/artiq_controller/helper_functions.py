@@ -5,7 +5,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-from fitting_functions import fit_n_peaks, gaussian_sum
+from fitting_functions import fit_n_peaks, gaussian_sum, _extract_mus_from_popt
 
 # Utility Functions - Load_data
 # ===============================================
@@ -21,7 +21,7 @@ def load_data(timestamp, ynames=["ratio_signal"]):
     ydata:      dict {yname: np.ndarray}, datasets you want to load
     """
 
-    print(f"[Data Loader] loading timestamp: {timestamp} ...")
+    #print(f"[Data Loader] loading timestamp: {timestamp} ...")
 
     date, _ = timestamp.split("_")
     basefilename = f"/home/electrons/software/data/{date}/{timestamp}"

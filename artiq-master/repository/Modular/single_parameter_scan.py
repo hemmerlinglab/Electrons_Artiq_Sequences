@@ -1,4 +1,5 @@
 from artiq.experiment import EnvExperiment
+from artiq.language.core import TerminationRequested
 import sys
 import os
 import time
@@ -33,14 +34,19 @@ class SingleParamScan(EnvExperiment):
 
         for ind in range(len(self.scan_values)):
 
-            # Record start time
-            t0 = time.time()
+            try:
 
-            # Apply current setpoint
-            scan_parameter(self, ind)
+                # Record start time
+                t0 = time.time()
 
-            # Perform Experiment
-            run_experiment_with_retries(self, measure, ind, validate_422=validate_422)
+                # Apply current setpoint
+                scan_parameter(self, ind)
 
-            # Record time cost for this experiment point
-            self.mutate_dataset("time_cost", ind, time.time() - t0)
+                # Perform Experiment
+                run_experiment_with_retries(self, measure, ind, validate_422=validate_422)
+
+                # Record time cost for this experiment point
+                self.mutate_dataset("time_cost", ind, time.time() - t0)
+
+            except TerminationRequested:
+                return

@@ -2,6 +2,7 @@ from artiq.language.core import TerminationRequested
 from artiq.coredevice.exceptions import RTIOOverflow, RTIOUnderflow
 import numpy as np
 import time
+from scipy.optimize import curve_fit
 
 from base_sequences import (
     count_histogram,
@@ -14,6 +15,10 @@ from base_sequences import (
     recover_threshold_detector
 )
 from helper_functions import latin_hypercube, bo_suggest_next
+
+# gailezheli
+from scan_functions import _scan_wait_time
+
 
 MAX_RTIO_RETRIES = 3
 MAX_LASER_RETRIES = 3
@@ -84,6 +89,10 @@ def run_experiment_with_retries(self, experiment_function, ind, **kwargs):
                 print(f"Failed to recover detector, Retrying ({detector_retries}/{MAX_DETECTOR_RETRIES}) ...")
             raise RuntimeError("Unable to address detector error!")
 
+        except TerminationRequested as e:
+            print("Termination requested, aborting the experiment ...")
+            raise TerminationRequested(e) from e
+
 # ===================================================================
 # 1) Top Level Controllers
 def measure(self, ind, print_result=False, validate_390=False, validate_422=True):
@@ -114,11 +123,73 @@ def measure(self, ind, print_result=False, validate_390=False, validate_422=True
         if print_result:
             print(f"Trapped: {cts_trapped}, Lost: {cts_lost}, Loading: {cts_loading}")
 
+# 改了這裡
     elif self.mode == 'Lifetime_fast':
-        pass
+        N = np.zeros(2)
+
+        for i, wt in enumerate([0.0, self.wait_time_fast]):
+            _scan_wait_time(self, wt, None)
+
+            if self.histogram_on:
+                cts_trapped, cts_lost, cts_loading = trap_with_histogram(self, 2*ind+i)
+            else:
+                cts_trapped, cts_lost, cts_loading = trap_without_histogram(self)
+
+            store_to_dataset(self, 2*ind+i, cts_trapped, cts_lost, cts_loading)
+
+            if cts_loading == 0:
+                raise RuntimeError("No Loading Signal Detected")
+
+            N[i] = cts_trapped/cts_loading
+
+        # compute lifetime function
+        lifetime_fast = self.wait_time_fast/np.log(N[0]/N[1])
+
+        self.mutate_dataset('lifetime', ind, lifetime_fast)
+
 
     elif self.mode == 'Lifetime':
-        pass
+        n = len(self.wait_time_arr)
+        N = np.zeros(n)
+
+        for i, wt in enumerate(self.wait_time_arr):
+            _scan_wait_time(self, wt, None)
+            self.no_of_repeats = int(self.repeats_arr[i])
+
+            if self.histogram_on:
+                cts_trapped, cts_lost, cts_loading = trap_with_histogram(self, n*ind+i)
+            else:
+                cts_trapped, cts_lost, cts_loading = trap_without_histogram(self)
+
+            store_to_dataset(self, n*ind+i, cts_trapped, cts_lost, cts_loading)
+
+            if cts_loading == 0:
+                raise RuntimeError("No Loading Signal Detected")
+
+            N[i] = cts_trapped/cts_loading
+
+        # fit for lifetime
+        def f(t, N0, tao):
+            y = N0*np.exp(-t/tao)
+            return y
+
+        # Point 0 for initial estimation
+        idx0 = np.argmin(self.wait_time_arr)
+        N0 = N[idx0]
+        t0 = self.wait_time_arr[idx0]
+
+        # Point 1 for initial estimation
+        target = np.min(self.wait_time_arr) + self.wait_time_fast
+        idx1 = np.abs(self.wait_time_arr - target).argmin()
+        N1 = N[idx1]
+        t1 = self.wait_time_arr[idx1]
+        tao0 = (t1-t0)/np.log(N0/N1)
+
+        popt, pcov = curve_fit(f, self.wait_time_arr, N, p0=[N0*np.exp(t0/tao0), tao0], bounds=((0, 0), (np.inf, np.inf)))
+
+        tao = popt[1]
+        self.mutate_dataset('lifetime', ind, tao)
+
 
     elif self.mode == 'Counting':
         # Counting mode information sheet:

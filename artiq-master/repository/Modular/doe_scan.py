@@ -1,4 +1,5 @@
 from artiq.experiment import EnvExperiment
+from artiq.language.core import TerminationRequested
 import sys
 import os
 import time
@@ -31,17 +32,22 @@ class DOEScan(EnvExperiment):
 
             for ind, row in self.setpoints.iterrows():
 
-                # Record start time
-                t0 = time.time()
+                try:
 
-                # Apply current setpoint
-                set_doe_parameters(self, row, ind, self.steps)
+                    # Record start time
+                    t0 = time.time()
 
-                # Perform Experiment
-                run_experiment_with_retries(self, measure, ind)
+                    # Apply current setpoint
+                    set_doe_parameters(self, row, ind, self.steps)
 
-                # Record time cost for this experiment point
-                self.mutate_dataset("time_cost", ind, time.time() - t0)
+                    # Perform Experiment
+                    run_experiment_with_retries(self, measure, ind)
+
+                    # Record time cost for this experiment point
+                    self.mutate_dataset("time_cost", ind, time.time() - t0)
+
+                except TerminationRequested:
+                    return
 
         elif self.utility_mode == "Single Experiment":
             run_experiment_with_retries(self, measure, 0)

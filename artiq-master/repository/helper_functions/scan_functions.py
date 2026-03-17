@@ -164,7 +164,7 @@ def _scan_wait_time(self, val, scan_values, scan_check = False):
 
     if scan_check:
         return _limit_check(self.scanning_parameter, scan_values, [0, 1000000])
-    
+
     else:
         self.wait_time = val
         update_detection_time(self)

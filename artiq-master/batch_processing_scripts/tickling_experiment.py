@@ -105,6 +105,14 @@ def load_or_init_job_list(
         with open(JOB_LIST_PATH, "r", encoding="utf-8") as f:
             job_list = json.load(f)
         run_tag = job_list["run_tag"]
+
+        # Normalize done_count based on timestamps length (resume safety)
+        for scan_type in ["RF", "DC"]:
+            for sp in job_list[scan_type]["setpoints"]:
+                ts_len = len(sp.get("timestamps", []))
+                done = int(sp.get("done_count", 0))
+                sp["done_count"] = min(repeats, max(done, ts_len))
+
         print(f"[Manager] Resuming from existing job list: {JOB_LIST_PATH} (run_tag={run_tag})")
         return job_list, run_tag
 
@@ -151,8 +159,8 @@ def get_remaining_jobs_shuffled(job_list, scan_type, repeats):
     remaining = []
     for setpoint_idx, sp in enumerate(setpoints):
         done = sp["done_count"]
-        for rep in range(done, repeats):
-            remaining.append((setpoint_idx, rep))
+        for _ in range(done, repeats):
+            remaining.append(setpoint_idx)
     random.shuffle(remaining)
     return remaining
 
@@ -186,7 +194,7 @@ config = {
     "tickle_pulse_length": 130,
 }
 
-E = [-0.07, +0.04, -0.01]
+E = [-0.070, +0.046, +0.040]
 Ex, Ey, Ez = E
 
 # Single scan range (no rough/fine split); analysis uses fine-scan method
@@ -216,7 +224,7 @@ U2_list = [
     -0.240, -0.245, -0.250, -0.255, -0.260, -0.265, -0.270, -0.275,
     -0.280, -0.300, -0.320, -0.340, -0.360, -0.380, -0.400,
 ]
-RF_fixed_for_DC = 1.50
+RF_fixed_for_DC = 1.20
 
 
 # 3) Load or init run_job_list (enables resume)
@@ -295,10 +303,11 @@ if remaining_RF:
     )
     initialize = True
     total_rf = len(remaining_RF)
-    for run_idx, (setpoint_idx, rep) in enumerate(remaining_RF):
+    for run_idx, setpoint_idx in enumerate(remaining_RF):
         sp = job_list["RF"]["setpoints"][setpoint_idx]
         RF_amplitude = sp["RF_amplitude"]
         U2 = sp["U2"]
+        rep = sp["done_count"]
         print(f"[Manager] RF scan ({run_idx+1}/{total_rf}) setpoint_i={setpoint_idx} rep={rep} "
               f"RF_amplitude={RF_amplitude:.2f} U2={U2:.3f} ...")
 
@@ -378,11 +387,13 @@ if remaining_DC:
         .set_param("no_of_repeats", NO_OF_REPEATS)
         .set_param("histogram_refresh", NO_OF_REPEATS)
     )
+    initialize = True
     total_dc = len(remaining_DC)
-    for run_idx, (setpoint_idx, rep) in enumerate(remaining_DC):
+    for run_idx, setpoint_idx in enumerate(remaining_DC):
         sp = job_list["DC"]["setpoints"][setpoint_idx]
         RF_amplitude = sp["RF_amplitude"]
         U2 = sp["U2"]
+        rep = sp["done_count"]
         print(f"[Manager] DC scan ({run_idx+1}/{total_dc}) setpoint_i={setpoint_idx} rep={rep} "
               f"U2={U2:.3f} RF_amplitude={RF_amplitude:.2f} ...")
 
@@ -390,12 +401,13 @@ if remaining_DC:
 
         ts = run_with_422_relock(
             scanner_DC, config,
-            initialize=False,
+            initialize=initialize,
             scanning_parameter="tickle_frequency",
             min_scan=TICKLE_MIN,
             max_scan=TICKLE_MAX,
             steps=TICKLE_STEPS,
         )
+        initialize = False
 
         scan_result = analyze_fine_scan(
             ts,

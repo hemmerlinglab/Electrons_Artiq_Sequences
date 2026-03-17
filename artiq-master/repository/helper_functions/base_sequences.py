@@ -97,7 +97,7 @@ def update_detection_time(self):
 
     # detect all the time + 10 us extraction pulse
     # in trapping mode, unit is us, but in counting mode, unit is ms
-    if self.mode == 'Trapping':
+    if self.mode != "Counting":
         self.detection_time = self.load_time + self.wait_time + self.ext_pulse_length // 1000 + 10
 
     return
