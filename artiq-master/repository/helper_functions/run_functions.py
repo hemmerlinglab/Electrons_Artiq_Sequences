@@ -2,7 +2,7 @@ from artiq.language.core import TerminationRequested
 from artiq.coredevice.exceptions import RTIOOverflow, RTIOUnderflow
 import numpy as np
 import time
-from scipy.optimize import curve_fit
+from scipy.optimize import curve_fit, minimize
 
 from base_sequences import (
     count_histogram,
@@ -70,7 +70,11 @@ def run_experiment_with_retries(self, experiment_function, ind, **kwargs):
             record_laser_error(self, ind, e)
             laser_retries += 1
             t0 = time.time()
-            handle_laser_jump(self, laser_to_fix=int(e.laser_id))
+            handle_laser_jump(self,
+                laser_to_fix = int(e.laser_id),
+                setpoint     = kwargs.get(f"expected_freq_{e.laser_id}"),
+                tol          = kwargs.get("tolerance", 1e-5)
+            )
             dt = time.time() - t0
             too_long = dt > 10
             too_many = laser_retries > MAX_LASER_RETRIES
@@ -95,8 +99,11 @@ def run_experiment_with_retries(self, experiment_function, ind, **kwargs):
 
 # ===================================================================
 # 1) Top Level Controllers
-def measure(self, ind, print_result=False, validate_390=False, validate_422=True,
-            expected_freq_422=None, expected_freq_390=None):
+def measure(self, ind, print_result=False,
+    validate_390=False, validate_422=True,
+    expected_freq_422=None, expected_freq_390=None,
+    tolerance=1e-5
+    ):
 
     if self.scheduler.check_pause():
         raise TerminationRequested("Termination requested during scan")
@@ -105,7 +112,9 @@ def measure(self, ind, print_result=False, validate_390=False, validate_422=True
         self.rf.set_amplitude()
 
     status_390, status_422 = record_laser_frequencies(
-        self, ind, target_422=expected_freq_422, target_390=expected_freq_390
+        self, ind,
+        target_422=expected_freq_422, target_390=expected_freq_390,
+        tol=tolerance
     )
     record_RF_amplitude(self, ind)
 
@@ -126,7 +135,6 @@ def measure(self, ind, print_result=False, validate_390=False, validate_422=True
         if print_result:
             print(f"Trapped: {cts_trapped}, Lost: {cts_lost}, Loading: {cts_loading}")
 
-# 改了這裡
     elif self.mode == 'Lifetime_fast':
         N = np.zeros(2)
 
@@ -154,6 +162,8 @@ def measure(self, ind, print_result=False, validate_390=False, validate_422=True
     elif self.mode == 'Lifetime':
         n = len(self.wait_time_arr)
         N = np.zeros(n)
+        T = np.zeros(n)
+        L = np.zeros(n)
 
         for i, wt in enumerate(self.wait_time_arr):
             _scan_wait_time(self, wt, None)
@@ -169,28 +179,15 @@ def measure(self, ind, print_result=False, validate_390=False, validate_422=True
             if cts_loading == 0:
                 raise RuntimeError("No Loading Signal Detected")
 
+            T[i] = cts_trapped
+            L[i] = cts_loading
             N[i] = cts_trapped/cts_loading
 
         # fit for lifetime
-        def f(t, N0, tao):
-            y = N0*np.exp(-t/tao)
-            return y
+        #tao = fit_lifetime_unweighted(self, T, L, N)
+        #tao = fit_lifetime_weighted(self, T, L, N)
+        tao = fit_lifetime_poisson_MLE(self, T, L, N)
 
-        # Point 0 for initial estimation
-        idx0 = np.argmin(self.wait_time_arr)
-        N0 = N[idx0]
-        t0 = self.wait_time_arr[idx0]
-
-        # Point 1 for initial estimation
-        target = np.min(self.wait_time_arr) + self.wait_time_fast
-        idx1 = np.abs(self.wait_time_arr - target).argmin()
-        N1 = N[idx1]
-        t1 = self.wait_time_arr[idx1]
-        tao0 = (t1-t0)/np.log(N0/N1)
-
-        popt, pcov = curve_fit(f, self.wait_time_arr, N, p0=[N0*np.exp(t0/tao0), tao0], bounds=((0, 0), (np.inf, np.inf)))
-
-        tao = popt[1]
         self.mutate_dataset('lifetime', ind, tao)
 
 
@@ -244,13 +241,14 @@ def record_detector_error(self, ind, err):
     err = (ind, type(err).__name__)
     self.err_list.append(err)
 
-def handle_laser_jump(self, laser_to_fix = 422, tol = 1e-5):
+def handle_laser_jump(self, laser_to_fix=422, setpoint=None, tol=1e-5):
     """
     When laser frequency was off (mode hopping), wait for the user to fix it manually.
     """
 
     act_freq = self.laser.get_frequency(laser_to_fix)
-    setpoint = getattr(self, f"frequency_{laser_to_fix}")
+    if not setpoint:
+        setpoint = getattr(self, f"frequency_{laser_to_fix}")
 
     while abs(act_freq - setpoint) > tol:
 
@@ -261,7 +259,170 @@ def handle_laser_jump(self, laser_to_fix = 422, tol = 1e-5):
         act_freq = self.laser.get_frequency(laser_to_fix)
 
 # ===================================================================
-# 2) For Optimizer
+# 2) For Lifetime
+def fit_lifetime_unweighted(self, T, L, N):
+
+    # fit for lifetime
+    def f(t, N0, tao):
+        y = N0*np.exp(-t/tao)
+        return y
+
+    t = np.asarray(self.wait_time_arr, dtype=float)
+    N = np.asarray(N, dtype=float)
+
+    # Point 0 for initial estimation
+    idx0 = np.argmin(self.wait_time_arr)
+    N0 = N[idx0]
+    t0 = self.wait_time_arr[idx0]
+
+    # Point 1 for initial estimation
+    target = np.min(self.wait_time_arr) + self.wait_time_fast
+    idx1 = np.abs(self.wait_time_arr - target).argmin()
+    N1 = N[idx1]
+    t1 = self.wait_time_arr[idx1]
+
+    if N0 <= 0:
+        N0 = 1e-12
+    if N1 <= 0 or N1 >= N0 or t1 == t0:
+        tao0 = np.max(t) - np.min(t)
+        if tao0 <= 0:
+            tao0 = 1.0
+    else:
+        tao0 = (t1-t0)/np.log(N0/N1)
+        if tao0 <= 0 or not np.isfinite(tao0):
+            tao0 = np.max(t) - np.min(t)
+            if tao0 <= 0:
+                tao0 = 1.0
+
+    popt, pcov = curve_fit(
+        f,
+        t,
+        N,
+        p0=[N0*np.exp(t0/tao0), tao0],
+        bounds=((0, 0), (np.inf, np.inf))
+    )
+
+    tao = popt[1]
+    return tao
+
+def fit_lifetime_weighted(self, T, L, N):
+
+    # fit for lifetime
+    def f(t, N0, tao):
+        y = N0*np.exp(-t/tao)
+        return y
+
+    t = np.asarray(self.wait_time_arr, dtype=float)
+    T = np.asarray(T, dtype=float)
+    L = np.asarray(L, dtype=float)
+    N = np.asarray(N, dtype=float)
+
+    # Initial estimation from positive points
+    pos = N > 0
+    if np.sum(pos) >= 2:
+        p = np.polyfit(t[pos], np.log(N[pos]), 1)
+
+        if p[0] < 0:
+            tao0 = -1.0 / p[0]
+        else:
+            tao0 = np.max(t) - np.min(t)
+            if tao0 <= 0:
+                tao0 = 1.0
+
+        N00 = np.exp(p[1])
+
+    else:
+        # Point 0 for initial estimation
+        idx0 = np.argmin(self.wait_time_arr)
+        N00 = N[idx0]
+        tao0 = np.max(t) - np.min(t)
+        if tao0 <= 0:
+            tao0 = 1.0
+
+    if N00 <= 0:
+        N00 = 1e-12
+    if tao0 <= 0:
+        tao0 = 1.0
+
+    # Poisson-inspired uncertainty for N = T / L
+    sigma = np.sqrt(np.maximum(T, 1.0)) / L
+
+    popt, pcov = curve_fit(
+        f,
+        t,
+        N,
+        p0=[N00, tao0],
+        sigma=sigma,
+        absolute_sigma=True,
+        bounds=((0, 0), (np.inf, np.inf)),
+        maxfev=10000
+    )
+
+    tao = popt[1]
+    return tao
+
+def fit_lifetime_poisson_MLE(self, T, L, N):
+
+    t = np.asarray(self.wait_time_arr, dtype=float)
+    T = np.asarray(T, dtype=float)
+    L = np.asarray(L, dtype=float)
+    N = np.asarray(N, dtype=float)
+
+    # Initial estimation from positive points
+    pos = N > 0
+    if np.sum(pos) >= 2:
+        p = np.polyfit(t[pos], np.log(N[pos]), 1)
+
+        if p[0] < 0:
+            tao0 = -1.0 / p[0]
+        else:
+            tao0 = np.max(t) - np.min(t)
+            if tao0 <= 0:
+                tao0 = 1.0
+
+        N00 = np.exp(p[1])
+
+    else:
+        # Point 0 for initial estimation
+        idx0 = np.argmin(self.wait_time_arr)
+        N00 = N[idx0]
+        tao0 = np.max(t) - np.min(t)
+        if tao0 <= 0:
+            tao0 = 1.0
+
+    if N00 <= 0:
+        N00 = 1e-12
+    if tao0 <= 0:
+        tao0 = 1.0
+
+    # Poisson negative log-likelihood
+    def nll(par):
+        N0, tao = par
+
+        if N0 <= 0 or tao <= 0:
+            return np.inf
+
+        mu = L * N0 * np.exp(-t/tao)
+        mu = np.maximum(mu, 1e-300)
+
+        y = np.sum(mu - T*np.log(mu))
+        return y
+
+    res = minimize(
+        nll,
+        x0=[N00, tao0],
+        bounds=((1e-12, None), (1e-12, None)),
+        method='L-BFGS-B'
+    )
+
+    if not res.success:
+        raise RuntimeError(f"Lifetime fit failed: {res.message}")
+
+    tao = res.x[1]
+    return tao
+
+# ===================================================================
+# 3) For Optimizer
 def initial_sampling(self):
 
     init_points = latin_hypercube(self.init_sample_size, self.bounds)
@@ -341,7 +502,7 @@ def trap_optimize(self, ind):
     return signal
 
 # ===================================================================
-# 3) Basic Components
+# 4) Basic Components
 def trap_with_histogram(self, my_ind):
 
     # run detection sequence

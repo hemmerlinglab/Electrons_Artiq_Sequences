@@ -29,6 +29,7 @@ class SingleParamScan(EnvExperiment):
             return
 
         validate_422 = True
+        tolerance = 1e-4 if self.scanning_parameter == "frequency_422" else 1e-5
 
         for ind in range(len(self.scan_values)):
 
@@ -48,6 +49,7 @@ class SingleParamScan(EnvExperiment):
                     self, measure, ind,
                     validate_422=validate_422,
                     expected_freq_422=expected_freq_422,
+                    tolerance=tolerance
                 )
 
                 # Record time cost for this experiment point
