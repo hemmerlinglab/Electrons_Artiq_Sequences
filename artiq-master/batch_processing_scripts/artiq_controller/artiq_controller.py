@@ -4,6 +4,7 @@ import re
 from datetime import datetime
 import os
 import json
+import traceback
 
 from config import drop_keys
 
@@ -173,7 +174,14 @@ class ArtiqController:
 
         return "".join(out_lines), cp.stderr
 
-    def _write_output_log(self, timestamp: str, stdout: str, stderr: str):
+    def _write_output_log(
+        self,
+        timestamp: str,
+        stdout: str,
+        stderr: str,
+        controller_traceback: str = "",
+        returncode = None,
+    ):
 
         try:
             date, time = timestamp.split("_")
@@ -186,8 +194,12 @@ class ArtiqController:
         with open(log_file, "a", encoding="utf-8") as f:
             f.write("\n" + "=" * 60 + "\n")
             f.write(f"timestamp: {timestamp}\n")
+            if returncode is not None:
+                f.write(f"returncode: {returncode}\n")
             f.write("stdout:\n" + stdout + "\n\n")
             f.write("stderr:\n" + stderr + "\n")
+            if controller_traceback:
+                f.write("\ncontroller_traceback:\n" + controller_traceback + "\n")
             f.write("=" * 60 + "\n")
 
     def _write_initial_instance_log(self, comment: str):
@@ -236,22 +248,75 @@ class ArtiqController:
 
     def run(self) -> str:
 
-        self._last_run_time = timestamp_string()
-        cp = subprocess.run(
-            self._construct_args(),
-            capture_output=True,
-            text=True,
-            cwd = self.workdir
-        )
-        self._last_end_time = timestamp_string()
+        proc = None
+        stdout = ""
+        stderr = ""
+        timestamp = ""
+        controller_traceback = ""
+        returncode = None
 
-        stdout, stderr = self._clean_output(cp)
-        self.last_output = (stdout, stderr)
-        timestamp = self._extract_timestamps(stdout, stderr)
-        self._write_output_log(timestamp, stdout, stderr)
-        self._write_instance_log(timestamp)
+        try:
+            self._last_run_time = timestamp_string()
 
-        return timestamp
+            proc = subprocess.Popen(
+                self._construct_args(),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                cwd=self.workdir
+            )
+
+            stdout, stderr = proc.communicate()
+            returncode = proc.returncode
+
+            cp = subprocess.CompletedProcess(proc.args, proc.returncode, stdout, stderr)
+            stdout, stderr = self._clean_output(cp)
+            self.last_output = (stdout, stderr)
+            timestamp = self._extract_timestamps(stdout, stderr)
+
+            return timestamp
+
+        except BaseException:
+            controller_traceback = traceback.format_exc()
+
+            if proc is not None:
+                try:
+                    proc.terminate()
+                    _stdout, _stderr = proc.communicate(timeout=5)
+                except subprocess.TimeoutExpired:
+                    proc.kill()
+                    _stdout, _stderr = proc.communicate()
+                except Exception:
+                    _stdout, _stderr = "", ""
+
+                if _stdout:
+                    stdout = _stdout
+                if _stderr:
+                    stderr = _stderr
+                returncode = proc.returncode
+
+                try:
+                    cp = subprocess.CompletedProcess(proc.args, proc.returncode, stdout, stderr)
+                    stdout, stderr = self._clean_output(cp)
+                except Exception:
+                    pass
+
+                self.last_output = (stdout, stderr)
+                if not timestamp:
+                    timestamp = self._extract_timestamps(stdout, stderr)
+
+            raise
+
+        finally:
+            self._last_end_time = timestamp_string()
+            self._write_output_log(
+                timestamp,
+                stdout,
+                stderr,
+                controller_traceback=controller_traceback,
+                returncode=returncode,
+            )
+            self._write_instance_log(timestamp)
 
 # 2) Subclass for single_parameter_scan
 # =============================================================================
@@ -272,8 +337,6 @@ class SingleParameterScan(ArtiqController):
     def run(
         self,
         *,
-        # Common “sequence settings”
-        mode: str = "Trapping",
         # OFAT scan settings
         scanning_parameter: str = "tickle_frequency",
         min_scan: float = 1.0,
@@ -293,7 +356,6 @@ class SingleParameterScan(ArtiqController):
         """
 
         self.load_params({
-            "mode": mode,
             "scanning_parameter": scanning_parameter,
             "min_scan": min_scan,
             "max_scan": max_scan,
@@ -323,7 +385,6 @@ class DoeScan(ArtiqController):
         self,
         *,
         # common "sequence settings"
-        mode: str = "Trapping",
         utility_mode: str = "DOE Scan",
         # DOE scan settings
         doe_file_path: str = "/home/electrons/software/"
@@ -341,7 +402,6 @@ class DoeScan(ArtiqController):
         Any additional ARTIQ parameters (Ex, RF_on, etc.) via **extra_params.
         """
         self.load_params({
-            "mode": mode,
             "utility_mode": utility_mode,
             "doe_file_path": doe_file_path,
             "doe_file_name": doe_file_name,
@@ -424,40 +484,81 @@ class FindOptimalE(ArtiqController):
         no_of_repeats: int = 3000,
         **extra_params,
     ):
-        # Set parameters
-        self.load_params({
-            "optimize_target": optimize_target,
-            "max_iteration": max_iteration,
-            "tolerance": tolerance,
-            "converge_count": converge_count,
-            "min_Ex": min_Ex,
-            "max_Ex": max_Ex,
-            "min_Ey": min_Ey,
-            "max_Ey": max_Ey,
-            "min_Ez": min_Ez,
-            "max_Ez": max_Ez,
-            "no_of_repeats": no_of_repeats,
-        })
-        self.load_params(extra_params)
+        cp = None
+        stdout = ""
+        stderr = ""
+        timestamp = ""
+        controller_traceback = ""
+        E_best_obs = None
+        E_best_model = None
 
-        # Run ARTIQ and capture stdout
-        self._last_run_time = datetime.now().strftime("%Y%m%d_%H%M%S")
-        cp = subprocess.run(
-            self._construct_args(),
-            capture_output=True,
-            text=True,
-            cwd = self.workdir
-        )
+        try:
+            # Set parameters
+            self.load_params({
+                "optimize_target": optimize_target,
+                "max_iteration": max_iteration,
+                "tolerance": tolerance,
+                "converge_count": converge_count,
+                "min_Ex": min_Ex,
+                "max_Ex": max_Ex,
+                "min_Ey": min_Ey,
+                "max_Ey": max_Ey,
+                "min_Ez": min_Ez,
+                "max_Ez": max_Ez,
+                "no_of_repeats": no_of_repeats,
+            })
+            self.load_params(extra_params)
 
-        # Parse both E's and timestamp from the printed analyze output
-        stdout, stderr = self._clean_output(cp)
-        self.last_output = (stdout, stderr)
-        timestamp = self._extract_timestamps(stdout, stderr)
-        E_best_obs, E_best_model = self._parse_optimal_Es(stdout, stderr)
-        self._write_output_log(timestamp, stdout, stderr)
-        self._write_instance_log(timestamp, E_best_obs, E_best_model)
+            # Run ARTIQ and capture stdout
+            self._last_run_time = timestamp_string()
+            cp = subprocess.run(
+                self._construct_args(),
+                capture_output=True,
+                text=True,
+                cwd=self.workdir
+            )
 
-        return E_best_obs, E_best_model, timestamp
+            # Parse both E's and timestamp from the printed analyze output
+            stdout, stderr = self._clean_output(cp)
+            self.last_output = (stdout, stderr)
+            timestamp = self._extract_timestamps(stdout, stderr)
+            E_best_obs, E_best_model = self._parse_optimal_Es(stdout, stderr)
+
+            return E_best_obs, E_best_model, timestamp
+
+        except BaseException:
+            controller_traceback = traceback.format_exc()
+
+            if cp is not None:
+                try:
+                    stdout, stderr = self._clean_output(cp)
+                    self.last_output = (stdout, stderr)
+                    if not timestamp:
+                        timestamp = self._extract_timestamps(stdout, stderr)
+                    if E_best_obs is None and E_best_model is None:
+                        E_best_obs, E_best_model = self._parse_optimal_Es(stdout, stderr)
+                except Exception:
+                    pass
+
+            raise
+
+        finally:
+            self._last_end_time = timestamp_string()
+
+            try:
+                self._write_output_log(
+                    timestamp,
+                    stdout,
+                    stderr,
+                    controller_traceback=controller_traceback,
+                )
+            except Exception:
+                pass
+
+            try:
+                self._write_instance_log(timestamp, E_best_obs, E_best_model)
+            except Exception:
+                pass
 
 if __name__ == "__main__":
     ac = ArtiqController("general_scan.py")

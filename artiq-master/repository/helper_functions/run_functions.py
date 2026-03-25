@@ -243,7 +243,7 @@ def record_detector_error(self, ind, err):
 
 def handle_laser_jump(self, laser_to_fix=422, setpoint=None, tol=1e-5):
     """
-    When laser frequency was off (mode hopping), wait for the user to fix it manually.
+    When laser frequency was off (mode hopping),wait for the user to fix it manually.
     """
 
     act_freq = self.laser.get_frequency(laser_to_fix)

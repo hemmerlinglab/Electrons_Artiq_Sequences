@@ -74,7 +74,7 @@ def calculate_Vin(chan, Vt):
 def safe_check(V, mode = "act_voltages"):
     """Return True if unsafe"""
     if mode == "act_voltages":
-        return abs(V[1]-V[0])>2005 or V[2]+5 < V[1]
+        return abs(V[1]-V[0])>2010 or V[2]+10 < V[1]
 
     elif mode == "setpoint":
         return abs(V[1]-V[0])>2000 or V[2]< V[1]

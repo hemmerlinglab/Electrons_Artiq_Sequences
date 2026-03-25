@@ -43,11 +43,17 @@ def relock_laser(
     fine_scan_width:    float = 2e-4,
     fine_steps:         int =   41,
     fine_repeats:       int =   10000,
+    relock_load_time:   float = 260.0,
+    relock_wait_time:   float = 140.0,
 ) -> Tuple[float, str, str]:
 
     f0 = scanner.get_param(f"frequency_{laser_to_relock}")
     scanner.save_profile("experiment")
 
+    # --- temporarily switch to the relock mode configuration ---
+    scanner.set_param("mode", "Trapping")
+    scanner.set_param("load_time", relock_load_time)
+    scanner.set_param("wait_time", relock_wait_time)
     scanner.set_param("no_of_repeats", rough_repeats)
     scanner.set_param("histogram_refresh", rough_repeats)
 

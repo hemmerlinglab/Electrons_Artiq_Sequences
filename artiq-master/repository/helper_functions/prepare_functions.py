@@ -242,14 +242,9 @@ def prepare_common_datasets(self):
 
     # counting mode datasets
     self.set_dataset('scan_result',        [0] * self.steps, broadcast=True)
-    
-    # experiment metadataset
-    self.set_dataset('time_cost',          [0] * self.steps, broadcast=True)
 
     # actual RF amplitude from keysight spec
     self.set_dataset('act_RF_amplitude',   [0] * self.steps, broadcast=True)
-        
-
 
 def prepare_ofat_datasets(self):
 
@@ -362,6 +357,10 @@ def _prepare_with_effective_steps(self, datasets_function):
     lp = _lifetime_points_for_prepare(self)
     effective_steps = self.steps * lp
     old_steps = self.steps
+
+    # experiment metadataset
+    print(self.steps)
+    self.set_dataset('time_cost', [0] * self.steps, broadcast=True)
 
     self.steps = effective_steps
     try:
