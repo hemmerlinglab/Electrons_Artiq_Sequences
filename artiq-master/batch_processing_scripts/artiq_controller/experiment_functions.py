@@ -1,5 +1,5 @@
 import time
-from typing import Tuple
+from typing import Any, Tuple, Dict
 from artiq_controller import SingleParameterScan
 from helper_functions import find_best_laser_frequency
 
@@ -10,7 +10,7 @@ def run_with_422_relock(scanner, config, initialize=False, **run_kwargs):
 
         if initialize:
             print("[Manager] Searching for laser 422 frequency ...")
-            new_422_freq, _, _ = relock_laser(scanner, laser_to_relock=422)
+            new_422_freq, _, _ = relock_laser(scanner, config, laser_to_relock=422)
             config["frequency_422"] = new_422_freq
             print("[Manager] Initialization Done, resuming to experiment scan ...")
 
@@ -23,7 +23,7 @@ def run_with_422_relock(scanner, config, initialize=False, **run_kwargs):
         if "LASER_OFF_422" in stderr:
             print("[Manager] Detected LASER_OFF_422 -> relock laser and retry scan.")
 
-            new_422_freq, _, _ = relock_laser(scanner, laser_to_relock=422)
+            new_422_freq, _, _ = relock_laser(scanner, config, laser_to_relock=422)
             config["frequency_422"] = new_422_freq
 
             print("[Manager] Resuming the interrupted scan ...")
@@ -35,6 +35,7 @@ def run_with_422_relock(scanner, config, initialize=False, **run_kwargs):
 
 def relock_laser(
     scanner:            SingleParameterScan,
+    config:             Dict[str, Any],
     laser_to_relock:    int =   422,
     rough_scan_center:  float = 709.078,
     rough_scan_width:   float = 3e-3,
@@ -58,7 +59,8 @@ def relock_laser(
     scanner.set_param("histogram_refresh", rough_repeats)
 
     print(f"[Relock_Laser] Scanning frequency_{laser_to_relock} [rough] ...")
-    ts_rough = scanner.run(
+    ts_rough = run_with_422_relock(
+        scanner, config, 
         scanning_parameter = f"frequency_{laser_to_relock}",
         min_scan = rough_scan_center - rough_scan_width,
         max_scan = rough_scan_center + rough_scan_width,
@@ -71,7 +73,8 @@ def relock_laser(
     scanner.set_param("histogram_refresh", fine_repeats)
 
     print(f"[Relock_Laser] Scanning frequency_{laser_to_relock} [fine] ...")
-    ts_fine = scanner.run(
+    ts_fine = run_with_422_relock(
+        scanner, config, 
         scanning_parameter = f"frequency_{laser_to_relock}",
         min_scan = freq_rough - fine_scan_width,
         max_scan = freq_rough + fine_scan_width,

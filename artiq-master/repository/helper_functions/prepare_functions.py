@@ -165,7 +165,7 @@ def prepare_saving_configuration(self):
     
     # Set the data going to save
     common_data_to_save = [
-            {'var' : 'arr_of_timestamps',  'name' : 'array of timestamps during extraction'},
+            #{'var' : 'arr_of_timestamps',  'name' : 'array of timestamps during extraction'},
             {'var' : 'last_frequency_422', 'name' : 'array of fetched last frequency from laser lock GUI, actual frequency if the GUI is measuring 422 at the time'},
             {'var' : 'last_frequency_390', 'name' : 'array of fetched last frequency from laser lock GUI, actual frequency if the GUI is measuring 390 at the time'},
             {'var' : 'trapped_signal',     'name' : 'array of trapped electron counts'},

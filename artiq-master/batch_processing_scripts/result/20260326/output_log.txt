@@ -1,0 +1,681 @@
+
+============================================================
+timestamp: 
+returncode: 1
+stdout:
+b'Keysight Technologies,N9000B,MY60251535,A.32.01\n'
+100
+Successfully sent setpoint 768.708843 THz to laser 390!
+Successfully sent setpoint 709.076670 THz to laser 422!
+[MCP] Applying MCP Voltage: 500.000, 2500.000, 2700.000
+
+****************************************************************************************************
+* Starting new scan
+****************************************************************************************************
+
+Scanning parameter tickle_frequency: 1.0 (1/100)
+Scanning parameter tickle_frequency: 2.0 (2/100)
+Scanning parameter tickle_frequency: 3.0 (3/100)
+Scanning parameter tickle_frequency: 4.0 (4/100)
+Scanning parameter tickle_frequency: 5.0 (5/100)
+Scanning parameter tickle_frequency: 6.0 (6/100)
+Scanning parameter tickle_frequency: 7.0 (7/100)
+Scanning parameter tickle_frequency: 8.0 (8/100)
+Scanning parameter tickle_frequency: 9.0 (9/100)
+Scanning parameter tickle_frequency: 10.0 (10/100)
+Scanning parameter tickle_frequency: 11.0 (11/100)
+Scanning parameter tickle_frequency: 12.0 (12/100)
+Scanning parameter tickle_frequency: 13.0 (13/100)
+Scanning parameter tickle_frequency: 14.0 (14/100)
+Scanning parameter tickle_frequency: 15.0 (15/100)
+Scanning parameter tickle_frequency: 16.0 (16/100)
+Scanning parameter tickle_frequency: 17.0 (17/100)
+Scanning parameter tickle_frequency: 18.0 (18/100)
+Scanning parameter tickle_frequency: 19.0 (19/100)
+Scanning parameter tickle_frequency: 20.0 (20/100)
+Scanning parameter tickle_frequency: 21.0 (21/100)
+Scanning parameter tickle_frequency: 22.0 (22/100)
+Scanning parameter tickle_frequency: 23.0 (23/100)
+Scanning parameter tickle_frequency: 24.0 (24/100)
+Scanning parameter tickle_frequency: 25.0 (25/100)
+Scanning parameter tickle_frequency: 26.0 (26/100)
+Scanning parameter tickle_frequency: 27.0 (27/100)
+Scanning parameter tickle_frequency: 28.0 (28/100)
+Scanning parameter tickle_frequency: 29.0 (29/100)
+Scanning parameter tickle_frequency: 30.0 (30/100)
+Scanning parameter tickle_frequency: 31.0 (31/100)
+Scanning parameter tickle_frequency: 32.0 (32/100)
+Scanning parameter tickle_frequency: 33.0 (33/100)
+Scanning parameter tickle_frequency: 34.0 (34/100)
+Scanning parameter tickle_frequency: 35.0 (35/100)
+Scanning parameter tickle_frequency: 36.0 (36/100)
+STATUS:LASER_OFF_422
+Laser error (Laser frequency of 422 is off, please fix it manually!)
+
+
+stderr:
+Traceback (most recent call last):
+  File "/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/run_functions.py", line 54, in run_experiment_with_retries
+    return experiment_function(self, ind, **kwargs)
+  File "/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/run_functions.py", line 123, in measure
+    raise LaserError(422)
+run_functions.LaserError: Laser frequency of 422 is off, please fix it manually!
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/nix/store/vpkbabjwkqf8g9l1k6w1d838amsq15z4-python3.8-artiq-6.7621.d9b01ed8/bin/.artiq_run-wrapped", line 9, in <module>
+    sys.exit(main())
+  File "/home/electrons/.nix-profile/lib/python3.8/site-packages/artiq/frontend/artiq_run.py", line 224, in main
+    return run(with_file=True)
+  File "/home/electrons/.nix-profile/lib/python3.8/site-packages/artiq/frontend/artiq_run.py", line 210, in run
+    raise exn
+  File "/home/electrons/.nix-profile/lib/python3.8/site-packages/artiq/frontend/artiq_run.py", line 203, in run
+    exp_inst.run()
+  File "/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/Modular/single_parameter_scan.py", line 48, in run
+    run_experiment_with_retries(
+  File "/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/run_functions.py", line 80, in run_experiment_with_retries
+    raise RuntimeError(f"LASER_OFF_{int(e.laser_id)}") from e
+RuntimeError: LASER_OFF_422
+
+============================================================
+
+============================================================
+timestamp: 
+returncode: 1
+stdout:
+b'Keysight Technologies,N9000B,MY60251535,A.32.01\n'
+61
+Successfully sent setpoint 768.708843 THz to laser 390!
+Successfully sent setpoint 709.076670 THz to laser 422!
+[MCP] Applying MCP Voltage: 500.000, 2500.000, 2700.000
+
+****************************************************************************************************
+* Starting new scan
+****************************************************************************************************
+
+Scanning parameter frequency_422: 709.0749999999999 (1/61)
+Successfully sent setpoint 709.075000 THz to laser 422!
+STATUS:LASER_OFF_422
+Laser error (Laser frequency of 422 is off, please fix it manually!)
+Scanning parameter frequency_422: 709.0750999999999 (2/61)
+Successfully sent setpoint 709.075100 THz to laser 422!
+Scanning parameter frequency_422: 709.0751999999999 (3/61)
+Successfully sent setpoint 709.075200 THz to laser 422!
+Scanning parameter frequency_422: 709.0753 (4/61)
+Successfully sent setpoint 709.075300 THz to laser 422!
+STATUS:LASER_OFF_422
+Laser error (Laser frequency of 422 is off, please fix it manually!)
+Scanning parameter frequency_422: 709.0754 (5/61)
+Successfully sent setpoint 709.075400 THz to laser 422!
+STATUS:LASER_OFF_422
+Laser error (Laser frequency of 422 is off, please fix it manually!)
+Scanning parameter frequency_422: 709.0754999999999 (6/61)
+Successfully sent setpoint 709.075500 THz to laser 422!
+Scanning parameter frequency_422: 709.0755999999999 (7/61)
+Successfully sent setpoint 709.075600 THz to laser 422!
+Scanning parameter frequency_422: 709.0757 (8/61)
+Successfully sent setpoint 709.075700 THz to laser 422!
+Scanning parameter frequency_422: 709.0758 (9/61)
+Successfully sent setpoint 709.075800 THz to laser 422!
+Scanning parameter frequency_422: 709.0758999999999 (10/61)
+Successfully sent setpoint 709.075900 THz to laser 422!
+Scanning parameter frequency_422: 709.0759999999999 (11/61)
+Successfully sent setpoint 709.076000 THz to laser 422!
+Scanning parameter frequency_422: 709.0761 (12/61)
+Successfully sent setpoint 709.076100 THz to laser 422!
+Scanning parameter frequency_422: 709.0762 (13/61)
+Successfully sent setpoint 709.076200 THz to laser 422!
+Scanning parameter frequency_422: 709.0763 (14/61)
+Successfully sent setpoint 709.076300 THz to laser 422!
+Scanning parameter frequency_422: 709.0763999999999 (15/61)
+Successfully sent setpoint 709.076400 THz to laser 422!
+Scanning parameter frequency_422: 709.0764999999999 (16/61)
+Successfully sent setpoint 709.076500 THz to laser 422!
+Scanning parameter frequency_422: 709.0766 (17/61)
+Successfully sent setpoint 709.076600 THz to laser 422!
+Scanning parameter frequency_422: 709.0767 (18/61)
+Successfully sent setpoint 709.076700 THz to laser 422!
+Scanning parameter frequency_422: 709.0767999999999 (19/61)
+Successfully sent setpoint 709.076800 THz to laser 422!
+Scanning parameter frequency_422: 709.0768999999999 (20/61)
+Successfully sent setpoint 709.076900 THz to laser 422!
+Scanning parameter frequency_422: 709.077 (21/61)
+Successfully sent setpoint 709.077000 THz to laser 422!
+Scanning parameter frequency_422: 709.0771 (22/61)
+Successfully sent setpoint 709.077100 THz to laser 422!
+Scanning parameter frequency_422: 709.0772 (23/61)
+Successfully sent setpoint 709.077200 THz to laser 422!
+Scanning parameter frequency_422: 709.0772999999999 (24/61)
+Successfully sent setpoint 709.077300 THz to laser 422!
+Scanning parameter frequency_422: 709.0774 (25/61)
+Successfully sent setpoint 709.077400 THz to laser 422!
+Scanning parameter frequency_422: 709.0775 (26/61)
+Successfully sent setpoint 709.077500 THz to laser 422!
+Scanning parameter frequency_422: 709.0776 (27/61)
+Successfully sent setpoint 709.077600 THz to laser 422!
+Scanning parameter frequency_422: 709.0776999999999 (28/61)
+Successfully sent setpoint 709.077700 THz to laser 422!
+Scanning parameter frequency_422: 709.0778 (29/61)
+Successfully sent setpoint 709.077800 THz to laser 422!
+Scanning parameter frequency_422: 709.0779 (30/61)
+Successfully sent setpoint 709.077900 THz to laser 422!
+Scanning parameter frequency_422: 709.078 (31/61)
+Successfully sent setpoint 709.078000 THz to laser 422!
+Scanning parameter frequency_422: 709.0781 (32/61)
+Successfully sent setpoint 709.078100 THz to laser 422!
+Scanning parameter frequency_422: 709.0781999999999 (33/61)
+Successfully sent setpoint 709.078200 THz to laser 422!
+Scanning parameter frequency_422: 709.0783 (34/61)
+Successfully sent setpoint 709.078300 THz to laser 422!
+Scanning parameter frequency_422: 709.0784 (35/61)
+Successfully sent setpoint 709.078400 THz to laser 422!
+Scanning parameter frequency_422: 709.0785 (36/61)
+Successfully sent setpoint 709.078500 THz to laser 422!
+Scanning parameter frequency_422: 709.0785999999999 (37/61)
+Successfully sent setpoint 709.078600 THz to laser 422!
+Scanning parameter frequency_422: 709.0787 (38/61)
+Successfully sent setpoint 709.078700 THz to laser 422!
+Scanning parameter frequency_422: 709.0788 (39/61)
+Successfully sent setpoint 709.078800 THz to laser 422!
+Scanning parameter frequency_422: 709.0789 (40/61)
+Successfully sent setpoint 709.078900 THz to laser 422!
+Scanning parameter frequency_422: 709.079 (41/61)
+Successfully sent setpoint 709.079000 THz to laser 422!
+Scanning parameter frequency_422: 709.0791 (42/61)
+Successfully sent setpoint 709.079100 THz to laser 422!
+Scanning parameter frequency_422: 709.0792 (43/61)
+Successfully sent setpoint 709.079200 THz to laser 422!
+Scanning parameter frequency_422: 709.0793 (44/61)
+Successfully sent setpoint 709.079300 THz to laser 422!
+Scanning parameter frequency_422: 709.0794 (45/61)
+Successfully sent setpoint 709.079400 THz to laser 422!
+Scanning parameter frequency_422: 709.0795 (46/61)
+Successfully sent setpoint 709.079500 THz to laser 422!
+Scanning parameter frequency_422: 709.0796 (47/61)
+Successfully sent setpoint 709.079600 THz to laser 422!
+Scanning parameter frequency_422: 709.0797 (48/61)
+Successfully sent setpoint 709.079700 THz to laser 422!
+Scanning parameter frequency_422: 709.0798 (49/61)
+Successfully sent setpoint 709.079800 THz to laser 422!
+Scanning parameter frequency_422: 709.0799 (50/61)
+Successfully sent setpoint 709.079900 THz to laser 422!
+Scanning parameter frequency_422: 709.08 (51/61)
+Successfully sent setpoint 709.080000 THz to laser 422!
+Scanning parameter frequency_422: 709.0801 (52/61)
+Successfully sent setpoint 709.080100 THz to laser 422!
+Scanning parameter frequency_422: 709.0802 (53/61)
+Successfully sent setpoint 709.080200 THz to laser 422!
+Scanning parameter frequency_422: 709.0803 (54/61)
+Successfully sent setpoint 709.080300 THz to laser 422!
+Scanning parameter frequency_422: 709.0804 (55/61)
+Successfully sent setpoint 709.080400 THz to laser 422!
+Scanning parameter frequency_422: 709.0805 (56/61)
+Successfully sent setpoint 709.080500 THz to laser 422!
+STATUS:LASER_OFF_422
+Laser error (Laser frequency of 422 is off, please fix it manually!)
+
+
+stderr:
+Traceback (most recent call last):
+  File "/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/run_functions.py", line 54, in run_experiment_with_retries
+    return experiment_function(self, ind, **kwargs)
+  File "/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/run_functions.py", line 123, in measure
+    raise LaserError(422)
+run_functions.LaserError: Laser frequency of 422 is off, please fix it manually!
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/nix/store/vpkbabjwkqf8g9l1k6w1d838amsq15z4-python3.8-artiq-6.7621.d9b01ed8/bin/.artiq_run-wrapped", line 9, in <module>
+    sys.exit(main())
+  File "/home/electrons/.nix-profile/lib/python3.8/site-packages/artiq/frontend/artiq_run.py", line 224, in main
+    return run(with_file=True)
+  File "/home/electrons/.nix-profile/lib/python3.8/site-packages/artiq/frontend/artiq_run.py", line 210, in run
+    raise exn
+  File "/home/electrons/.nix-profile/lib/python3.8/site-packages/artiq/frontend/artiq_run.py", line 203, in run
+    exp_inst.run()
+  File "/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/Modular/single_parameter_scan.py", line 48, in run
+    run_experiment_with_retries(
+  File "/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/run_functions.py", line 80, in run_experiment_with_retries
+    raise RuntimeError(f"LASER_OFF_{int(e.laser_id)}") from e
+RuntimeError: LASER_OFF_422
+
+============================================================
+
+============================================================
+timestamp: 20260326_122257
+returncode: 0
+stdout:
+b'Keysight Technologies,N9000B,MY60251535,A.32.01\n'
+61
+Successfully sent setpoint 768.708843 THz to laser 390!
+Successfully sent setpoint 709.079610 THz to laser 422!
+[MCP] Applying MCP Voltage: 500.000, 2500.000, 2700.000
+
+****************************************************************************************************
+* Starting new scan
+****************************************************************************************************
+
+Scanning parameter frequency_422: 709.0749999999999 (1/61)
+Successfully sent setpoint 709.075000 THz to laser 422!
+STATUS:LASER_OFF_422
+Laser error (Laser frequency of 422 is off, please fix it manually!)
+Scanning parameter frequency_422: 709.0750999999999 (2/61)
+Successfully sent setpoint 709.075100 THz to laser 422!
+Scanning parameter frequency_422: 709.0751999999999 (3/61)
+Successfully sent setpoint 709.075200 THz to laser 422!
+Scanning parameter frequency_422: 709.0753 (4/61)
+Successfully sent setpoint 709.075300 THz to laser 422!
+Scanning parameter frequency_422: 709.0754 (5/61)
+Successfully sent setpoint 709.075400 THz to laser 422!
+Scanning parameter frequency_422: 709.0754999999999 (6/61)
+Successfully sent setpoint 709.075500 THz to laser 422!
+Scanning parameter frequency_422: 709.0755999999999 (7/61)
+Successfully sent setpoint 709.075600 THz to laser 422!
+Scanning parameter frequency_422: 709.0757 (8/61)
+Successfully sent setpoint 709.075700 THz to laser 422!
+Scanning parameter frequency_422: 709.0758 (9/61)
+Successfully sent setpoint 709.075800 THz to laser 422!
+Scanning parameter frequency_422: 709.0758999999999 (10/61)
+Successfully sent setpoint 709.075900 THz to laser 422!
+Scanning parameter frequency_422: 709.0759999999999 (11/61)
+Successfully sent setpoint 709.076000 THz to laser 422!
+Scanning parameter frequency_422: 709.0761 (12/61)
+Successfully sent setpoint 709.076100 THz to laser 422!
+Scanning parameter frequency_422: 709.0762 (13/61)
+Successfully sent setpoint 709.076200 THz to laser 422!
+Scanning parameter frequency_422: 709.0763 (14/61)
+Successfully sent setpoint 709.076300 THz to laser 422!
+Scanning parameter frequency_422: 709.0763999999999 (15/61)
+Successfully sent setpoint 709.076400 THz to laser 422!
+Scanning parameter frequency_422: 709.0764999999999 (16/61)
+Successfully sent setpoint 709.076500 THz to laser 422!
+Scanning parameter frequency_422: 709.0766 (17/61)
+Successfully sent setpoint 709.076600 THz to laser 422!
+Scanning parameter frequency_422: 709.0767 (18/61)
+Successfully sent setpoint 709.076700 THz to laser 422!
+Scanning parameter frequency_422: 709.0767999999999 (19/61)
+Successfully sent setpoint 709.076800 THz to laser 422!
+Scanning parameter frequency_422: 709.0768999999999 (20/61)
+Successfully sent setpoint 709.076900 THz to laser 422!
+Scanning parameter frequency_422: 709.077 (21/61)
+Successfully sent setpoint 709.077000 THz to laser 422!
+Scanning parameter frequency_422: 709.0771 (22/61)
+Successfully sent setpoint 709.077100 THz to laser 422!
+Scanning parameter frequency_422: 709.0772 (23/61)
+Successfully sent setpoint 709.077200 THz to laser 422!
+Scanning parameter frequency_422: 709.0772999999999 (24/61)
+Successfully sent setpoint 709.077300 THz to laser 422!
+Scanning parameter frequency_422: 709.0774 (25/61)
+Successfully sent setpoint 709.077400 THz to laser 422!
+Scanning parameter frequency_422: 709.0775 (26/61)
+Successfully sent setpoint 709.077500 THz to laser 422!
+Scanning parameter frequency_422: 709.0776 (27/61)
+Successfully sent setpoint 709.077600 THz to laser 422!
+Scanning parameter frequency_422: 709.0776999999999 (28/61)
+Successfully sent setpoint 709.077700 THz to laser 422!
+Scanning parameter frequency_422: 709.0778 (29/61)
+Successfully sent setpoint 709.077800 THz to laser 422!
+Scanning parameter frequency_422: 709.0779 (30/61)
+Successfully sent setpoint 709.077900 THz to laser 422!
+Scanning parameter frequency_422: 709.078 (31/61)
+Successfully sent setpoint 709.078000 THz to laser 422!
+Scanning parameter frequency_422: 709.0781 (32/61)
+Successfully sent setpoint 709.078100 THz to laser 422!
+Scanning parameter frequency_422: 709.0781999999999 (33/61)
+Successfully sent setpoint 709.078200 THz to laser 422!
+Scanning parameter frequency_422: 709.0783 (34/61)
+Successfully sent setpoint 709.078300 THz to laser 422!
+Scanning parameter frequency_422: 709.0784 (35/61)
+Successfully sent setpoint 709.078400 THz to laser 422!
+Scanning parameter frequency_422: 709.0785 (36/61)
+Successfully sent setpoint 709.078500 THz to laser 422!
+Scanning parameter frequency_422: 709.0785999999999 (37/61)
+Successfully sent setpoint 709.078600 THz to laser 422!
+Scanning parameter frequency_422: 709.0787 (38/61)
+Successfully sent setpoint 709.078700 THz to laser 422!
+Scanning parameter frequency_422: 709.0788 (39/61)
+Successfully sent setpoint 709.078800 THz to laser 422!
+Scanning parameter frequency_422: 709.0789 (40/61)
+Successfully sent setpoint 709.078900 THz to laser 422!
+Scanning parameter frequency_422: 709.079 (41/61)
+Successfully sent setpoint 709.079000 THz to laser 422!
+Scanning parameter frequency_422: 709.0791 (42/61)
+Successfully sent setpoint 709.079100 THz to laser 422!
+Scanning parameter frequency_422: 709.0792 (43/61)
+Successfully sent setpoint 709.079200 THz to laser 422!
+Scanning parameter frequency_422: 709.0793 (44/61)
+Successfully sent setpoint 709.079300 THz to laser 422!
+Scanning parameter frequency_422: 709.0794 (45/61)
+Successfully sent setpoint 709.079400 THz to laser 422!
+Scanning parameter frequency_422: 709.0795 (46/61)
+Successfully sent setpoint 709.079500 THz to laser 422!
+Scanning parameter frequency_422: 709.0796 (47/61)
+Successfully sent setpoint 709.079600 THz to laser 422!
+Scanning parameter frequency_422: 709.0797 (48/61)
+Successfully sent setpoint 709.079700 THz to laser 422!
+Scanning parameter frequency_422: 709.0798 (49/61)
+Successfully sent setpoint 709.079800 THz to laser 422!
+Scanning parameter frequency_422: 709.0799 (50/61)
+Successfully sent setpoint 709.079900 THz to laser 422!
+Scanning parameter frequency_422: 709.08 (51/61)
+Successfully sent setpoint 709.080000 THz to laser 422!
+Scanning parameter frequency_422: 709.0801 (52/61)
+Successfully sent setpoint 709.080100 THz to laser 422!
+Scanning parameter frequency_422: 709.0802 (53/61)
+Successfully sent setpoint 709.080200 THz to laser 422!
+Scanning parameter frequency_422: 709.0803 (54/61)
+Successfully sent setpoint 709.080300 THz to laser 422!
+Scanning parameter frequency_422: 709.0804 (55/61)
+Successfully sent setpoint 709.080400 THz to laser 422!
+Scanning parameter frequency_422: 709.0805 (56/61)
+Successfully sent setpoint 709.080500 THz to laser 422!
+Scanning parameter frequency_422: 709.0806 (57/61)
+Successfully sent setpoint 709.080600 THz to laser 422!
+Scanning parameter frequency_422: 709.0807 (58/61)
+Successfully sent setpoint 709.080700 THz to laser 422!
+Scanning parameter frequency_422: 709.0808000000001 (59/61)
+Successfully sent setpoint 709.080800 THz to laser 422!
+Scanning parameter frequency_422: 709.0809 (60/61)
+Successfully sent setpoint 709.080900 THz to laser 422!
+Scanning parameter frequency_422: 709.081 (61/61)
+Successfully sent setpoint 709.081000 THz to laser 422!
+Successfully sent setpoint 709.079610 THz to laser 422!
+Saving data...
+Config file written.
+Experiment /home/electrons/software/data/20260326/20260326_122257 finished.
+Experiment finished.
+ 709.0758 709.0759 709.076  709.0761 709.0762 709.0763 709.0764 709.0765
+ 709.0766 709.0767 709.0768 709.0769 709.077  709.0771 709.0772 709.0773
+ 709.0774 709.0775 709.0776 709.0777 709.0778 709.0779 709.078  709.0781
+ 709.0782 709.0783 709.0784 709.0785 709.0786 709.0787 709.0788 709.0789
+ 709.079  709.0791 709.0792 709.0793 709.0794 709.0795 709.0796 709.0797
+ 709.0798 709.0799 709.08   709.0801 709.0802 709.0803 709.0804 709.0805
+ 709.0806 709.0807 709.0808 709.0809 709.081 ]
+
+
+stderr:
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/analyze_functions.py:226: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
+  arr = np.array(self.get_dataset(hlp['var']))
+
+============================================================
+
+============================================================
+timestamp: 20260326_122609
+returncode: 0
+stdout:
+b'Keysight Technologies,N9000B,MY60251535,A.32.01\n'
+41
+Successfully sent setpoint 768.708843 THz to laser 390!
+Successfully sent setpoint 709.079610 THz to laser 422!
+[MCP] Applying MCP Voltage: 500.000, 2500.000, 2700.000
+
+****************************************************************************************************
+* Starting new scan
+****************************************************************************************************
+
+Scanning parameter frequency_422: 709.0765 (1/41)
+Successfully sent setpoint 709.076500 THz to laser 422!
+STATUS:LASER_OFF_422
+Laser error (Laser frequency of 422 is off, please fix it manually!)
+Scanning parameter frequency_422: 709.07651 (2/41)
+Successfully sent setpoint 709.076510 THz to laser 422!
+Scanning parameter frequency_422: 709.07652 (3/41)
+Successfully sent setpoint 709.076520 THz to laser 422!
+Scanning parameter frequency_422: 709.07653 (4/41)
+Successfully sent setpoint 709.076530 THz to laser 422!
+Scanning parameter frequency_422: 709.07654 (5/41)
+Successfully sent setpoint 709.076540 THz to laser 422!
+Scanning parameter frequency_422: 709.07655 (6/41)
+Successfully sent setpoint 709.076550 THz to laser 422!
+Scanning parameter frequency_422: 709.07656 (7/41)
+Successfully sent setpoint 709.076560 THz to laser 422!
+Scanning parameter frequency_422: 709.07657 (8/41)
+Successfully sent setpoint 709.076570 THz to laser 422!
+Scanning parameter frequency_422: 709.07658 (9/41)
+Successfully sent setpoint 709.076580 THz to laser 422!
+Scanning parameter frequency_422: 709.07659 (10/41)
+Successfully sent setpoint 709.076590 THz to laser 422!
+Scanning parameter frequency_422: 709.0766 (11/41)
+Successfully sent setpoint 709.076600 THz to laser 422!
+Scanning parameter frequency_422: 709.07661 (12/41)
+Successfully sent setpoint 709.076610 THz to laser 422!
+Scanning parameter frequency_422: 709.0766199999999 (13/41)
+Successfully sent setpoint 709.076620 THz to laser 422!
+Scanning parameter frequency_422: 709.07663 (14/41)
+Successfully sent setpoint 709.076630 THz to laser 422!
+Scanning parameter frequency_422: 709.07664 (15/41)
+Successfully sent setpoint 709.076640 THz to laser 422!
+Scanning parameter frequency_422: 709.07665 (16/41)
+Successfully sent setpoint 709.076650 THz to laser 422!
+Scanning parameter frequency_422: 709.07666 (17/41)
+Successfully sent setpoint 709.076660 THz to laser 422!
+Scanning parameter frequency_422: 709.0766699999999 (18/41)
+Successfully sent setpoint 709.076670 THz to laser 422!
+Scanning parameter frequency_422: 709.07668 (19/41)
+Successfully sent setpoint 709.076680 THz to laser 422!
+Scanning parameter frequency_422: 709.07669 (20/41)
+Successfully sent setpoint 709.076690 THz to laser 422!
+Scanning parameter frequency_422: 709.0767 (21/41)
+Successfully sent setpoint 709.076700 THz to laser 422!
+Scanning parameter frequency_422: 709.0767099999999 (22/41)
+Successfully sent setpoint 709.076710 THz to laser 422!
+Scanning parameter frequency_422: 709.0767199999999 (23/41)
+Successfully sent setpoint 709.076720 THz to laser 422!
+Scanning parameter frequency_422: 709.07673 (24/41)
+Successfully sent setpoint 709.076730 THz to laser 422!
+Scanning parameter frequency_422: 709.07674 (25/41)
+Successfully sent setpoint 709.076740 THz to laser 422!
+Scanning parameter frequency_422: 709.07675 (26/41)
+Successfully sent setpoint 709.076750 THz to laser 422!
+Scanning parameter frequency_422: 709.0767599999999 (27/41)
+Successfully sent setpoint 709.076760 THz to laser 422!
+Scanning parameter frequency_422: 709.0767699999999 (28/41)
+Successfully sent setpoint 709.076770 THz to laser 422!
+Scanning parameter frequency_422: 709.07678 (29/41)
+Successfully sent setpoint 709.076780 THz to laser 422!
+Scanning parameter frequency_422: 709.07679 (30/41)
+Successfully sent setpoint 709.076790 THz to laser 422!
+Scanning parameter frequency_422: 709.0767999999999 (31/41)
+Successfully sent setpoint 709.076800 THz to laser 422!
+Scanning parameter frequency_422: 709.0768099999999 (32/41)
+Successfully sent setpoint 709.076810 THz to laser 422!
+Scanning parameter frequency_422: 709.0768199999999 (33/41)
+Successfully sent setpoint 709.076820 THz to laser 422!
+Scanning parameter frequency_422: 709.07683 (34/41)
+Successfully sent setpoint 709.076830 THz to laser 422!
+Scanning parameter frequency_422: 709.07684 (35/41)
+Successfully sent setpoint 709.076840 THz to laser 422!
+Scanning parameter frequency_422: 709.0768499999999 (36/41)
+Successfully sent setpoint 709.076850 THz to laser 422!
+Scanning parameter frequency_422: 709.0768599999999 (37/41)
+Successfully sent setpoint 709.076860 THz to laser 422!
+Scanning parameter frequency_422: 709.0768699999999 (38/41)
+Successfully sent setpoint 709.076870 THz to laser 422!
+Scanning parameter frequency_422: 709.07688 (39/41)
+Successfully sent setpoint 709.076880 THz to laser 422!
+Scanning parameter frequency_422: 709.0768899999999 (40/41)
+Successfully sent setpoint 709.076890 THz to laser 422!
+Scanning parameter frequency_422: 709.0768999999999 (41/41)
+Successfully sent setpoint 709.076900 THz to laser 422!
+Successfully sent setpoint 709.079610 THz to laser 422!
+Saving data...
+Config file written.
+Experiment /home/electrons/software/data/20260326/20260326_122609 finished.
+Experiment finished.
+ 709.07657 709.07658 709.07659 709.0766  709.07661 709.07662 709.07663
+ 709.07664 709.07665 709.07666 709.07667 709.07668 709.07669 709.0767
+ 709.07671 709.07672 709.07673 709.07674 709.07675 709.07676 709.07677
+ 709.07678 709.07679 709.0768  709.07681 709.07682 709.07683 709.07684
+ 709.07685 709.07686 709.07687 709.07688 709.07689 709.0769 ]
+
+
+stderr:
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/analyze_functions.py:226: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
+  arr = np.array(self.get_dataset(hlp['var']))
+
+============================================================
+
+============================================================
+timestamp: 20260326_123101
+returncode: 0
+stdout:
+b'Keysight Technologies,N9000B,MY60251535,A.32.01\n'
+100
+Successfully sent setpoint 768.708843 THz to laser 390!
+Successfully sent setpoint 709.076700 THz to laser 422!
+[MCP] Applying MCP Voltage: 500.000, 2500.000, 2700.000
+
+****************************************************************************************************
+* Starting new scan
+****************************************************************************************************
+
+Scanning parameter tickle_frequency: 1.0 (1/100)
+STATUS:LASER_OFF_422
+Laser error (Laser frequency of 422 is off, please fix it manually!)
+Scanning parameter tickle_frequency: 2.0 (2/100)
+Scanning parameter tickle_frequency: 3.0 (3/100)
+Scanning parameter tickle_frequency: 4.0 (4/100)
+Scanning parameter tickle_frequency: 5.0 (5/100)
+Scanning parameter tickle_frequency: 6.0 (6/100)
+Scanning parameter tickle_frequency: 7.0 (7/100)
+Scanning parameter tickle_frequency: 8.0 (8/100)
+Scanning parameter tickle_frequency: 9.0 (9/100)
+Scanning parameter tickle_frequency: 10.0 (10/100)
+Scanning parameter tickle_frequency: 11.0 (11/100)
+Scanning parameter tickle_frequency: 12.0 (12/100)
+Scanning parameter tickle_frequency: 13.0 (13/100)
+Scanning parameter tickle_frequency: 14.0 (14/100)
+Scanning parameter tickle_frequency: 15.0 (15/100)
+Scanning parameter tickle_frequency: 16.0 (16/100)
+Scanning parameter tickle_frequency: 17.0 (17/100)
+Scanning parameter tickle_frequency: 18.0 (18/100)
+Scanning parameter tickle_frequency: 19.0 (19/100)
+Scanning parameter tickle_frequency: 20.0 (20/100)
+Scanning parameter tickle_frequency: 21.0 (21/100)
+Scanning parameter tickle_frequency: 22.0 (22/100)
+Scanning parameter tickle_frequency: 23.0 (23/100)
+Scanning parameter tickle_frequency: 24.0 (24/100)
+Scanning parameter tickle_frequency: 25.0 (25/100)
+Scanning parameter tickle_frequency: 26.0 (26/100)
+Scanning parameter tickle_frequency: 27.0 (27/100)
+Scanning parameter tickle_frequency: 28.0 (28/100)
+Scanning parameter tickle_frequency: 29.0 (29/100)
+Scanning parameter tickle_frequency: 30.0 (30/100)
+Scanning parameter tickle_frequency: 31.0 (31/100)
+Scanning parameter tickle_frequency: 32.0 (32/100)
+Scanning parameter tickle_frequency: 33.0 (33/100)
+Scanning parameter tickle_frequency: 34.0 (34/100)
+Scanning parameter tickle_frequency: 35.0 (35/100)
+Scanning parameter tickle_frequency: 36.0 (36/100)
+Scanning parameter tickle_frequency: 37.0 (37/100)
+Scanning parameter tickle_frequency: 38.0 (38/100)
+Scanning parameter tickle_frequency: 39.0 (39/100)
+Scanning parameter tickle_frequency: 40.0 (40/100)
+Scanning parameter tickle_frequency: 41.0 (41/100)
+Scanning parameter tickle_frequency: 42.0 (42/100)
+Scanning parameter tickle_frequency: 43.0 (43/100)
+Scanning parameter tickle_frequency: 44.0 (44/100)
+Scanning parameter tickle_frequency: 45.0 (45/100)
+Scanning parameter tickle_frequency: 46.0 (46/100)
+Scanning parameter tickle_frequency: 47.0 (47/100)
+Scanning parameter tickle_frequency: 48.0 (48/100)
+Scanning parameter tickle_frequency: 49.0 (49/100)
+Scanning parameter tickle_frequency: 50.0 (50/100)
+Scanning parameter tickle_frequency: 51.0 (51/100)
+Scanning parameter tickle_frequency: 52.0 (52/100)
+Scanning parameter tickle_frequency: 53.0 (53/100)
+Scanning parameter tickle_frequency: 54.0 (54/100)
+Scanning parameter tickle_frequency: 55.0 (55/100)
+Scanning parameter tickle_frequency: 56.0 (56/100)
+Scanning parameter tickle_frequency: 57.0 (57/100)
+Scanning parameter tickle_frequency: 58.0 (58/100)
+Scanning parameter tickle_frequency: 59.0 (59/100)
+Scanning parameter tickle_frequency: 60.0 (60/100)
+Scanning parameter tickle_frequency: 61.0 (61/100)
+Scanning parameter tickle_frequency: 62.0 (62/100)
+Scanning parameter tickle_frequency: 63.0 (63/100)
+Scanning parameter tickle_frequency: 64.0 (64/100)
+Scanning parameter tickle_frequency: 65.0 (65/100)
+Scanning parameter tickle_frequency: 66.0 (66/100)
+Scanning parameter tickle_frequency: 67.0 (67/100)
+Scanning parameter tickle_frequency: 68.0 (68/100)
+Scanning parameter tickle_frequency: 69.0 (69/100)
+Scanning parameter tickle_frequency: 70.0 (70/100)
+Scanning parameter tickle_frequency: 71.0 (71/100)
+Scanning parameter tickle_frequency: 72.0 (72/100)
+Scanning parameter tickle_frequency: 73.0 (73/100)
+Scanning parameter tickle_frequency: 74.0 (74/100)
+Scanning parameter tickle_frequency: 75.0 (75/100)
+Scanning parameter tickle_frequency: 76.0 (76/100)
+Scanning parameter tickle_frequency: 77.0 (77/100)
+Scanning parameter tickle_frequency: 78.0 (78/100)
+Scanning parameter tickle_frequency: 79.0 (79/100)
+Scanning parameter tickle_frequency: 80.0 (80/100)
+Scanning parameter tickle_frequency: 81.0 (81/100)
+Scanning parameter tickle_frequency: 82.0 (82/100)
+Scanning parameter tickle_frequency: 83.0 (83/100)
+Scanning parameter tickle_frequency: 84.0 (84/100)
+Scanning parameter tickle_frequency: 85.0 (85/100)
+Scanning parameter tickle_frequency: 86.0 (86/100)
+Scanning parameter tickle_frequency: 87.0 (87/100)
+Scanning parameter tickle_frequency: 88.0 (88/100)
+Scanning parameter tickle_frequency: 89.0 (89/100)
+Scanning parameter tickle_frequency: 90.0 (90/100)
+Scanning parameter tickle_frequency: 91.0 (91/100)
+Scanning parameter tickle_frequency: 92.0 (92/100)
+Scanning parameter tickle_frequency: 93.0 (93/100)
+Scanning parameter tickle_frequency: 94.0 (94/100)
+Scanning parameter tickle_frequency: 95.0 (95/100)
+Scanning parameter tickle_frequency: 96.0 (96/100)
+Scanning parameter tickle_frequency: 97.0 (97/100)
+Scanning parameter tickle_frequency: 98.0 (98/100)
+Scanning parameter tickle_frequency: 99.0 (99/100)
+Scanning parameter tickle_frequency: 100.0 (100/100)
+Saving data...
+Config file written.
+Experiment /home/electrons/software/data/20260326/20260326_123101 finished.
+Experiment finished.
+   3.   4.   4.   4.   4.   4.   5.   5.   5.   5.   5.   6.   6.   6.
+   6.   6.   7.   7.   7.   7.   7.   8.   8.   8.   8.   8.   9.   9.
+   9.   9.   9.  10.  10.  10.  10.  10.  11.  11.  11.  11.  11.  12.
+  12.  12.  12.  12.  13.  13.  13.  13.  13.  14.  14.  14.  14.  14.
+  15.  15.  15.  15.  15.  16.  16.  16.  16.  16.  17.  17.  17.  17.
+  17.  18.  18.  18.  18.  18.  19.  19.  19.  19.  19.  20.  20.  20.
+  20.  20.  21.  21.  21.  21.  21.  22.  22.  22.  22.  22.  23.  23.
+  23.  23.  23.  24.  24.  24.  24.  24.  25.  25.  25.  25.  25.  26.
+  26.  26.  26.  26.  27.  27.  27.  27.  27.  28.  28.  28.  28.  28.
+  29.  29.  29.  29.  29.  30.  30.  30.  30.  30.  31.  31.  31.  31.
+  31.  32.  32.  32.  32.  32.  33.  33.  33.  33.  33.  34.  34.  34.
+  34.  34.  35.  35.  35.  35.  35.  36.  36.  36.  36.  36.  37.  37.
+  37.  37.  37.  38.  38.  38.  38.  38.  39.  39.  39.  39.  39.  40.
+  40.  40.  40.  40.  41.  41.  41.  41.  41.  42.  42.  42.  42.  42.
+  43.  43.  43.  43.  43.  44.  44.  44.  44.  44.  45.  45.  45.  45.
+  45.  46.  46.  46.  46.  46.  47.  47.  47.  47.  47.  48.  48.  48.
+  48.  48.  49.  49.  49.  49.  49.  50.  50.  50.  50.  50.  51.  51.
+  51.  51.  51.  52.  52.  52.  52.  52.  53.  53.  53.  53.  53.  54.
+  54.  54.  54.  54.  55.  55.  55.  55.  55.  56.  56.  56.  56.  56.
+  57.  57.  57.  57.  57.  58.  58.  58.  58.  58.  59.  59.  59.  59.
+  59.  60.  60.  60.  60.  60.  61.  61.  61.  61.  61.  62.  62.  62.
+  62.  62.  63.  63.  63.  63.  63.  64.  64.  64.  64.  64.  65.  65.
+  65.  65.  65.  66.  66.  66.  66.  66.  67.  67.  67.  67.  67.  68.
+  68.  68.  68.  68.  69.  69.  69.  69.  69.  70.  70.  70.  70.  70.
+  71.  71.  71.  71.  71.  72.  72.  72.  72.  72.  73.  73.  73.  73.
+  73.  74.  74.  74.  74.  74.  75.  75.  75.  75.  75.  76.  76.  76.
+  76.  76.  77.  77.  77.  77.  77.  78.  78.  78.  78.  78.  79.  79.
+  79.  79.  79.  80.  80.  80.  80.  80.  81.  81.  81.  81.  81.  82.
+  82.  82.  82.  82.  83.  83.  83.  83.  83.  84.  84.  84.  84.  84.
+  85.  85.  85.  85.  85.  86.  86.  86.  86.  86.  87.  87.  87.  87.
+  87.  88.  88.  88.  88.  88.  89.  89.  89.  89.  89.  90.  90.  90.
+  90.  90.  91.  91.  91.  91.  91.  92.  92.  92.  92.  92.  93.  93.
+  93.  93.  93.  94.  94.  94.  94.  94.  95.  95.  95.  95.  95.  96.
+  96.  96.  96.  96.  97.  97.  97.  97.  97.  98.  98.  98.  98.  98.
+  99.  99.  99.  99.  99. 100. 100. 100. 100. 100.]
+
+
+stderr:
+/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/analyze_functions.py:226: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
+  arr = np.array(self.get_dataset(hlp['var']))
+
+============================================================
