@@ -15,8 +15,6 @@ from base_sequences import (
     recover_threshold_detector
 )
 from helper_functions import latin_hypercube, bo_suggest_next
-
-# gailezheli
 from scan_functions import _scan_wait_time
 
 
@@ -232,6 +230,9 @@ def record_RTIO_error(self, ind, err):
     time.sleep(HOST_SLEEP_S)
 
 def record_laser_error(self, ind, err):
+    laser_id = getattr(err, "laser_id", None)
+    if laser_id is not None:
+        print(f"STATUS:LASER_OFF_{int(laser_id)}", flush=True)
     print(f"Laser error ({err})")
     err = (ind, type(err).__name__)
     self.err_list.append(err)
@@ -486,7 +487,7 @@ def trap_optimize(self, ind):
     if self.optimize_target == "trapped_signal":
         signal = cts_trapped
     elif self.optimize_target == "ratio_signal":
-        ssignal = (cts_trapped / cts_loading) if cts_loading > 0 else 0.0
+        signal = (cts_trapped / cts_loading) if cts_loading > 0 else 0.0
     elif self.optimize_target == "ratio_weighted":
         signal = ((cts_trapped + 2 * cts_lost) / cts_loading) if cts_loading > 0 else 0.0
     elif self.optimize_target == "lost_signal":

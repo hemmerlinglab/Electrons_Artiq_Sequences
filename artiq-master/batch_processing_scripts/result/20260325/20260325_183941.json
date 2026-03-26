@@ -1,0 +1,10 @@
+{
+  "metadata": {
+    "experiment_comment": "",
+    "command": "artiq_run",
+    "script": "/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/Modular/single_parameter_scan.py",
+    "workdir": "/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/",
+    "log_path": "/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/batch_processing_scripts/result"
+  },
+  "runs": []
+}

@@ -2,9 +2,11 @@ import subprocess
 import copy
 import re
 from datetime import datetime
-import os
 import json
 import traceback
+import threading
+import queue
+import os
 
 from config import drop_keys
 
@@ -32,6 +34,11 @@ class ArtiqController:
         self.script = script_path
         self.workdir = workdir    # Must set appropriately otherwise artiq would crash
         self.log_path = log_path
+        self.last_output = ("", "")
+        self.live_status = {
+            "laser_off_422": False,
+            "laser_off_390": False,
+        }
 
         # Private Attributes
         self._profiles = {}       # In-memory profiles: name -> {"script": ..., "command": ..., "params": {...}}
@@ -130,6 +137,8 @@ class ArtiqController:
     # -----------------------------
     # Internal helpers
     # -----------------------------
+    # 1. parse IO with system terminal and artiq
+    # +++++++++++++++++++++++++++++++++++++++++++++++++
     def _construct_args(self):
         args = [self.command, "-q", self.script]
         for key, value in self.exp_params.items():
@@ -141,6 +150,8 @@ class ArtiqController:
         m = re.search(r"(\d{8}_\d{6})", combined)
         return m.group(1) if m else ""
 
+    # 2. logging utilities
+    # +++++++++++++++++++++++++++++++++++++++++++++++++
     def _clean_output(self, cp):
         """
         Remove big chunk of datasets from stdout
@@ -240,79 +251,129 @@ class ArtiqController:
         with open(self._instance_log, "w", encoding="utf-8") as f:
             json.dump(doc, f, indent=2, ensure_ascii=False)
 
+    # 3. monitor artiq status in real time
+    # +++++++++++++++++++++++++++++++++++++++++++++++++
+    def _reset_live_status(self):
+        self.live_status = {
+            "laser_off_422": False,
+            "laser_off_390": False,
+        }
+
+    def _handle_live_stdout_line(self, line: str):
+        """
+        Set the status you require the ArtiqController class to monitor
+        currently monitoring laser errors for 390 and 422
+        """
+        if "STATUS:LASER_OFF_422" in line:
+            self.live_status["laser_off_422"] = True
+            print("[ArtiqController] Laser 422 needs manual fix.")
+
+        if "STATUS:LASER_OFF_390" in line:
+            self.live_status["laser_off_390"] = True
+            print("[ArtiqController] Laser 390 needs manual fix.")
+
+    def _spawn_process(self):
+        env = os.environ.copy()
+        env["PYTHONUNBUFFERED"] = "1"
+
+        return subprocess.Popen(
+            self._construct_args(),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            bufsize=1,
+            cwd=self.workdir,
+            env=env,
+        )
+
+    def _start_stream_reader_threads(self, proc, q):
+
+        def reader(pipe, tag):
+            try:
+                for line in iter(pipe.readline, ''):
+                    q.put((tag, line))
+            finally:
+                pipe.close()
+
+        t_out = threading.Thread(target=reader, args=(proc.stdout, "stdout"), daemon=True)
+        t_err = threading.Thread(target=reader, args=(proc.stderr, "stderr"), daemon=True)
+        t_out.start()
+        t_err.start()
+
+        return t_out, t_err
+
+    def _collect_stream_output(self, proc, q, stdout_lines, stderr_lines):
+
+        while True:
+            try:
+                tag, line = q.get(timeout=0.1)
+            except queue.Empty:
+                if proc.poll() is not None:
+                    if q.empty():
+                        break
+                    continue
+                continue
+
+            if tag == "stdout":
+                stdout_lines.append(line)
+                self._handle_live_stdout_line(line)
+            else:
+                stderr_lines.append(line)
+
+    def _finalize_completed_process(self, proc, returncode, stdout_lines, stderr_lines):
+        stdout = "".join(stdout_lines)
+        stderr = "".join(stderr_lines)
+
+        cp = subprocess.CompletedProcess(proc.args, returncode, stdout, stderr)
+        stdout, stderr = self._clean_output(cp)
+        self.last_output = (stdout, stderr)
+        timestamp = self._extract_timestamps(stdout, stderr)
+
+        return stdout, stderr, timestamp
+
     # -----------------------------
     # Main Utilities
     # -----------------------------
-    def print_args(self):
-        print(self._construct_args())
-
     def run(self) -> str:
 
         proc = None
         stdout = ""
         stderr = ""
+        stdout_lines = []
+        stderr_lines = []
         timestamp = ""
         controller_traceback = ""
         returncode = None
+        q = queue.Queue()
 
+        # run experiment with real-time monitoring on Artiq's output
         try:
             self._last_run_time = timestamp_string()
+            self._reset_live_status()
 
-            proc = subprocess.Popen(
-                self._construct_args(),
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-                cwd=self.workdir
+            proc = self._spawn_process()
+            self._start_stream_reader_threads(proc, q)
+            self._collect_stream_output(proc, q, stdout_lines, stderr_lines)
+
+            returncode = proc.wait()
+            stdout, stderr, timestamp = self._finalize_completed_process(
+                proc, returncode, stdout_lines, stderr_lines
             )
-
-            stdout, stderr = proc.communicate()
-            returncode = proc.returncode
-
-            cp = subprocess.CompletedProcess(proc.args, proc.returncode, stdout, stderr)
-            stdout, stderr = self._clean_output(cp)
-            self.last_output = (stdout, stderr)
-            timestamp = self._extract_timestamps(stdout, stderr)
 
             return timestamp
 
+        # if the operator do KeyboardInterrupt, keep traceback and crash
         except BaseException:
             controller_traceback = traceback.format_exc()
-
-            if proc is not None:
-                try:
-                    proc.terminate()
-                    _stdout, _stderr = proc.communicate(timeout=5)
-                except subprocess.TimeoutExpired:
-                    proc.kill()
-                    _stdout, _stderr = proc.communicate()
-                except Exception:
-                    _stdout, _stderr = "", ""
-
-                if _stdout:
-                    stdout = _stdout
-                if _stderr:
-                    stderr = _stderr
-                returncode = proc.returncode
-
-                try:
-                    cp = subprocess.CompletedProcess(proc.args, proc.returncode, stdout, stderr)
-                    stdout, stderr = self._clean_output(cp)
-                except Exception:
-                    pass
-
-                self.last_output = (stdout, stderr)
-                if not timestamp:
-                    timestamp = self._extract_timestamps(stdout, stderr)
-
             raise
 
+        # no matter the process succeeded or failed, write log
         finally:
             self._last_end_time = timestamp_string()
             self._write_output_log(
                 timestamp,
-                stdout,
-                stderr,
+                stdout if stdout else "".join(stdout_lines),
+                stderr if stderr else "".join(stderr_lines),
                 controller_traceback=controller_traceback,
                 returncode=returncode,
             )
@@ -484,16 +545,20 @@ class FindOptimalE(ArtiqController):
         no_of_repeats: int = 3000,
         **extra_params,
     ):
-        cp = None
+        proc = None
         stdout = ""
         stderr = ""
+        stdout_lines = []
+        stderr_lines = []
         timestamp = ""
         controller_traceback = ""
+        returncode = None
         E_best_obs = None
         E_best_model = None
+        q = queue.Queue()
 
+        # run experiment with real-time monitoring on Artiq's output
         try:
-            # Set parameters
             self.load_params({
                 "optimize_target": optimize_target,
                 "max_iteration": max_iteration,
@@ -509,65 +574,48 @@ class FindOptimalE(ArtiqController):
             })
             self.load_params(extra_params)
 
-            # Run ARTIQ and capture stdout
             self._last_run_time = timestamp_string()
-            cp = subprocess.run(
-                self._construct_args(),
-                capture_output=True,
-                text=True,
-                cwd=self.workdir
+            self._reset_live_status()
+
+            proc = self._spawn_process()
+            self._start_stream_reader_threads(proc, q)
+            self._collect_stream_output(proc, q, stdout_lines, stderr_lines)
+
+            returncode = proc.wait()
+            stdout, stderr, timestamp = self._finalize_completed_process(
+                proc, returncode, stdout_lines, stderr_lines
             )
 
-            # Parse both E's and timestamp from the printed analyze output
-            stdout, stderr = self._clean_output(cp)
-            self.last_output = (stdout, stderr)
-            timestamp = self._extract_timestamps(stdout, stderr)
             E_best_obs, E_best_model = self._parse_optimal_Es(stdout, stderr)
 
             return E_best_obs, E_best_model, timestamp
 
+        # if the operator do KeyboardInterrupt, keep traceback and crash
         except BaseException:
             controller_traceback = traceback.format_exc()
-
-            if cp is not None:
-                try:
-                    stdout, stderr = self._clean_output(cp)
-                    self.last_output = (stdout, stderr)
-                    if not timestamp:
-                        timestamp = self._extract_timestamps(stdout, stderr)
-                    if E_best_obs is None and E_best_model is None:
-                        E_best_obs, E_best_model = self._parse_optimal_Es(stdout, stderr)
-                except Exception:
-                    pass
-
             raise
 
+        # no matter the process succeeded or failed, write log
         finally:
             self._last_end_time = timestamp_string()
+            self._write_output_log(
+                timestamp,
+                stdout if stdout else "".join(stdout_lines),
+                stderr if stderr else "".join(stderr_lines),
+                controller_traceback=controller_traceback,
+                returncode=returncode,
+            )
+            self._write_instance_log(timestamp, E_best_obs, E_best_model)
 
-            try:
-                self._write_output_log(
-                    timestamp,
-                    stdout,
-                    stderr,
-                    controller_traceback=controller_traceback,
-                )
-            except Exception:
-                pass
-
-            try:
-                self._write_instance_log(timestamp, E_best_obs, E_best_model)
-            except Exception:
-                pass
 
 if __name__ == "__main__":
-    ac = ArtiqController("general_scan.py")
-    ac.set_param("time_count", 0.5)
-    ac.set_param("mesh_voltage", 120)
-    ac.set_param("scanning_parameter", "tickle_frequency")
-    ac.set_param("min_scan", 1)
-    ac.set_param("max_scan", 150)
-    ac.set_param("steps", 150)
+    ac = (
+        ArtiqController("MCP_PowerSupply.py")
+        .set_param("mode", "custom")
+        .set_param("front", 200)
+        .set_param("back", 2200)
+        .set_param("anode", 2400)
+    )
     ac.print_args()
 
     """

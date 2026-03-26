@@ -56,6 +56,7 @@ initialize = True
 
 for i, table in enumerate(tables):    
 
+    print(f"running experiment {i}/{len(tables)} with file {table} ...")
     scanner.set_param("wait_times_file", table)
 
     ts = run_with_422_relock(
@@ -68,6 +69,8 @@ for i, table in enumerate(tables):
     )
     initialize = False
     timestamp.append(ts)
+
+    print(f"scan complete, experiment timestamp: {ts}")
 
 print(timestamp)
 
