@@ -1,4 +1,5 @@
 from artiq.experiment import EnvExperiment
+from artiq.language.core import TerminationRequested
 import time
 import sys
 import os
@@ -26,22 +27,30 @@ class FindOptimalE(EnvExperiment):
         if not self.scan_ok:
             return
 
-        initial_sampling(self)
+        current_step = -1
+        try:
+            initial_sampling(self)
 
-        low_ei_count = 0
-        for current_step in range(self.max_iteration):
+            low_ei_count = 0
+            for current_step in range(self.max_iteration):
 
-            t0 = time.time()
+                t0 = time.time()
 
-            ei = run_experiment_with_retries(self, bo_sampling, current_step)
+                ei = run_experiment_with_retries(self, bo_sampling, current_step)
 
-            # converge in advance: ei < tolerance event counter
-            if ei < self.tolerance: low_ei_count += 1
-            else: low_ei_count = 0
+                # converge in advance: ei < tolerance event counter
+                if ei < self.tolerance: low_ei_count += 1
+                else: low_ei_count = 0
 
-            self.mutate_dataset("time_cost", current_step + self.init_sample_size, time.time() - t0)
+                self.mutate_dataset("time_cost", current_step + self.init_sample_size, time.time() - t0)
 
-            # if the algorithm was already converged
-            if (current_step + 1) >= self.min_iteration \
-                    and low_ei_count >= self.converge_count:
-                break
+                # if the algorithm was already converged
+                if (current_step + 1) >= self.min_iteration \
+                        and low_ei_count >= self.converge_count:
+                    break
+
+        except TerminationRequested:
+            return
+        except Exception as e:
+            print(f"Optimizer terminated early at step {current_step}: {e}")
+            return

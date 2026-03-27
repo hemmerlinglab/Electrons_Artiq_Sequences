@@ -20,7 +20,7 @@ def run_with_422_relock(scanner, config, initialize=False, **run_kwargs):
         ts = scanner.run(**run_kwargs)
         stdout, stderr = scanner.last_output
 
-        if "LASER_OFF_422" in stderr:
+        if "STATUS:LASER_FAILED_422" in stdout:
             print("[Manager] Detected LASER_OFF_422 -> relock laser and retry scan.")
 
             new_422_freq, _, _ = relock_laser(scanner, config, laser_to_relock=422)
