@@ -34,10 +34,7 @@ config = {
 
 # 2) Scan settings
 # =================================================================
-tables = [ 
-    "lifetime_wait_times_slow_20260324 (2).csv", 
-    "lifetime_wait_times_slow_20260324 (3).csv", 
-    "lifetime_wait_times_slow_20260324 (4).csv", 
+tables = [  
     "lifetime_wait_times_slow_20260324 (5).csv", 
     "lifetime_wait_times_slow_20260324 (6).csv"
 ]

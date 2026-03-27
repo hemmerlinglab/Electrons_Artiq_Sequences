@@ -59,6 +59,7 @@ def relock_laser(
     scanner.set_param("histogram_refresh", rough_repeats)
 
     print(f"[Relock_Laser] Scanning frequency_{laser_to_relock} [rough] ...")
+
     ts_rough = run_with_422_relock(
         scanner, config, 
         scanning_parameter = f"frequency_{laser_to_relock}",
@@ -66,7 +67,9 @@ def relock_laser(
         max_scan = rough_scan_center + rough_scan_width,
         steps = rough_steps,
     )
+  
     freq_rough = find_best_laser_frequency(ts_rough)
+
     print(f"[Relock_Laser] Scan Result: {freq_rough:6f} THz")
 
     scanner.set_param("no_of_repeats", fine_repeats)
@@ -80,6 +83,7 @@ def relock_laser(
         max_scan = freq_rough + fine_scan_width,
         steps = fine_steps
     )
+
     freq_fine = find_best_laser_frequency(ts_fine)
     print(f"[Relock_Laser] Scan Result: {freq_fine:6f} THz")
 
@@ -93,4 +97,4 @@ def relock_laser(
     else:
         print(f"frequency_{laser_to_relock} updated: {f0:.6f} -> {freq_fine:.6f} THz")
 
-    return freq_fine, ts_rough, ts_fine
+    return freq_fine, ts_rough, ts_fine 

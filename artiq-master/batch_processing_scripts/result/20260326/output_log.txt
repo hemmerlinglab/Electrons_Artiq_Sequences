@@ -1006,3 +1006,213 @@ Experiment finished.
 stderr:
 
 ============================================================
+
+============================================================
+timestamp: 
+returncode: 1
+stdout:
+100
+b'Keysight Technologies,N9000B,MY60251535,A.32.01\n'
+Successfully sent setpoint 768.708843 THz to laser 390!
+Successfully sent setpoint 709.076700 THz to laser 422!
+[MCP] Applying MCP Voltage: 500.000, 2500.000, 2700.000
+****************************************************************************************************
+* Starting new scan
+****************************************************************************************************
+
+Scanning parameter tickle_frequency: 1.0 (1/100)
+Scanning parameter tickle_frequency: 2.0 (2/100)
+Scanning parameter tickle_frequency: 3.0 (3/100)
+Scanning parameter tickle_frequency: 4.0 (4/100)
+Scanning parameter tickle_frequency: 5.0 (5/100)
+Scanning parameter tickle_frequency: 6.0 (6/100)
+Scanning parameter tickle_frequency: 7.0 (7/100)
+Scanning parameter tickle_frequency: 8.0 (8/100)
+Scanning parameter tickle_frequency: 9.0 (9/100)
+Scanning parameter tickle_frequency: 10.0 (10/100)
+Scanning parameter tickle_frequency: 11.0 (11/100)
+Scanning parameter tickle_frequency: 12.0 (12/100)
+Scanning parameter tickle_frequency: 13.0 (13/100)
+Scanning parameter tickle_frequency: 14.0 (14/100)
+Scanning parameter tickle_frequency: 15.0 (15/100)
+Scanning parameter tickle_frequency: 16.0 (16/100)
+Scanning parameter tickle_frequency: 17.0 (17/100)
+Scanning parameter tickle_frequency: 18.0 (18/100)
+Scanning parameter tickle_frequency: 19.0 (19/100)
+Scanning parameter tickle_frequency: 20.0 (20/100)
+Scanning parameter tickle_frequency: 21.0 (21/100)
+Scanning parameter tickle_frequency: 22.0 (22/100)
+Scanning parameter tickle_frequency: 23.0 (23/100)
+Scanning parameter tickle_frequency: 24.0 (24/100)
+Scanning parameter tickle_frequency: 25.0 (25/100)
+Scanning parameter tickle_frequency: 26.0 (26/100)
+Scanning parameter tickle_frequency: 27.0 (27/100)
+Scanning parameter tickle_frequency: 28.0 (28/100)
+Scanning parameter tickle_frequency: 29.0 (29/100)
+Scanning parameter tickle_frequency: 30.0 (30/100)
+Scanning parameter tickle_frequency: 31.0 (31/100)
+Scanning parameter tickle_frequency: 32.0 (32/100)
+Scanning parameter tickle_frequency: 33.0 (33/100)
+Scanning parameter tickle_frequency: 34.0 (34/100)
+Scanning parameter tickle_frequency: 35.0 (35/100)
+Scanning parameter tickle_frequency: 36.0 (36/100)
+Scanning parameter tickle_frequency: 37.0 (37/100)
+Scanning parameter tickle_frequency: 38.0 (38/100)
+Scanning parameter tickle_frequency: 39.0 (39/100)
+Scanning parameter tickle_frequency: 40.0 (40/100)
+Scanning parameter tickle_frequency: 41.0 (41/100)
+Scanning parameter tickle_frequency: 42.0 (42/100)
+Scanning parameter tickle_frequency: 43.0 (43/100)
+Scanning parameter tickle_frequency: 44.0 (44/100)
+Scanning parameter tickle_frequency: 45.0 (45/100)
+Scanning parameter tickle_frequency: 46.0 (46/100)
+Scanning parameter tickle_frequency: 47.0 (47/100)
+Scanning parameter tickle_frequency: 48.0 (48/100)
+Scanning parameter tickle_frequency: 49.0 (49/100)
+Scanning parameter tickle_frequency: 50.0 (50/100)
+Scanning parameter tickle_frequency: 51.0 (51/100)
+Scanning parameter tickle_frequency: 52.0 (52/100)
+Scanning parameter tickle_frequency: 53.0 (53/100)
+Scanning parameter tickle_frequency: 54.0 (54/100)
+Scanning parameter tickle_frequency: 55.0 (55/100)
+Scanning parameter tickle_frequency: 56.0 (56/100)
+Scanning parameter tickle_frequency: 57.0 (57/100)
+Scanning parameter tickle_frequency: 58.0 (58/100)
+Scanning parameter tickle_frequency: 59.0 (59/100)
+Scanning parameter tickle_frequency: 60.0 (60/100)
+Scanning parameter tickle_frequency: 61.0 (61/100)
+Scanning parameter tickle_frequency: 62.0 (62/100)
+Scanning parameter tickle_frequency: 63.0 (63/100)
+Scanning parameter tickle_frequency: 64.0 (64/100)
+Scanning parameter tickle_frequency: 65.0 (65/100)
+Scanning parameter tickle_frequency: 66.0 (66/100)
+Scanning parameter tickle_frequency: 67.0 (67/100)
+Scanning parameter tickle_frequency: 68.0 (68/100)
+Scanning parameter tickle_frequency: 69.0 (69/100)
+Scanning parameter tickle_frequency: 70.0 (70/100)
+Scanning parameter tickle_frequency: 71.0 (71/100)
+Scanning parameter tickle_frequency: 72.0 (72/100)
+Scanning parameter tickle_frequency: 73.0 (73/100)
+Scanning parameter tickle_frequency: 74.0 (74/100)
+Scanning parameter tickle_frequency: 75.0 (75/100)
+Scanning parameter tickle_frequency: 76.0 (76/100)
+Scanning parameter tickle_frequency: 77.0 (77/100)
+Scanning parameter tickle_frequency: 78.0 (78/100)
+Scanning parameter tickle_frequency: 79.0 (79/100)
+Scanning parameter tickle_frequency: 80.0 (80/100)
+Scanning parameter tickle_frequency: 81.0 (81/100)
+Scanning parameter tickle_frequency: 82.0 (82/100)
+Scanning parameter tickle_frequency: 83.0 (83/100)
+Scanning parameter tickle_frequency: 84.0 (84/100)
+Scanning parameter tickle_frequency: 85.0 (85/100)
+Scanning parameter tickle_frequency: 86.0 (86/100)
+Scanning parameter tickle_frequency: 87.0 (87/100)
+Scanning parameter tickle_frequency: 88.0 (88/100)
+Scanning parameter tickle_frequency: 89.0 (89/100)
+Scanning parameter tickle_frequency: 90.0 (90/100)
+Scanning parameter tickle_frequency: 91.0 (91/100)
+Scanning parameter tickle_frequency: 92.0 (92/100)
+Scanning parameter tickle_frequency: 93.0 (93/100)
+Scanning parameter tickle_frequency: 94.0 (94/100)
+Scanning parameter tickle_frequency: 95.0 (95/100)
+Scanning parameter tickle_frequency: 96.0 (96/100)
+Scanning parameter tickle_frequency: 97.0 (97/100)
+Scanning parameter tickle_frequency: 98.0 (98/100)
+Scanning parameter tickle_frequency: 99.0 (99/100)
+Scanning parameter tickle_frequency: 100.0 (100/100)
+
+
+stderr:
+Traceback (most recent call last):
+  File "/nix/store/vpkbabjwkqf8g9l1k6w1d838amsq15z4-python3.8-artiq-6.7621.d9b01ed8/bin/.artiq_run-wrapped", line 9, in <module>
+    sys.exit(main())
+  File "/home/electrons/.nix-profile/lib/python3.8/site-packages/artiq/frontend/artiq_run.py", line 224, in main
+    return run(with_file=True)
+  File "/home/electrons/.nix-profile/lib/python3.8/site-packages/artiq/frontend/artiq_run.py", line 210, in run
+    raise exn
+  File "/home/electrons/.nix-profile/lib/python3.8/site-packages/artiq/frontend/artiq_run.py", line 204, in run
+    exp_inst.analyze()
+  File "/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/Modular/single_parameter_scan.py", line 24, in analyze
+    ofat_analyze(self)
+  File "/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/analyze_functions.py", line 20, in ofat_analyze
+    define_saving_configuration(self)
+  File "/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/analyze_functions.py", line 208, in define_saving_configuration
+    get_basefilename(self)
+NameError: name 'get_basefilename' is not defined
+
+============================================================
+
+============================================================
+timestamp: 
+returncode: 1
+stdout:
+100
+b'Keysight Technologies,N9000B,MY60251535,A.32.01\n'
+Successfully sent setpoint 768.708843 THz to laser 390!
+Successfully sent setpoint 709.076700 THz to laser 422!
+[MCP] Applying MCP Voltage: 500.000, 2500.000, 2700.000
+****************************************************************************************************
+* Starting new scan
+****************************************************************************************************
+
+Scanning parameter tickle_frequency: 1.0 (1/100)
+Scanning parameter tickle_frequency: 2.0 (2/100)
+Scanning parameter tickle_frequency: 3.0 (3/100)
+Scanning parameter tickle_frequency: 4.0 (4/100)
+Scanning parameter tickle_frequency: 5.0 (5/100)
+Scanning parameter tickle_frequency: 6.0 (6/100)
+Scanning parameter tickle_frequency: 7.0 (7/100)
+Scanning parameter tickle_frequency: 8.0 (8/100)
+Scanning parameter tickle_frequency: 9.0 (9/100)
+Scanning parameter tickle_frequency: 10.0 (10/100)
+Scanning parameter tickle_frequency: 11.0 (11/100)
+Scanning parameter tickle_frequency: 12.0 (12/100)
+Scanning parameter tickle_frequency: 13.0 (13/100)
+Scanning parameter tickle_frequency: 14.0 (14/100)
+Scanning parameter tickle_frequency: 15.0 (15/100)
+Scanning parameter tickle_frequency: 16.0 (16/100)
+Scanning parameter tickle_frequency: 17.0 (17/100)
+Scanning parameter tickle_frequency: 18.0 (18/100)
+Scanning parameter tickle_frequency: 19.0 (19/100)
+Scanning parameter tickle_frequency: 20.0 (20/100)
+Scanning parameter tickle_frequency: 21.0 (21/100)
+Scanning parameter tickle_frequency: 22.0 (22/100)
+Scanning parameter tickle_frequency: 23.0 (23/100)
+Scanning parameter tickle_frequency: 24.0 (24/100)
+Scanning parameter tickle_frequency: 25.0 (25/100)
+Scanning parameter tickle_frequency: 26.0 (26/100)
+Scanning parameter tickle_frequency: 27.0 (27/100)
+Scanning parameter tickle_frequency: 28.0 (28/100)
+Scanning parameter tickle_frequency: 29.0 (29/100)
+Scanning parameter tickle_frequency: 30.0 (30/100)
+Scanning parameter tickle_frequency: 31.0 (31/100)
+STATUS:LASER_OFF_422
+Laser error (Laser frequency of 422 is off, please fix it manually!)
+
+
+stderr:
+Traceback (most recent call last):
+  File "/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/run_functions.py", line 54, in run_experiment_with_retries
+    return experiment_function(self, ind, **kwargs)
+  File "/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/run_functions.py", line 123, in measure
+    raise LaserError(422)
+run_functions.LaserError: Laser frequency of 422 is off, please fix it manually!
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/nix/store/vpkbabjwkqf8g9l1k6w1d838amsq15z4-python3.8-artiq-6.7621.d9b01ed8/bin/.artiq_run-wrapped", line 9, in <module>
+    sys.exit(main())
+  File "/home/electrons/.nix-profile/lib/python3.8/site-packages/artiq/frontend/artiq_run.py", line 224, in main
+    return run(with_file=True)
+  File "/home/electrons/.nix-profile/lib/python3.8/site-packages/artiq/frontend/artiq_run.py", line 210, in run
+    raise exn
+  File "/home/electrons/.nix-profile/lib/python3.8/site-packages/artiq/frontend/artiq_run.py", line 203, in run
+    exp_inst.run()
+  File "/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/Modular/single_parameter_scan.py", line 48, in run
+    run_experiment_with_retries(
+  File "/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/run_functions.py", line 80, in run_experiment_with_retries
+    raise RuntimeError(f"LASER_OFF_{int(e.laser_id)}") from e
+RuntimeError: LASER_OFF_422
+
+============================================================
