@@ -35,10 +35,6 @@ class ArtiqController:
         self.workdir = workdir    # Must set appropriately otherwise artiq would crash
         self.log_path = log_path
         self.last_output = ("", "")
-        self.live_status = {
-            "laser_off_422": False,
-            "laser_off_390": False,
-        }
 
         # Private Attributes
         self._profiles = {}       # In-memory profiles: name -> {"script": ..., "command": ..., "params": {...}}
@@ -253,23 +249,15 @@ class ArtiqController:
 
     # 3. monitor artiq status in real time
     # +++++++++++++++++++++++++++++++++++++++++++++++++
-    def _reset_live_status(self):
-        self.live_status = {
-            "laser_off_422": False,
-            "laser_off_390": False,
-        }
-
     def _handle_live_stdout_line(self, line: str):
         """
-        Set the status you require the ArtiqController class to monitor
-        currently monitoring laser errors for 390 and 422
+        Called for every stdout line while the artiq process is running.
+        Prints a console notice when a laser STATUS signal is detected.
         """
         if "STATUS:LASER_OFF_422" in line:
-            self.live_status["laser_off_422"] = True
             print("[ArtiqController] Laser 422 needs manual fix.")
 
         if "STATUS:LASER_OFF_390" in line:
-            self.live_status["laser_off_390"] = True
             print("[ArtiqController] Laser 390 needs manual fix.")
 
     def _spawn_process(self):
@@ -286,80 +274,59 @@ class ArtiqController:
             env=env,
         )
 
-    def _start_stream_reader_threads(self, proc, q):
+    def _run_artiq(self):
+        """
+        Spawn the artiq process, stream stdout in real time for live STATUS monitoring,
+        then read stderr in one shot after the process ends.
+        Returns (stdout, stderr, timestamp, returncode).
+        """
+        stdout_lines = []
+        q = queue.Queue()
 
-        def reader(pipe, tag):
+        proc = self._spawn_process()
+
+        def stdout_reader():
             try:
-                for line in iter(pipe.readline, ''):
-                    q.put((tag, line))
+                for line in iter(proc.stdout.readline, ''):
+                    q.put(line)
             finally:
-                pipe.close()
+                proc.stdout.close()
 
-        t_out = threading.Thread(target=reader, args=(proc.stdout, "stdout"), daemon=True)
-        t_err = threading.Thread(target=reader, args=(proc.stderr, "stderr"), daemon=True)
-        t_out.start()
-        t_err.start()
-
-        return t_out, t_err
-
-    def _collect_stream_output(self, proc, q, stdout_lines, stderr_lines):
+        t = threading.Thread(target=stdout_reader, daemon=True)
+        t.start()
 
         while True:
             try:
-                tag, line = q.get(timeout=0.1)
-            except queue.Empty:
-                if proc.poll() is not None:
-                    if q.empty():
-                        break
-                    continue
-                continue
-
-            if tag == "stdout":
+                line = q.get(timeout=0.1)
                 stdout_lines.append(line)
                 self._handle_live_stdout_line(line)
-            else:
-                stderr_lines.append(line)
+            except queue.Empty:
+                if proc.poll() is not None and q.empty():
+                    break
 
-    def _finalize_completed_process(self, proc, returncode, stdout_lines, stderr_lines):
+        returncode = proc.wait()
+        stderr = proc.stderr.read()
+
         stdout = "".join(stdout_lines)
-        stderr = "".join(stderr_lines)
-
         cp = subprocess.CompletedProcess(proc.args, returncode, stdout, stderr)
         stdout, stderr = self._clean_output(cp)
         self.last_output = (stdout, stderr)
         timestamp = self._extract_timestamps(stdout, stderr)
-
-        return stdout, stderr, timestamp
+        return stdout, stderr, timestamp, returncode
 
     # -----------------------------
     # Main Utilities
     # -----------------------------
     def run(self) -> str:
 
-        proc = None
-        stdout = ""
-        stderr = ""
-        stdout_lines = []
-        stderr_lines = []
+        self._last_run_time = timestamp_string()
         timestamp = ""
         controller_traceback = ""
         returncode = None
-        q = queue.Queue()
+        stdout = stderr = ""
 
-        # run experiment with real-time monitoring on Artiq's output
         try:
-            self._last_run_time = timestamp_string()
-            self._reset_live_status()
-
-            proc = self._spawn_process()
-            self._start_stream_reader_threads(proc, q)
-            self._collect_stream_output(proc, q, stdout_lines, stderr_lines)
-
-            returncode = proc.wait()
-            stdout, stderr, timestamp = self._finalize_completed_process(
-                proc, returncode, stdout_lines, stderr_lines
-            )
-
+            stdout, stderr, timestamp, returncode = self._run_artiq()
             return timestamp
 
         # if the operator do KeyboardInterrupt, keep traceback and crash
@@ -371,9 +338,7 @@ class ArtiqController:
         finally:
             self._last_end_time = timestamp_string()
             self._write_output_log(
-                timestamp,
-                stdout if stdout else "".join(stdout_lines),
-                stderr if stderr else "".join(stderr_lines),
+                timestamp, stdout, stderr,
                 controller_traceback=controller_traceback,
                 returncode=returncode,
             )
@@ -545,49 +510,31 @@ class FindOptimalE(ArtiqController):
         no_of_repeats: int = 3000,
         **extra_params,
     ):
-        proc = None
-        stdout = ""
-        stderr = ""
-        stdout_lines = []
-        stderr_lines = []
+        self.load_params({
+            "optimize_target": optimize_target,
+            "max_iteration": max_iteration,
+            "tolerance": tolerance,
+            "converge_count": converge_count,
+            "min_Ex": min_Ex,
+            "max_Ex": max_Ex,
+            "min_Ey": min_Ey,
+            "max_Ey": max_Ey,
+            "min_Ez": min_Ez,
+            "max_Ez": max_Ez,
+            "no_of_repeats": no_of_repeats,
+        })
+        self.load_params(extra_params)
+
+        self._last_run_time = timestamp_string()
         timestamp = ""
         controller_traceback = ""
         returncode = None
-        E_best_obs = None
-        E_best_model = None
-        q = queue.Queue()
+        stdout = stderr = ""
+        E_best_obs = E_best_model = None
 
-        # run experiment with real-time monitoring on Artiq's output
         try:
-            self.load_params({
-                "optimize_target": optimize_target,
-                "max_iteration": max_iteration,
-                "tolerance": tolerance,
-                "converge_count": converge_count,
-                "min_Ex": min_Ex,
-                "max_Ex": max_Ex,
-                "min_Ey": min_Ey,
-                "max_Ey": max_Ey,
-                "min_Ez": min_Ez,
-                "max_Ez": max_Ez,
-                "no_of_repeats": no_of_repeats,
-            })
-            self.load_params(extra_params)
-
-            self._last_run_time = timestamp_string()
-            self._reset_live_status()
-
-            proc = self._spawn_process()
-            self._start_stream_reader_threads(proc, q)
-            self._collect_stream_output(proc, q, stdout_lines, stderr_lines)
-
-            returncode = proc.wait()
-            stdout, stderr, timestamp = self._finalize_completed_process(
-                proc, returncode, stdout_lines, stderr_lines
-            )
-
+            stdout, stderr, timestamp, returncode = self._run_artiq()
             E_best_obs, E_best_model = self._parse_optimal_Es(stdout, stderr)
-
             return E_best_obs, E_best_model, timestamp
 
         # if the operator do KeyboardInterrupt, keep traceback and crash
@@ -599,9 +546,7 @@ class FindOptimalE(ArtiqController):
         finally:
             self._last_end_time = timestamp_string()
             self._write_output_log(
-                timestamp,
-                stdout if stdout else "".join(stdout_lines),
-                stderr if stderr else "".join(stderr_lines),
+                timestamp, stdout, stderr,
                 controller_traceback=controller_traceback,
                 returncode=returncode,
             )

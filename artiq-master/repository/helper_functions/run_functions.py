@@ -60,8 +60,8 @@ def run_experiment_with_retries(self, experiment_function, ind, **kwargs):
             if rtio_retries <= MAX_RTIO_RETRIES:
                 print(f"Retrying ({rtio_retries}/{MAX_RTIO_RETRIES}) ...")
                 continue
-            print(f"Failed after {MAX_RTIO_RETRIES} trials, terminating experiment ...")
-            raise RuntimeError("Unable to address RTIO error!")
+            print(f"STATUS:RTIO_ERROR", flush=True)
+            raise RuntimeError(f"Failed after {MAX_RTIO_RETRIES} RTIO retries")
 
         # Handle Laser Errors
         except LaserError as e:
@@ -77,6 +77,7 @@ def run_experiment_with_retries(self, experiment_function, ind, **kwargs):
             too_long = dt > 10
             too_many = laser_retries > MAX_LASER_RETRIES
             if (self.laser_failure == "raise error") and (too_long or too_many):
+                print(f"STATUS:LASER_FAILED_{int(e.laser_id)}", flush=True)
                 raise RuntimeError(f"LASER_OFF_{int(e.laser_id)}") from e
             continue
 
@@ -89,7 +90,9 @@ def run_experiment_with_retries(self, experiment_function, ind, **kwargs):
                 continue
             if detector_retries <= MAX_DETECTOR_RETRIES:
                 print(f"Failed to recover detector, Retrying ({detector_retries}/{MAX_DETECTOR_RETRIES}) ...")
-            raise RuntimeError("Unable to address detector error!")
+                continue
+            print(f"STATUS:DETECTOR_ERROR", flush=True)
+            raise RuntimeError(f"Failed after {MAX_DETECTOR_RETRIES} detector retries")
 
         except TerminationRequested as e:
             print("Termination requested, aborting the experiment ...")

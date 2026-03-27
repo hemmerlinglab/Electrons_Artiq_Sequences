@@ -57,3 +57,6 @@ class SingleParamScan(EnvExperiment):
 
             except TerminationRequested:
                 return
+            except Exception as e:
+                print(f"Experiment terminated early at point {ind}: {e}")
+                return

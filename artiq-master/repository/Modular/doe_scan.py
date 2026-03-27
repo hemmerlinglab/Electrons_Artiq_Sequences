@@ -48,6 +48,15 @@ class DOEScan(EnvExperiment):
 
                 except TerminationRequested:
                     return
+                except Exception as e:
+                    print(f"Experiment terminated early at point {ind}: {e}")
+                    return
 
         elif self.utility_mode == "Single Experiment":
-            run_experiment_with_retries(self, measure, 0)
+            try:
+                run_experiment_with_retries(self, measure, 0)
+            except TerminationRequested:
+                return
+            except Exception as e:
+                print(f"Single experiment terminated early: {e}")
+                return
