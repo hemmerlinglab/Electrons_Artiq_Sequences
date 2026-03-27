@@ -11,47 +11,54 @@ from helper_functions import latin_hypercube, normalize_coordinates, normalize_v
 # 1) Master function for analyze
 def ofat_analyze(self):
 
-    try:
-        reset_scan_parameter(self)
-    except Exception:
-        print("[Error] Failed to reset scan parameter")
-        traceback.print_exc()
-
+    # 1) Reset devices to default state
+    reset_instruments(self)
     close_instruments(self)
 
+    # 2) Save data
+    define_ofat_saving_configuration(self)
+    define_saving_configuration(self)
     save_data_or_exit(self)
 
 def doe_analyze(self):
 
-    try:
-        reset_scanned_parameters(self)
-    except Exception:
-        print("[Error] Failed to reset scanned parameters")
-        traceback.print_exc()
-
+    # 1) Reset devices to default state
+    reset_instruments(self)
     close_instruments(self)
 
+    # 2) Save data
+    define_saving_configuration(self)
     save_data_or_exit(self)
-
     if self.scan_ok and self.utility_mode == "DOE Scan":
         save_to_doe_table(self)
 
 def optimizer_analyze(self):
 
-    try:
-        reset_optimizer_parameters(self)
-    except Exception:
-        print("[Error] Failed to reset optimizer parameters")
-        traceback.print_exc()
-
+    # 1) Reset devices to default state
+    reset_instruments(self)
     close_instruments(self)
 
+    # 2) Save data
+    define_saving_configuration(self)
+    define_optimizer_saving_configuration(self)
     save_data_or_exit(self)
 
     printout_final_result(self)
 
 # ===================================================================
 # 2) Subfunctions for analyze
+def reset_instruments(self, optimizer=False):
+
+    # Reset devices to default state
+    try:
+        if optimizer:
+            reset_optimizer_parameters(self)
+        else:
+            reset_scan_parameter(self)
+    except Exception:
+        print("[Error] Failed to reset scan parameter")
+        traceback.print_exc()
+
 def reset_scan_parameter(self):
 
     name = self.scanning_parameter
@@ -172,7 +179,52 @@ def find_model_optimum(self):
     return E_best, y_best
 
 # ===================================================================
-# 3) Functions for saving data
+# 3) Define data to save
+def define_saving_configuration(self):
+    
+    # Set the data going to save
+    common_data_to_save = [
+            #{'var' : 'arr_of_timestamps',  'name' : 'array of timestamps during extraction'},
+            {'var' : 'last_frequency_422', 'name' : 'array of fetched last frequency from laser lock GUI, actual frequency if the GUI is measuring 422 at the time'},
+            {'var' : 'last_frequency_390', 'name' : 'array of fetched last frequency from laser lock GUI, actual frequency if the GUI is measuring 390 at the time'},
+            {'var' : 'trapped_signal',     'name' : 'array of trapped electron counts'},
+            {'var' : 'loading_signal',     'name' : 'array of loading electron counts'},
+            {'var' : 'lost_signal',        'name' : 'array of kicked out electron counts in the first 15us or during the tickle pulse duration when it is smaller than 15us'},
+            {'var' : 'ratio_signal',       'name' : 'array of trapped counts / loading counts'},
+            {'var' : 'ratio_lost',         'name' : 'array of lost counts / loading counts'},
+            {'var' : 'scan_result',        'name' : 'array of recorded counts for counting mode'},
+            {'var' : 'time_cost',          'name' : 'array of time cost for each experiment scan'},
+            {'var' : 'act_RF_amplitude',   'name' : 'array of actual RF amplitude'},
+    ]
+
+    # save sequence file name
+    self.data_to_save.extend(common_data_to_save)
+    self.config_dict.append({'par' : 'sequence_file', 'val' : self.sequence_filename, 'cmt' : 'Filename of the main sequence file'})
+
+    if self.mode in ("Lifetime", "Lifetime_fast"):
+        tao = [{'var' : 'lifetime',  'name' : 'lifetime'}]
+        self.data_to_save.extend(tao)
+
+    get_basefilename(self)
+
+def define_ofat_saving_configuration(self):
+
+    self.data_to_save.append({'var' : 'arr_of_setpoints',   'name' : 'array of setpoints'})
+
+    if self.mode == 'Counting':
+        self.data_to_save.append({'var' : 'scan_x', 'name' : 'array of setpoints for counting mode, duplicate but in order to be compatible with applet'})
+
+def define_optimizer_saving_configuration(self):
+
+    optimizer_data_to_save = [
+        {'var' : 'e_trace', 'name' : 'array of electric field trace'},
+        {'var' : 'y_best',  'name' : 'array of best signal until now'},
+        {'var' : 'ei',      'name' : 'array of expected improvement'}
+    ]
+    self.data_to_save.extend(optimizer_data_to_save)
+
+# ===================================================================
+# 4) Functions for saving data
 def save_data_or_exit(self):
 
     # If there are error records, append to config_dict

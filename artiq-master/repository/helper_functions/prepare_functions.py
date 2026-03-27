@@ -29,190 +29,46 @@ from base_sequences import (
 # 1) Master function for prepare
 def ofat_prepare(self):
 
-    # 1) prepare instruments
-    prepare_instruments(self)
-
-    # 2) prepare datasets
-
+    # 1) Prepare datasets
     prepare_ofat_datasets(self)
-
     _prepare_with_effective_steps(self, prepare_common_datasets)
+    prepare_lifetime_datasets(self)
 
-    if self.mode == "Lifetime_fast":
-        self.set_dataset('lifetime', [0] * self.steps, broadcast=True)
-        out = np.repeat(self.scan_values, 2)
-        self.set_dataset('arr_of_setpoints', out, broadcast=True)
-
-    elif self.mode == "Lifetime":
-        self.set_dataset('lifetime', [0] * self.steps, broadcast=True)
-        n = len(self.wait_time_arr)
-        out = np.repeat(self.scan_values, n)
-        self.set_dataset('arr_of_setpoints', out, broadcast=True)
-
-    # 3) prepare others
+    # 2) Prepare devices
+    prepare_instruments(self)
     prepare_initialization(self)
-    prepare_ofat_saving_configuration(self)
-    prepare_saving_configuration(self)
 
 def doe_prepare(self):
 
-    # 1) prepare instruments
-    prepare_instruments(self)
+    # 1) Prepare datasets
+    prepare_doe_datasets(self)
 
-    # 2) prepare datasets
     if self.utility_mode == "Single Experiment":
         self.steps = 1
         self.scan_ok = True
-
-    prepare_doe_datasets(self)
-    self.set_dataset('lifetime', [0] * self.steps, broadcast=True)
-
-    if self.utility_mode == "DOE Scan":
+    elif self.utility_mode == "DOE Scan":
         _prepare_with_effective_steps(self, prepare_common_datasets)
 
-    # 3) prepare others
+    prepare_lifetime_datasets(self)
+
+    # 2) Prepare devices
+    prepare_instruments(self)
     prepare_initialization(self)
-    prepare_saving_configuration(self)
 
 def optimizer_prepare(self):
 
-    # 1) prepare instruments
-    prepare_instruments(self)
-
-    # 2) prepare datasets
+    # 1) Prepare datasets
     prepare_optimizer_datesets(self)
     self.set_dataset('lifetime', [0] * self.steps, broadcast=True)
-
     _prepare_with_effective_steps(self, prepare_common_datasets)
+    prepare_lifetime_datasets(self)
 
+    # 2) Prepare devices
+    prepare_instruments(self)
     prepare_initialization(self)
-    prepare_saving_configuration(self)
-    prepare_optimizer_saving_configuration(self)
 
 # ===================================================================
-# 2) Subfunctions for prepare
-def prepare_instruments(self):
-
-    self.ext_pulser         = BK4053()      # extraction pulse generator and AOM controller
-    self.tickler            = DSG821()      # tickle pulse generator
-    self.threshold_detector = DG4162()      # final signal for ARTIQ and threshold detector reset
-    self.laser              = LaserClient() # Laser Lock GUI client
-
-    # trap drive and measurement
-    self.rf = RFController(
-        mode = self.RF_amp_mode,
-        amplitude = self.RF_amplitude,
-        frequency = self.RF_frequency
-    )
-
-    # Zotino DC controller
-    self.electrodes = Electrodes(trap = self.trap, flipped = self.flip_electrodes)
-    for elec in self.electrodes.elec_dict.keys():
-        param_name = f"offset_{elec}"
-        offset_voltage = getattr(self, param_name)
-        self.electrodes.set_offset(elec, offset_voltage)
-
-def prepare_initialization(self):
-
-    # configures the trap drive, mesh voltage, etc ...
-
-    # 1. Laser
-    #------------------------------------------------------
-    self.laser.set_frequency(390, self.frequency_390)
-    self.laser.set_frequency(422, self.frequency_422)
-
-    # 2. RF
-    #------------------------------------------------------
-    if self.RF_on:
-        self.rf.on()
-    else:
-        self.rf.off(kill_sockets=False)
-
-    # 3. DC voltages
-    #------------------------------------------------------
-    zotino_initialization(self)
-    set_multipoles(self)
-
-    # 4. Mesh and MCP
-    #------------------------------------------------------
-    #self.mesh = Mesh(initial_voltage = self.mesh_voltage)
-    set_mesh_voltage(self, self.mesh_voltage)
-    self.current_MCP_front = self.MCP_front
-    set_MCP_voltages(self, self.MCP_front)
-
-    # 5. Envelope Threshold Detector
-    #------------------------------------------------------
-    set_threshold_voltage(self, self.threshold_voltage*1e-3)
-    self.threshold_detector.config_general()
-    self.threshold_detector.set_to_signal_mode()
-    self.threshold_detector.on(1)
-
-    # 6. Extraction Pulse
-    #------------------------------------------------------
-    set_extraction_pulse(self)
-    set_loading_pulse(self)
-
-    # 7. Tickle Pulse
-    #------------------------------------------------------
-    if self.tickle_on:
-        self.tickler.on()
-        self.tickler.set_ampl(self.tickle_level)
-        self.tickler.set_freq(self.tickle_frequency)
-    else:
-        self.tickler.off()
-
-def prepare_saving_configuration(self):
-    
-    # Set the data going to save
-    common_data_to_save = [
-            #{'var' : 'arr_of_timestamps',  'name' : 'array of timestamps during extraction'},
-            {'var' : 'last_frequency_422', 'name' : 'array of fetched last frequency from laser lock GUI, actual frequency if the GUI is measuring 422 at the time'},
-            {'var' : 'last_frequency_390', 'name' : 'array of fetched last frequency from laser lock GUI, actual frequency if the GUI is measuring 390 at the time'},
-            {'var' : 'trapped_signal',     'name' : 'array of trapped electron counts'},
-            {'var' : 'loading_signal',     'name' : 'array of loading electron counts'},
-            {'var' : 'lost_signal',        'name' : 'array of kicked out electron counts in the first 15us or during the tickle pulse duration when it is smaller than 15us'},
-            {'var' : 'ratio_signal',       'name' : 'array of trapped counts / loading counts'},
-            {'var' : 'ratio_lost',         'name' : 'array of lost counts / loading counts'},
-            {'var' : 'scan_result',        'name' : 'array of recorded counts for counting mode'},
-            {'var' : 'time_cost',          'name' : 'array of time cost for each experiment scan'},
-            {'var' : 'act_RF_amplitude',   'name' : 'array of actual RF amplitude'}
-    ]
-
-    # save sequence file name
-    self.data_to_save.extend(common_data_to_save)
-    self.config_dict.append({'par' : 'sequence_file', 'val' : self.sequence_filename, 'cmt' : 'Filename of the main sequence file'})
-
-    if self.mode in ("Lifetime", "Lifetime_fast"):
-        tao = [{'var' : 'lifetime',  'name' : 'lifetime'}]
-        self.data_to_save.extend(tao)
-
-    get_basefilename(self)
-
-    self.core.reset() # Reset the core
-
-    for k in range(1):
-        print("")
-    print("*"*100)
-    print("* Starting new scan")
-    print("*"*100)
-    print("")
-
-def prepare_ofat_saving_configuration(self):
-
-    self.data_to_save.append({'var' : 'arr_of_setpoints',   'name' : 'array of setpoints'})
-
-    if self.mode == 'Counting':
-        self.data_to_save.append({'var' : 'scan_x', 'name' : 'array of setpoints for counting mode, duplicate but in order to be compatible with applet'})
-
-def prepare_optimizer_saving_configuration(self):
-
-    optimizer_data_to_save = [
-        {'var' : 'e_trace', 'name' : 'array of electric field trace'},
-        {'var' : 'y_best',  'name' : 'array of best signal until now'},
-        {'var' : 'ei',      'name' : 'array of expected improvement'}
-    ]
-    self.data_to_save.extend(optimizer_data_to_save)
-
+# 2) Subfunctions for prepare dataset
 def prepare_common_datasets(self):
 
     update_detection_time(self)
@@ -307,8 +163,104 @@ def prepare_optimizer_datesets(self):
 
     self.scan_ok = True
 
+def prepare_lifetime_datasets(self):
+
+    if self.mode == "Lifetime_fast":
+        self.set_dataset('lifetime', [0] * self.steps, broadcast=True)
+        out = np.repeat(self.scan_values, 2)
+        self.set_dataset('arr_of_setpoints', out, broadcast=True)
+
+    elif self.mode == "Lifetime":
+        self.set_dataset('lifetime', [0] * self.steps, broadcast=True)
+        n = len(self.wait_time_arr)
+        out = np.repeat(self.scan_values, n)
+        self.set_dataset('arr_of_setpoints', out, broadcast=True)
+
 # ===================================================================
-# 3) Helper Functions
+# 3) Subfunctions for prepare devices
+def prepare_instruments(self):
+
+    self.ext_pulser         = BK4053()      # extraction pulse generator and AOM controller
+    self.tickler            = DSG821()      # tickle pulse generator
+    self.threshold_detector = DG4162()      # final signal for ARTIQ and threshold detector reset
+    self.laser              = LaserClient() # Laser Lock GUI client
+
+    # trap drive and measurement
+    self.rf = RFController(
+        mode = self.RF_amp_mode,
+        amplitude = self.RF_amplitude,
+        frequency = self.RF_frequency
+    )
+
+    # Zotino DC controller
+    self.electrodes = Electrodes(trap = self.trap, flipped = self.flip_electrodes)
+    for elec in self.electrodes.elec_dict.keys():
+        param_name = f"offset_{elec}"
+        offset_voltage = getattr(self, param_name)
+        self.electrodes.set_offset(elec, offset_voltage)
+
+def prepare_initialization(self):
+
+    # configures the trap drive, mesh voltage, etc ...
+
+    # 1. Laser
+    #------------------------------------------------------
+    self.laser.set_frequency(390, self.frequency_390)
+    self.laser.set_frequency(422, self.frequency_422)
+
+    # 2. RF
+    #------------------------------------------------------
+    if self.RF_on:
+        self.rf.on()
+    else:
+        self.rf.off(kill_sockets=False)
+
+    # 3. DC voltages
+    #------------------------------------------------------
+    zotino_initialization(self)
+    set_multipoles(self)
+
+    # 4. Mesh and MCP
+    #------------------------------------------------------
+    #self.mesh = Mesh(initial_voltage = self.mesh_voltage)
+    set_mesh_voltage(self, self.mesh_voltage)
+    self.current_MCP_front = self.MCP_front
+    set_MCP_voltages(self, self.MCP_front)
+
+    # 5. Envelope Threshold Detector
+    #------------------------------------------------------
+    set_threshold_voltage(self, self.threshold_voltage*1e-3)
+    self.threshold_detector.config_general()
+    self.threshold_detector.set_to_signal_mode()
+    self.threshold_detector.on(1)
+
+    # 6. Extraction Pulse
+    #------------------------------------------------------
+    set_extraction_pulse(self)
+    set_loading_pulse(self)
+
+    # 7. Tickle Pulse
+    #------------------------------------------------------
+    if self.tickle_on:
+        self.tickler.on()
+        self.tickler.set_ampl(self.tickle_level)
+        self.tickler.set_freq(self.tickle_frequency)
+    else:
+        self.tickler.off()
+
+    # 8. Artiq
+    #------------------------------------------------------
+    self.core.reset() # Reset the core
+
+    # 9. Message saying the experiment starts
+    #------------------------------------------------------
+    print("*"*100)
+    print("* Starting new scan")
+    print("*"*100)
+    print("")
+
+# ===================================================================
+# 4) Helper Functions
 def load_doe_setpoints(file_path, allowed_params):
 
     full_table = pd.read_csv(file_path)
