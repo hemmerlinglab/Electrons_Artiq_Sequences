@@ -329,11 +329,11 @@ class ArtiqController:
             self._finalize_process(proc, stdout_lines, q)
             raise
 
-        self._finalize_process(proc, stdout_lines, q)
+        stdout, stderr, returncode = self._finalize_process(proc, stdout_lines, q)
         timestamp = self._extract_timestamps(stdout, stderr)
         return stdout, stderr, timestamp, returncode
 
-    def _finalize_process(proc, stdout_lines, q):
+    def _finalize_process(self, proc, stdout_lines, q):
         returncode = proc.wait()
         stderr = proc.stderr.read()
 
@@ -366,6 +366,8 @@ class ArtiqController:
         # no matter the process succeeded or failed, write log
         finally:
             self._last_end_time = timestamp_string()
+            if not stdout:
+                stdout, stderr = self.last_output
             self._write_output_log(
                 timestamp, stdout, stderr,
                 controller_traceback=controller_traceback,
@@ -574,6 +576,8 @@ class FindOptimalE(ArtiqController):
         # no matter the process succeeded or failed, write log
         finally:
             self._last_end_time = timestamp_string()
+            if not stdout:
+                stdout, stderr = self.last_output
             self._write_output_log(
                 timestamp, stdout, stderr,
                 controller_traceback=controller_traceback,
