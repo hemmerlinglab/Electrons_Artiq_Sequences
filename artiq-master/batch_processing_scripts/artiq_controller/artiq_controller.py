@@ -2,6 +2,7 @@ import subprocess
 import copy
 import re
 from datetime import datetime
+import time
 import json
 import traceback
 import threading
@@ -42,6 +43,9 @@ class ArtiqController:
         self._creation_date = self._creation_time.split("_")[0]
         self._instance_log = os.path.join(self.log_path, self._creation_date, f"{self._creation_time}.json")
         self._instance_log_initialized = False
+        self._last_run_time = ""
+        self._last_end_time = ""
+        self._last_run_time_s = 0.0
 
         # Ensure save dirs
         os.makedirs(self.log_path, exist_ok=True)
@@ -254,16 +258,24 @@ class ArtiqController:
         Called for every stdout line while the artiq process is running.
         Prints a console notice when a laser STATUS signal is detected.
         """
-        if "STATUS:LASER_OFF_422" in line:
+
+        # Does not report in the first 5.0 s
+        SILENCE_TIME = 5.0
+        current_time = time.time()
+        mute = (current_time - self._last_run_time_s) < SILENCE_TIME
+
+        # Report
+        if ("STATUS:LASER_OFF_422" in line) and not mute:
             print("[ArtiqController] Laser 422 needs manual fix.")
 
-        if "STATUS:LASER_OFF_390" in line:
+        if ("STATUS:LASER_OFF_390" in line) and not mute:
             print("[ArtiqController] Laser 390 needs manual fix.")
 
     def _spawn_process(self):
         env = os.environ.copy()
         env["PYTHONUNBUFFERED"] = "1"
 
+        self._last_run_time_s = time.time()
         return subprocess.Popen(
             self._construct_args(),
             stdout=subprocess.PIPE,
@@ -295,15 +307,33 @@ class ArtiqController:
         t = threading.Thread(target=stdout_reader, daemon=True)
         t.start()
 
-        while True:
-            try:
-                line = q.get(timeout=0.1)
-                stdout_lines.append(line)
-                self._handle_live_stdout_line(line)
-            except queue.Empty:
-                if proc.poll() is not None and q.empty():
-                    break
+        try:
+            while True:
+                try:
+                    line = q.get(timeout=0.1)
+                    stdout_lines.append(line)
+                    self._handle_live_stdout_line(line)
+                except queue.Empty:
+                    if proc.poll() is not None and q.empty():
+                        break
+        except KeyboardInterrupt:
+            print("[ArtiqController] Termination Requested, waiting for ARTIQ end to exit ...")
+            deadline = time.time() + 10.0
+            while proc.poll() is None and time.time() < deadline:
+                try:
+                    stdout_lines.append(q.get(timeout=0.5))
+                except queue.Empty:
+                    pass
+            if proc.poll() is None:
+                proc.kill()
+            self._finalize_process(proc, stdout_lines, q)
+            raise
 
+        self._finalize_process(proc, stdout_lines, q)
+        timestamp = self._extract_timestamps(stdout, stderr)
+        return stdout, stderr, timestamp, returncode
+
+    def _finalize_process(proc, stdout_lines, q):
         returncode = proc.wait()
         stderr = proc.stderr.read()
 
@@ -311,8 +341,7 @@ class ArtiqController:
         cp = subprocess.CompletedProcess(proc.args, returncode, stdout, stderr)
         stdout, stderr = self._clean_output(cp)
         self.last_output = (stdout, stderr)
-        timestamp = self._extract_timestamps(stdout, stderr)
-        return stdout, stderr, timestamp, returncode
+        return stdout, stderr, returncode
 
     # -----------------------------
     # Main Utilities

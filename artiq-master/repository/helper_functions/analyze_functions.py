@@ -2,6 +2,8 @@ import numpy as np
 import shutil
 from configparser import ConfigParser
 import traceback
+import datetime
+import os
 
 import scan_functions as sf
 from base_sequences import set_multipoles
@@ -225,6 +227,24 @@ def define_optimizer_saving_configuration(self):
 
 # ===================================================================
 # 4) Functions for saving data
+def get_basefilename(self, extension = ''):
+    my_timestamp = datetime.datetime.today()
+
+    self.today = datetime.datetime.today()
+    self.today = self.today.strftime('%Y%m%d')
+
+    self.datafolder = '/home/electrons/software/data/'
+
+    basefolder = str(self.today) # 20220707
+    # create new folder if doesn't exist yet
+    if not os.path.exists(self.datafolder + basefolder):
+        os.makedirs(self.datafolder + basefolder)
+
+    self.scan_timestamp = str(my_timestamp.strftime('%Y%m%d_%H%M%S'))
+
+    self.basefilename = self.datafolder + basefolder + '/' + self.scan_timestamp # 20220707_150655
+
+
 def save_data_or_exit(self):
 
     # If there are error records, append to config_dict

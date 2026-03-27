@@ -3,36 +3,40 @@ from typing import Any, Tuple, Dict
 from artiq_controller import SingleParameterScan
 from helper_functions import find_best_laser_frequency
 
+# ------------------------------------------------------------------------------------
+def _laser_failed(scanner):
+    stdout, _ = scanner.last_output
+    return "STATUS:LASER_FAILED_422" in stdout
 
+# ------------------------------------------------------------------------------------
+# Public: wrap an experiment run with automatic 422 relock
+# ------------------------------------------------------------------------------------
 def run_with_422_relock(scanner, config, initialize=False, **run_kwargs):
 
     while True:
-
         if initialize:
             print("[Manager] Searching for laser 422 frequency ...")
             new_422_freq, _, _ = relock_laser(scanner, config, laser_to_relock=422)
             config["frequency_422"] = new_422_freq
             print("[Manager] Initialization Done, resuming to experiment scan ...")
-
         initialize = False
+
         t0 = time.time()
-
         ts = scanner.run(**run_kwargs)
-        stdout, stderr = scanner.last_output
 
-        if "STATUS:LASER_FAILED_422" in stdout:
+        if _laser_failed(scanner):
             print("[Manager] Detected LASER_OFF_422 -> relock laser and retry scan.")
-
             new_422_freq, _, _ = relock_laser(scanner, config, laser_to_relock=422)
             config["frequency_422"] = new_422_freq
-
             print("[Manager] Resuming the interrupted scan ...")
             continue
 
         print(f"[Manager] Scan done in {time.time()-t0:.1f}s")
         return ts
 
-
+# ------------------------------------------------------------------------------------
+# Private: relock routine - loop until a successful laser scan
+# ------------------------------------------------------------------------------------
 def relock_laser(
     scanner:            SingleParameterScan,
     config:             Dict[str, Any],
@@ -51,41 +55,51 @@ def relock_laser(
     f0 = scanner.get_param(f"frequency_{laser_to_relock}")
     scanner.save_profile("experiment")
 
-    # --- temporarily switch to the relock mode configuration ---
     scanner.set_param("mode", "Trapping")
     scanner.set_param("load_time", relock_load_time)
     scanner.set_param("wait_time", relock_wait_time)
-    scanner.set_param("no_of_repeats", rough_repeats)
-    scanner.set_param("histogram_refresh", rough_repeats)
 
-    print(f"[Relock_Laser] Scanning frequency_{laser_to_relock} [rough] ...")
+    while True:
 
-    ts_rough = run_with_422_relock(
-        scanner, config, 
-        scanning_parameter = f"frequency_{laser_to_relock}",
-        min_scan = rough_scan_center - rough_scan_width,
-        max_scan = rough_scan_center + rough_scan_width,
-        steps = rough_steps,
-    )
-  
-    freq_rough = find_best_laser_frequency(ts_rough)
+        # ----- Rough Scan -----
+        scanner.set_param("no_of_repeats", rough_repeats)
+        scanner.set_param("histogram_refresh", rough_repeats)
+        print(f"[Relock_Laser] Scanning frequency_{laser_to_relock} [rough] ...")
 
-    print(f"[Relock_Laser] Scan Result: {freq_rough:6f} THz")
+        ts_rough = run_with_422_relock(
+            scanner, config, 
+            scanning_parameter = f"frequency_{laser_to_relock}",
+            min_scan = rough_scan_center - rough_scan_width,
+            max_scan = rough_scan_center + rough_scan_width,
+            steps = rough_steps,
+        )
 
-    scanner.set_param("no_of_repeats", fine_repeats)
-    scanner.set_param("histogram_refresh", fine_repeats)
+        if _laser_failed(scanner):
+            print("[Relock_Laser] Laser failed during rough scan, retrying ...")
+            continue
+      
+        freq_rough = find_best_laser_frequency(ts_rough)
+        print(f"[Relock_Laser] Rough Scan Result: {freq_rough:6f} THz")
 
-    print(f"[Relock_Laser] Scanning frequency_{laser_to_relock} [fine] ...")
-    ts_fine = run_with_422_relock(
-        scanner, config, 
-        scanning_parameter = f"frequency_{laser_to_relock}",
-        min_scan = freq_rough - fine_scan_width,
-        max_scan = freq_rough + fine_scan_width,
-        steps = fine_steps
-    )
+        scanner.set_param("no_of_repeats", fine_repeats)
+        scanner.set_param("histogram_refresh", fine_repeats)
+        print(f"[Relock_Laser] Scanning frequency_{laser_to_relock} [fine] ...")
 
-    freq_fine = find_best_laser_frequency(ts_fine)
-    print(f"[Relock_Laser] Scan Result: {freq_fine:6f} THz")
+        ts_fine = run_with_422_relock(
+            scanner, config, 
+            scanning_parameter = f"frequency_{laser_to_relock}",
+            min_scan = freq_rough - fine_scan_width,
+            max_scan = freq_rough + fine_scan_width,
+            steps = fine_steps
+        )
+
+        if _laser_failed(scanner):
+            print("[Relock_Laser] Laser failed during fine scan, retrying ...")
+            continue
+
+        freq_fine = find_best_laser_frequency(ts_fine)
+        print(f"[Relock_Laser] Scan Result: {freq_fine:6f} THz")
+        break
 
     # Recover experiment configs but with the new laser frequency
     scanner.load_profile("experiment")
