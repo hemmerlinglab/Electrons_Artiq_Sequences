@@ -86,7 +86,7 @@ def load_common_parameters(self):
     group_display = "Display Settings"
     my_setattr(self, 'histogram_on',      BooleanValue(default=True), group=group_display, scanable=False)
     my_setattr(self, 'bin_width',         NumberValue(default=1.0,unit='us',scale=1,ndecimals=1,step=0.1), group=group_display, scanable = False)
-    my_setattr(self, 'histogram_refresh', NumberValue(default=5000,unit='',scale=1,ndecimals=0,step=1), group=group_display, scanable = False)
+    my_setattr(self, 'histogram_refresh', NumberValue(default=1000,unit='',scale=1,ndecimals=0,step=1), group=group_display, scanable = False)
 
     # 2. Detector Settings
     #------------------------------------------------------
@@ -113,9 +113,9 @@ def load_common_parameters(self):
     # 3-3) Lifetime Mode
     group_lifetime = "Sequence_Settings (Lifetime Mode)"
     my_setattr(self, 'wait_times_path',   StringValue(default='/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/Table/'), group=group_lifetime, scanable=False)
-    my_setattr(self, 'wait_times_file',   StringValue(default='lifetime_wait_times_short.csv'), group=group_lifetime, scanable=False)
+    my_setattr(self, 'wait_times_file',   StringValue(default='lifetime_wait_times_short.csv'), group=group_lifetime)
     my_setattr(self, 'repeats_ratio',     NumberValue(default=1.0,unit='',scale=1,ndecimals=2,step=0.01), group=group_lifetime)
-    my_setattr(self, 'wait_time_fast',    NumberValue(default=700,unit='us',scale=1,ndecimals=0,step=1), group=group_lifetime)
+    my_setattr(self, 'wait_time_fast',    NumberValue(default=1000,unit='us',scale=1,ndecimals=0,step=1), group=group_lifetime)
 
     # 4. Trap Settings
     #------------------------------------------------------
@@ -125,7 +125,7 @@ def load_common_parameters(self):
     # 5. Laser Settings
     #------------------------------------------------------
     group_laser = "Laser Settings"
-    my_setattr(self, 'frequency_422',     NumberValue(default=709.079610,unit='THz',scale=1,ndecimals=6,step=1e-6), group=group_laser)
+    my_setattr(self, 'frequency_422',     NumberValue(default=709.076780,unit='THz',scale=1,ndecimals=6,step=1e-6), group=group_laser)
     my_setattr(self, 'frequency_390',     NumberValue(default=768.708843,unit='THz',scale=1,ndecimals=6,step=1e-6), group=group_laser)
     my_setattr(self, 'laser_failure',     EnumerationValue(['wait for fix', 'raise error'], default='wait for fix'), group=group_laser, scanable=False)
 
@@ -157,7 +157,7 @@ def load_common_parameters(self):
     #------------------------------------------------------
     group_DC = "DC Multipoles Settings"
     my_setattr(self, 'U1',                NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.001), group=group_DC)
-    my_setattr(self, 'U2',                NumberValue(default=-0.35,unit='V',scale=1,ndecimals=3,step=.001), group=group_DC)
+    my_setattr(self, 'U2',                NumberValue(default=-0.25,unit='V',scale=1,ndecimals=3,step=.001), group=group_DC)
     my_setattr(self, 'U3',                NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.001), group=group_DC)
     my_setattr(self, 'U4',                NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.001), group=group_DC)
     my_setattr(self, 'U5',                NumberValue(default=0.0,unit='V',scale=1,ndecimals=3,step=.001), group=group_DC)
@@ -167,9 +167,9 @@ def load_experiment_parameters(self):
     # 1. 1st Order Multipoles
     #------------------------------------------------------
     group_DC = "DC Multipoles Settings"
-    my_setattr(self, 'Ex',                  NumberValue(default=-0.070,unit='V',scale=1,ndecimals=3,step=.001), group=group_DC)
-    my_setattr(self, 'Ey',                  NumberValue(default=0.046,unit='V',scale=1,ndecimals=3,step=.001), group=group_DC)
-    my_setattr(self, 'Ez',                  NumberValue(default=0.040,unit='V',scale=1,ndecimals=3,step=.001), group=group_DC)
+    my_setattr(self, 'Ex',                  NumberValue(default=-0.119,unit='V',scale=1,ndecimals=3,step=.001), group=group_DC)
+    my_setattr(self, 'Ey',                  NumberValue(default=0.070,unit='V',scale=1,ndecimals=3,step=.001), group=group_DC)
+    my_setattr(self, 'Ez',                  NumberValue(default=0.056,unit='V',scale=1,ndecimals=3,step=.001), group=group_DC)
 
     # 2. Tickle Settings
     #------------------------------------------------------
@@ -196,6 +196,7 @@ def load_doe_parameters(self):
     my_setattr(self, 'utility_mode',  EnumerationValue(['Single Experiment', 'DOE Scan'], default='DOE Scan'), scanable=False)
     my_setattr(self, 'doe_file_path', StringValue(default='/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/doe_configs/'), scanable=False)
     my_setattr(self, 'doe_file_name', StringValue(default='doe_table.csv'), scanable=False)
+    my_setattr(self, 'shuffle_doe_table', BooleanValue(default=False), scanable=False)
 
 def load_optimizer_parameters(self):
 

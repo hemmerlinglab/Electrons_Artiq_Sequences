@@ -1,10 +1,29 @@
-*.pyc
-*.hd5
+# Python
 __pycache__/
-artiq-master/results
-artiq-master/last_rid.pyon
-drivers/data
+*.pyc
+
+# Data files
 *.h5
+*.hd5
+
+# Editor / lock files
 *.swp
+*.swo
+*~
+.~lock.*#
+
+# Notebook cache
+**/.ipynb_checkpoints/
+
+# Runtime state (ARTIQ)
+**/dataset_db.pyon
+**/last_rid.pyon
+
+# Generated outputs
+artiq-master/results/
+artiq-master/batch_processing_scripts/result/
+drivers/data/
+
+# Generated images
 *.png
 *.jpg

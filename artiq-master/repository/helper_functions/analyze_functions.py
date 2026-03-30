@@ -264,15 +264,50 @@ def save_data_or_exit(self):
 
         print('Scan terminated.')
 
-def save_to_doe_table(self):
+def _doe_table_autofill_supported_names(self, n_rows):
+    """
+    Names in ``data_to_save`` whose current dataset has length ``n_rows``
+    (one value per DOE setpoint row; suitable for CSV autofill).
+    """
+    out = []
+    for hlp in self.data_to_save:
+        key = hlp["var"]
+        arr = np.asarray(self.get_dataset(key))
+        if len(arr) == n_rows:
+            out.append(key)
+    return out
 
+
+def save_to_doe_table(self):
+    """
+    Write ``setpoints`` plus response columns: empty headers in the DOE CSV
+    (``fields_to_fill``) are filled from datasets with the same name, when length
+    matches the number of setpoint rows.
+    """
     results = self.setpoints.copy()
+    n_rows = len(results)
+    autofill_failures = []
 
     for col_name in self.fields_to_fill:
         try:
-            results[col_name] = self.get_dataset(col_name)
+            raw = self.get_dataset(col_name)
         except Exception:
-            print(f"Failed to save data column {col_name}: No such dataset!")
+            autofill_failures.append((col_name, "no such dataset"))
+            continue
+
+        arr = np.asarray(raw)
+        if len(arr) != n_rows:
+            autofill_failures.append((col_name, f"length {len(arr)} != DOE rows ({n_rows})"))
+            continue
+
+        results[col_name] = arr
+
+    # Operator hint if any column could not be filled (wrong/missing dataset length)
+    if autofill_failures:
+        bad = ", ".join(sorted({c for c, _ in autofill_failures}))
+        print(f"DOE table autofill: length mismatch for columns: {bad} (need {n_rows} values per column).")
+        sup = _doe_table_autofill_supported_names(self, n_rows)
+        print(f"Supported dataset names for autofill: {', '.join(sup) if sup else '(none)'}")
 
     output_file = f"{self.basefilename}_DOE_results_table.csv"
     results.to_csv(output_file, index=False)

@@ -5,6 +5,28 @@ import time
 from helper_functions import calculate_input_voltage, calculate_Vsampler, calculate_HighV, calculate_Vin, safe_check
 
 ###########################################################
+##  Lifetime table (host-side CSV)  ########################
+###########################################################
+
+
+def lifetime_csv_path(filepath):
+    """Absolute or relative path to a lifetime table; append ``.csv`` if the suffix is missing."""
+    path = str(filepath).strip()
+    if not path.lower().endswith(".csv"):
+        path = path + ".csv"
+    return path
+
+
+def load_lifetime_wait_times(filepath):
+    """Read wait times and repeat counts from a lifetime timing table CSV."""
+    path = lifetime_csv_path(filepath)
+    hlp = np.genfromtxt(path, delimiter=",", skip_header=1)
+    wait_times = hlp[:, 0]
+    no_of_repeats = hlp[:, 1]
+    return wait_times, no_of_repeats
+
+
+###########################################################
 ##  Control Widgets  ######################################
 ###########################################################
 

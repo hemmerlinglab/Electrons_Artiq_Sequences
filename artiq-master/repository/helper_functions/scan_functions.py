@@ -1,8 +1,19 @@
+import os
 import time
 import numpy as np
 import sys
 
-from base_sequences import set_mesh_voltage, set_threshold_voltage, set_multipoles, set_loading_pulse, set_extraction_pulse, set_MCP_voltages, update_detection_time
+from base_sequences import (
+    set_mesh_voltage,
+    set_threshold_voltage,
+    set_multipoles,
+    set_loading_pulse,
+    set_extraction_pulse,
+    set_MCP_voltages,
+    update_detection_time,
+    load_lifetime_wait_times,
+    lifetime_csv_path,
+)
 
 #####################################################################
 ##  -- Master Scanning Functions  --  ###############################
@@ -181,6 +192,19 @@ def _scan_no_of_repeats(self, val, scan_values, scan_check = False):
         self.no_of_repeats = int(val)
 
         return 1
+
+
+def _scan_wait_times_file(self, val, scan_values, scan_check=False):
+    """Same as prepare path: `load_lifetime_wait_times(self.wait_times_path + self.wait_times_file)`."""
+    base = self.wait_times_path
+    if scan_check:
+        for v in np.asarray(scan_values, dtype=object).ravel():
+            load_lifetime_wait_times(base + str(v).strip())
+        return True
+    full = lifetime_csv_path(base + str(val).strip())
+    self.wait_times_file = os.path.basename(full)
+    self.wait_time_arr, self.repeats_arr = load_lifetime_wait_times(full)
+    return 1
 
 # 3. Laser Parameters  -------------------------------------------------------#
 #-----------------------------------------------------------------------------#

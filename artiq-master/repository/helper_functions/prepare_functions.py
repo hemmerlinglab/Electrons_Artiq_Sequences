@@ -20,7 +20,8 @@ from base_sequences import (
     set_threshold_voltage,
     set_MCP_voltages,
     set_extraction_pulse,
-    set_loading_pulse
+    set_loading_pulse,
+    load_lifetime_wait_times,
 )
 
 # ===================================================================
@@ -122,6 +123,10 @@ def prepare_doe_datasets(self):
     self.setpoints, self.fields_to_fill, self.steps = \
         load_doe_setpoints(self.doe_file, allowed_params) # self.steps is first created here
 
+    if self.shuffle_doe_table:
+        # reset_index so run indices 0..n-1 match dataset rows after iterating
+        self.setpoints = self.setpoints.sample(frac=1).reset_index(drop=True)
+
     # Safety: perform scan check for all parameters
     self.scan_ok = True
     for param_to_scan in self.setpoints.columns:
@@ -165,14 +170,31 @@ def prepare_lifetime_datasets(self):
 
     if self.mode == "Lifetime_fast":
         self.set_dataset('lifetime', [0] * self.steps, broadcast=True)
-        out = np.repeat(self.scan_values, 2)
-        self.set_dataset('arr_of_setpoints', out, broadcast=True)
-
+        n_rep = 2
     elif self.mode == "Lifetime":
         self.set_dataset('lifetime', [0] * self.steps, broadcast=True)
-        n = len(self.wait_time_arr)
-        out = np.repeat(self.scan_values, n)
-        self.set_dataset('arr_of_setpoints', out, broadcast=True)
+        n_rep = len(self.wait_time_arr)
+    else:
+        return
+
+    # Lifetime allocates one acquisition per wait-time slot; length is steps * n_rep, matching
+    # prepare_common_datasets under _prepare_with_effective_steps.
+    #
+    # DOE: only `prepare_doe_datasets` sets `self.setpoints`. X-axis is experiment number =
+    # CSV row index 0 .. steps-1 (same as non-lifetime arr_of_setpoints = np.arange(steps)).
+    # Each index is repeated n_rep times so every wait_time subsample under that row shares
+    # the same experiment number.
+    #
+    # OFAT (no setpoints): X-axis is the scanned parameter value at each step, repeated n_rep
+    # times (same as pre-DOE behavior).
+    if getattr(self, 'setpoints', None) is not None:
+        exp_no = np.arange(self.steps, dtype=np.float64)
+        arr_of_setpoints = np.repeat(exp_no, n_rep)
+    else:
+        arr_of_setpoints = np.repeat(
+            np.asarray(self.scan_values, dtype=np.float64), n_rep)
+
+    self.set_dataset('arr_of_setpoints', arr_of_setpoints, broadcast=True)
 
 # ===================================================================
 # 3) Subfunctions for prepare devices
@@ -286,12 +308,6 @@ def load_doe_setpoints(file_path, allowed_params):
     
     return setpoints, response_columns, len(setpoints)
 
-def load_lifetime_wait_times(filepath):
-    hlp = np.genfromtxt(filepath, delimiter=",", skip_header=1)
-    wait_times = hlp[:,0]
-    no_of_repeats = hlp[:,1]
-    return wait_times, no_of_repeats
-
 def _lifetime_points_for_prepare(self):
 
     if self.mode == "Lifetime":
@@ -309,7 +325,6 @@ def _prepare_with_effective_steps(self, datasets_function):
     old_steps = self.steps
 
     # experiment metadataset
-    print(self.steps)
     self.set_dataset('time_cost', [0] * self.steps, broadcast=True)
 
     self.steps = effective_steps
