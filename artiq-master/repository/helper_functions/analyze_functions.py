@@ -414,10 +414,7 @@ def save_csv_tables(self):
 
 def save_all(self):
 
-    # CSV-first outputs
     save_csv_tables(self)
-    if getattr(self, "legacy_dataset_files", False):
-        save_all_data(self)
 
     # save all config
     self.config_dict.append({'par' : 'Status', 'val' : True, 'cmt' : 'Run finished.'})
@@ -425,28 +422,6 @@ def save_all(self):
     
     # add scan to list
     add_scan_to_list(self)
-
-def save_all_data(self):
-    # loops over data_to_save and saves all data sets in the array self.data_to_save
-    for hlp in self.data_to_save:
-        
-        try:
-            # transform into numpy arrays
-            arr = np.array(self.get_dataset(hlp['var']))
-       
-            # Write Data to Files
-            f_hlp = open(self.basefilename + '_' + hlp['var'],'w')
-        
-            np.savetxt(f_hlp, arr, delimiter=",")
-    
-        except:
-            
-            arr = self.get_dataset(hlp['var'])
-
-            for k in range(len(arr)):
-                f_hlp.write(str(arr[k]) + '\n')        
-
-        f_hlp.close()
 
 def add_scan_to_list(self):
 
