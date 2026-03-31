@@ -38,7 +38,10 @@ class DOEScan(EnvExperiment):
                     t0 = time.time()
 
                     # Apply current setpoint
-                    set_doe_parameters(self, row, ind, self.steps)
+                    set_doe_parameters(
+                        self, row, ind, self.steps,
+                        param_names=getattr(self, "doe_param_names", None)
+                    )
 
                     # Perform Experiment
                     run_experiment_with_retries(self, measure, ind)

@@ -1,4 +1,6 @@
 import numpy as np
+import os
+import pandas as pd
 from scipy.signal import find_peaks
 
 import matplotlib
@@ -17,22 +19,32 @@ def load_data(timestamp, ynames=["ratio_signal"]):
     timestamp:  str, which experiment you want to load data from
     ynames:     list, dataset name you want to load, use the same name as its dataset name in artiq
     2) OUTPUT ---------------------------------------
-    xdata:      np.ndarray, setpoint data, loaded from _arr_of_setpoints
+    xdata:      np.ndarray, setpoint data (column = scanned parameter name from _conf)
     ydata:      dict {yname: np.ndarray}, datasets you want to load
     """
 
-    #print(f"[Data Loader] loading timestamp: {timestamp} ...")
-
     date, _ = timestamp.split("_")
     basefilename = f"/home/electrons/software/data/{date}/{timestamp}"
-    try:
-        xdata = np.genfromtxt(f"{basefilename}_arr_of_setpoints")
-    except Exception:
-        xdata = None
+    scan_path = f"{basefilename}_scan_result.csv"
+    sub_path = f"{basefilename}_substep_result.csv"
+    scan_df = pd.read_csv(scan_path) if os.path.exists(scan_path) else None
+    sub_df = pd.read_csv(sub_path) if os.path.exists(sub_path) else None
+
+    # The CSV column for x-axis is the actual scanned parameter name (from _conf file)
+    xdata = None
+    if scan_df is not None:
+        scanning_parameter = load_configuration(timestamp, ["scanning_parameter"])[0]
+        if scanning_parameter and scanning_parameter in scan_df.columns:
+            xdata = scan_df[scanning_parameter].to_numpy()
 
     ydata = {}
     for yname in ynames:
-        ydata[yname] = np.genfromtxt(f"{basefilename}_{yname}")
+        if (scan_df is not None) and (yname in scan_df.columns):
+            ydata[yname] = scan_df[yname].to_numpy()
+        elif (sub_df is not None) and (yname in sub_df.columns):
+            ydata[yname] = sub_df[yname].to_numpy()
+        else:
+            raise FileNotFoundError(f"Dataset '{yname}' not found in scan/substep CSV outputs")
     return xdata, ydata
 
 def load_configuration(timestamp, conf_names=["U2"]):

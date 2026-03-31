@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import matplotlib
 matplotlib.use("Agg")   # Use non-interactive backend (no Qt / xcb)
 import matplotlib.pyplot as plt
@@ -90,8 +91,8 @@ for row in ROWS:
 DATA_DIRECTORY = "/home/electrons/software/data"
 
 # Example filename pattern:
-#   /home/electrons/software/data/20241205/20241205_153000_arr_of_setpoints (no .csv)
-FILE_TEMPLATE = "{timestamp}_{param}"
+#   /home/electrons/software/data/20241205/20241205_153000_scan_result.csv
+FILE_TEMPLATE = "{timestamp}_scan_result.csv"
 
 # Signals to plot
 Y_SIGNALS = [
@@ -101,62 +102,46 @@ Y_SIGNALS = [
     "ratio_lost",
 ]
 
-X_SIGNAL = "arr_of_setpoints"
-
-MULTI_FILE_TEMPLATE = "{timestamp}_{dataset}"
+X_PARAM_PREFIX = "offset_"
 
 # =============================================================================
 # 2) Data loading for a single scan
 # =============================================================================
 
-def load_single_scan_data(timestamp: str, y_dataset: str):
+def load_single_scan_data(timestamp: str, y_dataset: str, x_column: str = None):
     """
-    Load one single_parameter_scan result from disk, using the new
-    multi-file layout.
+    Load one single_parameter_scan result from disk.
 
     Parameters
     ----------
     timestamp : str
         Timestamp string embedded in the ARTIQ output
         (e.g. '20251202_104918'). Used to reconstruct the data path:
-        /data/YYYYMMDD/timestamp_dataset.csv
+        /data/YYYYMMDD/timestamp_scan_result.csv
 
     y_dataset : str
         Name of the Y dataset to load, e.g.:
             'trapped_signal', 'lost_signal',
             'ratio_signal', 'ratio_lost'.
 
+    x_column : str
+        Column name for the x-axis (the scanned parameter name, e.g. 'offset_tl1').
+
     Returns
     -------
     x_values : np.ndarray
-        The scanned parameter values (from arr_of_setpoints).
+        The scanned parameter values.
     y_values : np.ndarray
         The corresponding measured values for the chosen dataset.
     """
     date, _ = timestamp.split("_", 1)
     base_dir = f"{DATA_DIRECTORY}/{date}"
 
-    # X: setpoints
-    x_filename = MULTI_FILE_TEMPLATE.format(timestamp=timestamp,
-                                            dataset=X_SIGNAL)
-    x_path = f"{base_dir}/{x_filename}"
-
-    # Y: selected dataset
-    y_filename = MULTI_FILE_TEMPLATE.format(timestamp=timestamp,
-                                            dataset=y_dataset)
-    y_path = f"{base_dir}/{y_filename}"
-
-    print(f"  Loading X from: {x_path}")
-    print(f"  Loading Y ({y_dataset}) from: {y_path}")
-
-    x_data = np.genfromtxt(x_path, delimiter=",", comments="#")
-    y_data = np.genfromtxt(y_path, delimiter=",", comments="#")
-
-    # If files accidentally have more than one column, take the first one.
-    if x_data.ndim > 1:
-        x_data = x_data[:, 0]
-    if y_data.ndim > 1:
-        y_data = y_data[:, 0]
+    scan_path = f"{base_dir}/{timestamp}_scan_result.csv"
+    print(f"  Loading scan table from: {scan_path}")
+    table = pd.read_csv(scan_path)
+    x_data = table[x_column].to_numpy()
+    y_data = table[y_dataset].to_numpy()
 
     if x_data.shape[0] != y_data.shape[0]:
         raise ValueError(
@@ -239,7 +224,7 @@ def load_results_for_dataset(timestamps: dict, y_dataset: str):
     results = {}
     for elec, ts in timestamps.items():
         try:
-            x, y = load_single_scan_data(ts, y_dataset)
+            x, y = load_single_scan_data(ts, y_dataset, x_column=f"{X_PARAM_PREFIX}{elec}")
         except Exception as e:
             print(f"  !!! Failed to load data for {elec}, y={y_dataset}: {e}")
             x = np.array([])

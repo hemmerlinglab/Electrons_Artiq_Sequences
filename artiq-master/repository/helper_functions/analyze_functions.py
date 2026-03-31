@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import shutil
 from configparser import ConfigParser
 import traceback
@@ -31,8 +32,6 @@ def doe_analyze(self):
     # 2) Save data
     define_saving_configuration(self)
     save_data_or_exit(self)
-    if self.scan_ok and self.utility_mode == "DOE Scan":
-        save_to_doe_table(self)
 
 def optimizer_analyze(self):
 
@@ -79,7 +78,8 @@ def reset_scanned_parameters(self):
 
     default_values = {item["par"]: item["val"] for item in self.config_dict}
 
-    for param_name in self.setpoints.columns:
+    param_names = getattr(self, "doe_param_names", self.setpoints.columns)
+    for param_name in param_names:
         initial_value = default_values[param_name]
 
         func = sf._get_scan_function(param_name)
@@ -183,20 +183,21 @@ def find_model_optimum(self):
 # ===================================================================
 # 3) Define data to save
 def define_saving_configuration(self):
+    signal_level = "substep" if self.mode in ("Lifetime", "Lifetime_fast") else "scan"
     
     # Set the data going to save
     common_data_to_save = [
             #{'var' : 'arr_of_timestamps',  'name' : 'array of timestamps during extraction'},
-            {'var' : 'last_frequency_422', 'name' : 'array of fetched last frequency from laser lock GUI, actual frequency if the GUI is measuring 422 at the time'},
-            {'var' : 'last_frequency_390', 'name' : 'array of fetched last frequency from laser lock GUI, actual frequency if the GUI is measuring 390 at the time'},
-            {'var' : 'trapped_signal',     'name' : 'array of trapped electron counts'},
-            {'var' : 'loading_signal',     'name' : 'array of loading electron counts'},
-            {'var' : 'lost_signal',        'name' : 'array of kicked out electron counts in the first 15us or during the tickle pulse duration when it is smaller than 15us'},
-            {'var' : 'ratio_signal',       'name' : 'array of trapped counts / loading counts'},
-            {'var' : 'ratio_lost',         'name' : 'array of lost counts / loading counts'},
-            {'var' : 'scan_result',        'name' : 'array of recorded counts for counting mode'},
-            {'var' : 'time_cost',          'name' : 'array of time cost for each experiment scan'},
-            {'var' : 'act_RF_amplitude',   'name' : 'array of actual RF amplitude'},
+            {'var': 'last_frequency_422', 'level': 'scan',       'name': 'array of fetched last frequency from laser lock GUI, actual frequency if the GUI is measuring 422 at the time'},
+            {'var': 'last_frequency_390', 'level': 'scan',       'name': 'array of fetched last frequency from laser lock GUI, actual frequency if the GUI is measuring 390 at the time'},
+            {'var': 'trapped_signal',     'level': signal_level, 'name': 'array of trapped electron counts'},
+            {'var': 'loading_signal',     'level': signal_level, 'name': 'array of loading electron counts'},
+            {'var': 'lost_signal',        'level': signal_level, 'name': 'array of kicked out electron counts in the first 15us or during the tickle pulse duration when it is smaller than 15us'},
+            {'var': 'ratio_signal',       'level': signal_level, 'name': 'array of trapped counts / loading counts'},
+            {'var': 'ratio_lost',         'level': signal_level, 'name': 'array of lost counts / loading counts'},
+            {'var': 'scan_result',        'level': 'scan',       'name': 'array of recorded counts for counting mode'},
+            {'var': 'time_cost',          'level': 'scan',       'name': 'array of time cost for each experiment scan'},
+            {'var': 'act_RF_amplitude',   'level': 'scan',       'name': 'array of actual RF amplitude'},
     ]
 
     # save sequence file name
@@ -204,24 +205,24 @@ def define_saving_configuration(self):
     self.config_dict.append({'par' : 'sequence_file', 'val' : self.sequence_filename, 'cmt' : 'Filename of the main sequence file'})
 
     if self.mode in ("Lifetime", "Lifetime_fast"):
-        tao = [{'var' : 'lifetime',  'name' : 'lifetime'}]
+        tao = [{'var': 'lifetime', 'level': 'scan', 'name': 'lifetime'}]
         self.data_to_save.extend(tao)
 
     get_basefilename(self)
 
 def define_ofat_saving_configuration(self):
 
-    self.data_to_save.append({'var' : 'arr_of_setpoints',   'name' : 'array of setpoints'})
+    self.data_to_save.append({'var': 'arr_of_setpoints', 'level': 'scan', 'name': 'array of setpoints'})
 
     if self.mode == 'Counting':
-        self.data_to_save.append({'var' : 'scan_x', 'name' : 'array of setpoints for counting mode, duplicate but in order to be compatible with applet'})
+        self.data_to_save.append({'var': 'scan_x', 'level': 'scan', 'name': 'array of setpoints for counting mode, duplicate but in order to be compatible with applet'})
 
 def define_optimizer_saving_configuration(self):
 
     optimizer_data_to_save = [
-        {'var' : 'e_trace', 'name' : 'array of electric field trace'},
-        {'var' : 'y_best',  'name' : 'array of best signal until now'},
-        {'var' : 'ei',      'name' : 'array of expected improvement'}
+        {'var': 'e_trace', 'level': 'scan', 'name': 'array of electric field trace'},
+        {'var': 'y_best',  'level': 'scan', 'name': 'array of best signal until now'},
+        {'var': 'ei',      'level': 'scan', 'name': 'array of expected improvement'}
     ]
     self.data_to_save.extend(optimizer_data_to_save)
 
@@ -264,58 +265,159 @@ def save_data_or_exit(self):
 
         print('Scan terminated.')
 
-def _doe_table_autofill_supported_names(self, n_rows):
+def _dataset_len(self, key):
+    return len(np.asarray(self.get_dataset(key)))
+
+
+def _scan_row_count(self):
+    if getattr(self, "utility_mode", None) == "DOE Scan" and hasattr(self, "setpoints"):
+        return len(self.setpoints)
+    if hasattr(self, "scan_values"):
+        return len(self.scan_values)
+    return _dataset_len(self, "time_cost")
+
+
+def _build_scan_result_table(self):
     """
-    Names in ``data_to_save`` whose current dataset has length ``n_rows``
-    (one value per DOE setpoint row; suitable for CSV autofill).
+    Build one-row-per-scan-point table for OFAT/DOE/optimizer.
     """
-    out = []
+    n_scan = _scan_row_count(self)
+    out = pd.DataFrame()
+
+    # DOE: include shuffled execution order table with row identity columns.
+    if getattr(self, "utility_mode", None) == "DOE Scan" and hasattr(self, "setpoints"):
+        points = self.setpoints.reset_index(drop=True)
+        if len(points) == n_scan:
+            out = points.copy()
+    else:
+        out["scan_index"] = np.arange(n_scan, dtype=int)
+
     for hlp in self.data_to_save:
+        if hlp.get("level", "scan") == "substep":
+            continue
         key = hlp["var"]
         arr = np.asarray(self.get_dataset(key))
-        if len(arr) == n_rows:
-            out.append(key)
+        if len(arr) != n_scan:
+            # Optimizer BO traces are indexed by optimizer iteration (0..max_iteration-1),
+            # while scan table is indexed by full experiment steps (init + BO).
+            if (
+                hasattr(self, "init_sample_size")
+                and key in {"y_best", "ei", "length_scale", "best_rel_noise", "optimizer_x"}
+                and len(arr) == int(getattr(self, "max_iteration", -1))
+            ):
+                full = np.full(n_scan, np.nan)
+                i0 = int(self.init_sample_size)
+                full[i0:i0 + len(arr)] = arr
+                arr = full
+            else:
+                continue
+
+        if key == "e_trace":
+            arr2 = np.asarray(arr, dtype=float)
+            if arr2.ndim == 2 and arr2.shape[1] >= 3:
+                out["ex_trace"] = arr2[:, 0]
+                out["ey_trace"] = arr2[:, 1]
+                out["ez_trace"] = arr2[:, 2]
+            continue
+
+        if key == "arr_of_setpoints" and hasattr(self, "scanning_parameter"):
+            # OFAT/single-parameter scans: use the physical parameter name as CSV column.
+            col = str(self.scanning_parameter)
+            if col and (col not in out.columns):
+                out[col] = arr
+                continue
+
+        if arr.ndim == 1:
+            out[key] = arr
+
+    if "doe_run_order" in out.columns:
+        cols = ["doe_run_order"] + [c for c in out.columns if c != "doe_run_order"]
+        out = out[cols]
+
     return out
 
 
-def save_to_doe_table(self):
+def _build_substep_result_table(self):
     """
-    Write ``setpoints`` plus response columns: empty headers in the DOE CSV
-    (``fields_to_fill``) are filled from datasets with the same name, when length
-    matches the number of setpoint rows.
+    Build one-row-per-substep table (lifetime modes only).
     """
-    results = self.setpoints.copy()
-    n_rows = len(results)
-    autofill_failures = []
+    if self.mode not in ("Lifetime", "Lifetime_fast"):
+        return None
 
-    for col_name in self.fields_to_fill:
-        try:
-            raw = self.get_dataset(col_name)
-        except Exception:
-            autofill_failures.append((col_name, "no such dataset"))
+    is_doe = getattr(self, "utility_mode", None) == "DOE Scan" and hasattr(self, "setpoints")
+    n_scan = _scan_row_count(self)
+    trapped = np.asarray(self.get_dataset("trapped_signal"))
+    n_sub = len(trapped)
+    if n_scan <= 0 or n_sub <= n_scan:
+        return None
+
+    n_rep = max(1, int(getattr(self, "lifetime_points_per_scan", n_sub // n_scan)))
+    scan_index = np.repeat(np.arange(n_scan, dtype=int), n_rep)[:n_sub]
+    substep_index = np.tile(np.arange(n_rep, dtype=int), n_scan)[:n_sub]
+    base_cols = {
+        "substep_index": substep_index,
+        "global_index": np.arange(n_sub, dtype=int),
+    }
+    if not is_doe:
+        base_cols["scan_index"] = scan_index
+    out = pd.DataFrame(base_cols)
+
+    wt_used = np.asarray(self.get_dataset("wait_time_used"))
+    reps_used = np.asarray(self.get_dataset("repeats_used"))
+    file_used = np.asarray(self.get_dataset("wait_times_file_used"), dtype=object)
+    if len(wt_used) == n_sub:
+        out["wait_time"] = wt_used
+    if len(reps_used) == n_sub:
+        out["no_of_repeats"] = reps_used
+    if self.mode == "Lifetime" and len(file_used) == n_sub:
+        out["wait_times_file"] = file_used
+
+    if is_doe:
+        points = self.setpoints.reset_index(drop=True)
+        if len(points) == n_scan:
+            for col in points.columns:
+                out[col] = points[col].to_numpy()[scan_index]
+
+    for hlp in self.data_to_save:
+        if hlp.get("level", "scan") != "substep":
             continue
+        key = hlp["var"]
+        arr = np.asarray(self.get_dataset(key))
+        if len(arr) == n_sub:
+            out[key] = arr
 
-        arr = np.asarray(raw)
-        if len(arr) != n_rows:
-            autofill_failures.append((col_name, f"length {len(arr)} != DOE rows ({n_rows})"))
-            continue
+    # Keep OFAT lifetime x-axis in substep output.
+    if not is_doe:
+        arr = np.asarray(self.get_dataset("arr_of_setpoints"))
+        if len(arr) == n_sub:
+            out["arr_of_setpoints"] = arr
 
-        results[col_name] = arr
+    # Remove padded compatibility rows (variable wait-time table lengths).
+    if "wait_time" in out.columns:
+        valid = np.isfinite(out["wait_time"].to_numpy(dtype=float))
+        out = out.loc[valid].reset_index(drop=True)
 
-    # Operator hint if any column could not be filled (wrong/missing dataset length)
-    if autofill_failures:
-        bad = ", ".join(sorted({c for c, _ in autofill_failures}))
-        print(f"DOE table autofill: length mismatch for columns: {bad} (need {n_rows} values per column).")
-        sup = _doe_table_autofill_supported_names(self, n_rows)
-        print(f"Supported dataset names for autofill: {', '.join(sup) if sup else '(none)'}")
+    if "doe_run_order" in out.columns:
+        cols = ["doe_run_order"] + [c for c in out.columns if c != "doe_run_order"]
+        out = out[cols]
 
-    output_file = f"{self.basefilename}_DOE_results_table.csv"
-    results.to_csv(output_file, index=False)
+    return out
+
+
+def save_csv_tables(self):
+    scan_df = _build_scan_result_table(self)
+    scan_df.to_csv(f"{self.basefilename}_scan_result.csv", index=False)
+
+    sub_df = _build_substep_result_table(self)
+    if sub_df is not None:
+        sub_df.to_csv(f"{self.basefilename}_substep_result.csv", index=False)
 
 def save_all(self):
 
-    # save all data
-    save_all_data(self)
+    # CSV-first outputs
+    save_csv_tables(self)
+    if getattr(self, "legacy_dataset_files", False):
+        save_all_data(self)
 
     # save all config
     self.config_dict.append({'par' : 'Status', 'val' : True, 'cmt' : 'Run finished.'})

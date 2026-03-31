@@ -78,15 +78,6 @@ def prepare_common_datasets(self):
     # data sets to save all time stamps
     self.set_dataset('arr_of_timestamps',  [ [] for _ in range(self.steps) ], broadcast=True)
 
-    # ===== EXTREMELY IMPORTANT NOTE =====:
-    # Remember that last frequency is not necessary actual frequency, because our wavemeter switching
-    # is achieved by manually moving the optical blocker at the beam splitter, so probably the light
-    # has long been blocked and have not updated for minutes
-    # Another problem is that each set point takes several seconds or even minutes, this means a single
-    # measurement at the beginning of the scan could be misleading, we could consider let the frequency
-    # monitoring recurring during each scan
-    self.set_dataset('last_frequency_422', [0] * self.steps, broadcast=True)
-    self.set_dataset('last_frequency_390', [0] * self.steps, broadcast=True)
     self.set_dataset('MCP_voltages',       [0] * 3,          broadcast=True)
     
     self.set_dataset('trapped_signal',     [0] * self.steps, broadcast=True)
@@ -94,12 +85,6 @@ def prepare_common_datasets(self):
     self.set_dataset('lost_signal',        [0] * self.steps, broadcast=True)
     self.set_dataset('ratio_signal',       [0] * self.steps, broadcast=True)
     self.set_dataset('ratio_lost',         [0] * self.steps, broadcast=True)
-
-    # counting mode datasets
-    self.set_dataset('scan_result',        [0] * self.steps, broadcast=True)
-
-    # actual RF amplitude from keysight spec
-    self.set_dataset('act_RF_amplitude',   [0] * self.steps, broadcast=True)
 
 def prepare_ofat_datasets(self):
 
@@ -123,13 +108,32 @@ def prepare_doe_datasets(self):
     self.setpoints, self.fields_to_fill, self.steps = \
         load_doe_setpoints(self.doe_file, allowed_params) # self.steps is first created here
 
+    # Real scan parameters (exclude DOE bookkeeping columns added below)
+    self.doe_param_names = list(self.setpoints.columns)
+    self.setpoints.insert(0, "doe_input_row", np.arange(len(self.setpoints), dtype=int))
+
     if self.shuffle_doe_table:
         # reset_index so run indices 0..n-1 match dataset rows after iterating
         self.setpoints = self.setpoints.sample(frac=1).reset_index(drop=True)
+    self.setpoints["doe_run_order"] = np.arange(len(self.setpoints), dtype=int)
+
+    # Lifetime DOE may scan different wait_times_file tables. Reserve substep arrays
+    # with the maximum wait-time rows across the table so indexing stays consistent.
+    if (
+        self.mode == "Lifetime"
+        and self.utility_mode == "DOE Scan"
+        and "wait_times_file" in self.doe_param_names
+    ):
+        max_points = 0
+        for fname in self.setpoints["wait_times_file"].to_numpy():
+            wt, _ = load_lifetime_wait_times(self.wait_times_path + str(fname).strip())
+            max_points = max(max_points, len(wt))
+        if max_points > 0:
+            self.lifetime_points_per_scan = max_points
 
     # Safety: perform scan check for all parameters
     self.scan_ok = True
-    for param_to_scan in self.setpoints.columns:
+    for param_to_scan in self.doe_param_names:
         self.scan_values = self.setpoints[param_to_scan].to_numpy()
         self.scanning_parameter = param_to_scan
         self.scan_ok = self.scan_ok and scan_parameter(self, 0, scan_check = True)
@@ -170,12 +174,19 @@ def prepare_lifetime_datasets(self):
 
     if self.mode == "Lifetime_fast":
         self.set_dataset('lifetime', [0] * self.steps, broadcast=True)
-        n_rep = 2
+        n_rep = self.lifetime_points_per_scan
     elif self.mode == "Lifetime":
         self.set_dataset('lifetime', [0] * self.steps, broadcast=True)
-        n_rep = len(self.wait_time_arr)
+        n_rep = self.lifetime_points_per_scan
     else:
         return
+
+    substep_count = self.steps * n_rep
+
+    # Substep-level tracking datasets (only needed for Lifetime modes)
+    self.set_dataset('wait_time_used',       [0] * substep_count, broadcast=True)
+    self.set_dataset('repeats_used',         [0] * substep_count, broadcast=True)
+    self.set_dataset('wait_times_file_used', [""] * substep_count, broadcast=True)
 
     # Lifetime allocates one acquisition per wait-time slot; length is steps * n_rep, matching
     # prepare_common_datasets under _prepare_with_effective_steps.
@@ -312,10 +323,14 @@ def _lifetime_points_for_prepare(self):
 
     if self.mode == "Lifetime":
         self.wait_time_arr, self.repeats_arr = load_lifetime_wait_times(self.wait_times_path + self.wait_times_file)
-        return len(self.wait_time_arr)
+        if not hasattr(self, "lifetime_points_per_scan"):
+            self.lifetime_points_per_scan = len(self.wait_time_arr)
+        return self.lifetime_points_per_scan
     elif self.mode == "Lifetime_fast":
-        return 2
+        self.lifetime_points_per_scan = 2
+        return self.lifetime_points_per_scan
     else:
+        self.lifetime_points_per_scan = 1
         return 1
 
 def _prepare_with_effective_steps(self, datasets_function):
@@ -324,7 +339,17 @@ def _prepare_with_effective_steps(self, datasets_function):
     effective_steps = self.steps * lp
     old_steps = self.steps
 
-    # experiment metadataset
+    # ===== EXTREMELY IMPORTANT NOTE =====:
+    # Remember that last frequency is not necessary actual frequency, because our wavemeter switching
+    # is achieved by manually moving the optical blocker at the beam splitter, so probably the light
+    # has long been blocked and have not updated for minutes.
+    # Another problem is that each set point takes several seconds or even minutes, this means a single
+    # measurement at the beginning of the scan could be misleading, we could consider let the frequency
+    # monitoring recurring during each scan.
+    self.set_dataset('last_frequency_422', [0] * self.steps, broadcast=True)
+    self.set_dataset('last_frequency_390', [0] * self.steps, broadcast=True)
+    self.set_dataset('act_RF_amplitude',   [0] * self.steps, broadcast=True)
+    self.set_dataset('scan_result',        [0] * self.steps, broadcast=True)
     self.set_dataset('time_cost', [0] * self.steps, broadcast=True)
 
     self.steps = effective_steps

@@ -52,14 +52,17 @@ def scan_parameter(self, my_ind, scan_check = False, reset_value = False):
         print(f"Parameter to scan {param_name} has no scanning function yet!")
         return 0
 
-def set_doe_parameters(self, row, ind, steps):
+def set_doe_parameters(self, row, ind, steps, param_names=None):
     """
     set multiple parameters for DOE scans
     """
 
     print(f"Setting step {ind+1}/{steps} ...")
 
-    for param_name in row.index:
+    if param_names is None:
+        param_names = row.index
+
+    for param_name in param_names:
         val = row[param_name]
 
         func = _get_scan_function(param_name)

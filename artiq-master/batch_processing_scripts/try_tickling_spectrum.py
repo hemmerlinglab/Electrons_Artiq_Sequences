@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -65,9 +66,10 @@ def load_data(ts):
     date, _ = ts.split("_")
     basefilename = f"{basepath}/{date}/{ts}"
 
-    xs = np.genfromtxt(f"{basefilename}_arr_of_setpoints", delimiter=",")
-    ys1 = np.genfromtxt(f"{basefilename}_ratio_signal", delimiter=",")
-    ys2 = np.genfromtxt(f"{basefilename}_ratio_lost", delimiter=",")
+    scan = pd.read_csv(f"{basefilename}_scan_result.csv")
+    xs = scan["tickle_frequency"].to_numpy()
+    ys1 = scan["ratio_signal"].to_numpy()
+    ys2 = scan["ratio_lost"].to_numpy()
 
     return xs, ys1, ys2
 

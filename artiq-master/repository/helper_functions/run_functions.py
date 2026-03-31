@@ -137,17 +137,22 @@ def measure(self, ind, print_result=False,
             print(f"Trapped: {cts_trapped}, Lost: {cts_lost}, Loading: {cts_loading}")
 
     elif self.mode == 'Lifetime_fast':
+        points_per_scan = self.lifetime_points_per_scan
         N = np.zeros(2)
 
         for i, wt in enumerate([0.0, self.wait_time_fast]):
             _scan_wait_time(self, wt, None)
+            idx = points_per_scan * ind + i
+            self.mutate_dataset('wait_time_used', idx, wt)
+            self.mutate_dataset('repeats_used', idx, int(self.no_of_repeats))
+            self.mutate_dataset('wait_times_file_used', idx, str(getattr(self, "wait_times_file", "")))
 
             if self.histogram_on:
-                cts_trapped, cts_lost, cts_loading = trap_with_histogram(self, 2*ind+i)
+                cts_trapped, cts_lost, cts_loading = trap_with_histogram(self, idx)
             else:
                 cts_trapped, cts_lost, cts_loading = trap_without_histogram(self)
 
-            store_to_dataset(self, 2*ind+i, cts_trapped, cts_lost, cts_loading)
+            store_to_dataset(self, idx, cts_trapped, cts_lost, cts_loading)
 
             if cts_loading == 0:
                 raise RuntimeError("No Loading Signal Detected")
@@ -161,21 +166,26 @@ def measure(self, ind, print_result=False,
 
 
     elif self.mode == 'Lifetime':
-        n = len(self.wait_time_arr)
-        N = np.zeros(n)
-        T = np.zeros(n)
-        L = np.zeros(n)
+        points_per_scan = self.lifetime_points_per_scan
+        num_wait_times = len(self.wait_time_arr)
+        N = np.zeros(num_wait_times)
+        T = np.zeros(num_wait_times)
+        L = np.zeros(num_wait_times)
 
         for i, wt in enumerate(self.wait_time_arr):
             _scan_wait_time(self, wt, None)
             self.no_of_repeats = int(self.repeats_arr[i])
+            idx = points_per_scan * ind + i
+            self.mutate_dataset('wait_time_used', idx, wt)
+            self.mutate_dataset('repeats_used', idx, int(self.no_of_repeats))
+            self.mutate_dataset('wait_times_file_used', idx, str(getattr(self, "wait_times_file", "")))
 
             if self.histogram_on:
-                cts_trapped, cts_lost, cts_loading = trap_with_histogram(self, n*ind+i)
+                cts_trapped, cts_lost, cts_loading = trap_with_histogram(self, idx)
             else:
                 cts_trapped, cts_lost, cts_loading = trap_without_histogram(self)
 
-            store_to_dataset(self, n*ind+i, cts_trapped, cts_lost, cts_loading)
+            store_to_dataset(self, idx, cts_trapped, cts_lost, cts_loading)
 
             if cts_loading == 0:
                 raise RuntimeError("No Loading Signal Detected")
@@ -183,6 +193,11 @@ def measure(self, ind, print_result=False,
             T[i] = cts_trapped
             L[i] = cts_loading
             N[i] = cts_trapped/cts_loading
+
+        # If this wait-time table is shorter than reserved substep slots, mark the
+        # trailing slots as unmeasured (NaN) instead of leaving misleading zeros.
+        for i in range(num_wait_times, points_per_scan):
+            _fill_missing_substep(self, points_per_scan * ind + i)
 
         # fit for lifetime
         #tao = fit_lifetime_unweighted(self, T, L, N)
@@ -572,3 +587,15 @@ def store_to_dataset(self, my_ind, cts_trapped, cts_lost, cts_loading):
         qbar = sampler_read(self)[4]
         if qbar <= 0.5:
             raise DetectorError("Threshold detector was dead!")
+
+
+def _fill_missing_substep(self, idx):
+    """Mark an unmeasured lifetime substep explicitly as NaN."""
+    self.mutate_dataset('wait_time_used', idx, np.nan)
+    self.mutate_dataset('repeats_used', idx, np.nan)
+    self.mutate_dataset('wait_times_file_used', idx, str(getattr(self, "wait_times_file", "")))
+    self.mutate_dataset('trapped_signal', idx, np.nan)
+    self.mutate_dataset('lost_signal', idx, np.nan)
+    self.mutate_dataset('loading_signal', idx, np.nan)
+    self.mutate_dataset('ratio_signal', idx, np.nan)
+    self.mutate_dataset('ratio_lost', idx, np.nan)

@@ -87,6 +87,7 @@ def load_common_parameters(self):
     my_setattr(self, 'histogram_on',      BooleanValue(default=True), group=group_display, scanable=False)
     my_setattr(self, 'bin_width',         NumberValue(default=1.0,unit='us',scale=1,ndecimals=1,step=0.1), group=group_display, scanable = False)
     my_setattr(self, 'histogram_refresh', NumberValue(default=1000,unit='',scale=1,ndecimals=0,step=1), group=group_display, scanable = False)
+    my_setattr(self, 'legacy_dataset_files', BooleanValue(default=False), group=group_display, scanable=False)
 
     # 2. Detector Settings
     #------------------------------------------------------
