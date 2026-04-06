@@ -98,24 +98,29 @@ def load_common_parameters(self):
     # 3. Sequence Settings
     #------------------------------------------------------
     # 3-1) General
-    group_general = "Sequence Settings (Trapping & Lifetime Mode)"
+    group_general = "Shared Sequence Settings"
     my_setattr(self, 'load_time',         NumberValue(default=260,unit='us',scale=1,ndecimals=0,step=1), group=group_general)
+    my_setattr(self, 'no_of_repeats',     NumberValue(default=10000,unit='',scale=1,ndecimals=0,step=1), group=group_general)
 
     # 3-1) Trapping Mode
-    group_trapping = "Sequence Settings (Trapping Mode)"
+    group_trapping = "Trapping Mode Settings"
     my_setattr(self, 'wait_time',         NumberValue(default=140,unit='us',scale=1,ndecimals=0,step=1), group=group_trapping)
-    my_setattr(self, 'no_of_repeats',     NumberValue(default=10000,unit='',scale=1,ndecimals=0,step=1), group=group_trapping)
 
     # 3-2) Counting Mode
-    group_counting = "Sequence Settings (Counting Mode)"
+    group_counting = "Counting Mode Settings"
     my_setattr(self, 'detection_time',    NumberValue(default=1000,unit='ms for counting mode only',scale=1,ndecimals=0,step=1), group=group_counting)
 
     # 3-3) Lifetime Mode
-    group_lifetime = "Sequence_Settings (Lifetime Mode)"
+    group_lifetime = "Lifetime Mode Settings"
     my_setattr(self, 'wait_times_path',   StringValue(default='/home/electrons/software/Electrons_Artiq_Sequences/artiq-master/repository/helper_functions/Table/'), group=group_lifetime, scanable=False)
     my_setattr(self, 'wait_times_file',   StringValue(default='lifetime_wait_times_short.csv'), group=group_lifetime)
     my_setattr(self, 'repeats_ratio',     NumberValue(default=1.0,unit='',scale=1,ndecimals=2,step=0.01), group=group_lifetime)
-    my_setattr(self, 'wait_time_fast',    NumberValue(default=1000,unit='us',scale=1,ndecimals=0,step=1), group=group_lifetime)
+    my_setattr(self, 'wait_times_ratio',  NumberValue(default=1.0,unit='',scale=1,ndecimals=2,step=0.01), group=group_lifetime)
+
+    # 3-4) Lifetime_fast Mode
+    group_lifetime_fast = "Lifetime_fast Mode Settings" 
+    my_setattr(self, 'wait_time_fast1',   NumberValue(default=200,unit='us',scale=1,ndecimals=0,step=1), group=group_lifetime_fast)
+    my_setattr(self, 'wait_time_fast2',   NumberValue(default=2200,unit='us',scale=1,ndecimals=0,step=1), group=group_lifetime_fast)
 
     # 4. Trap Settings
     #------------------------------------------------------

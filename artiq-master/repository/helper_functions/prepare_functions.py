@@ -323,6 +323,8 @@ def _lifetime_points_for_prepare(self):
 
     if self.mode == "Lifetime":
         self.wait_time_arr, self.repeats_arr = load_lifetime_wait_times(self.wait_times_path + self.wait_times_file)
+        self.repeats_arr = np.asarray(self.repeats_arr, dtype=float) * self.repeats_ratio
+        self.wait_time_arr = np.asarray(self.wait_time_arr, dtype=float) * self.wait_times_ratio
         if not hasattr(self, "lifetime_points_per_scan"):
             self.lifetime_points_per_scan = len(self.wait_time_arr)
         return self.lifetime_points_per_scan

@@ -207,6 +207,8 @@ def _scan_wait_times_file(self, val, scan_values, scan_check=False):
     full = lifetime_csv_path(base + str(val).strip())
     self.wait_times_file = os.path.basename(full)
     self.wait_time_arr, self.repeats_arr = load_lifetime_wait_times(full)
+    self.repeats_arr = np.asarray(self.repeats_arr, dtype=float) * self.repeats_ratio
+    self.wait_time_arr = np.asarray(self.wait_time_arr, dtype=float) * self.wait_times_ratio
     return 1
 
 # 3. Laser Parameters  -------------------------------------------------------#

@@ -140,7 +140,7 @@ def measure(self, ind, print_result=False,
         points_per_scan = self.lifetime_points_per_scan
         N = np.zeros(2)
 
-        for i, wt in enumerate([0.0, self.wait_time_fast]):
+        for i, wt in enumerate([self.wait_time_fast1, self.wait_time_fast2]):
             _scan_wait_time(self, wt, None)
             idx = points_per_scan * ind + i
             self.mutate_dataset('wait_time_used', idx, wt)
@@ -159,8 +159,9 @@ def measure(self, ind, print_result=False,
 
             N[i] = cts_trapped/cts_loading
 
-        # compute lifetime function
-        lifetime_fast = self.wait_time_fast/np.log(N[0]/N[1])
+        # Two-point lifetime: N[0] at wait_time_fast1, N[1] at wait_time_fast2 (use fast1 < fast2)
+        delta_wait = float(self.wait_time_fast2) - float(self.wait_time_fast1)
+        lifetime_fast = delta_wait / np.log(N[0] / N[1])
 
         self.mutate_dataset('lifetime', ind, lifetime_fast)
 
@@ -295,7 +296,7 @@ def fit_lifetime_unweighted(self, T, L, N):
     t0 = self.wait_time_arr[idx0]
 
     # Point 1 for initial estimation
-    target = np.min(self.wait_time_arr) + self.wait_time_fast
+    target = np.min(self.wait_time_arr) + (self.wait_time_fast2 - self.wait_time_fast1)
     idx1 = np.abs(self.wait_time_arr - target).argmin()
     N1 = N[idx1]
     t1 = self.wait_time_arr[idx1]
